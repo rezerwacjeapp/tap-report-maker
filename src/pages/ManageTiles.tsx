@@ -1,27 +1,59 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, X } from "lucide-react";
-import { getTiles, saveTiles, type TileItem } from "@/lib/storage";
+import { ArrowLeft, Plus, X, Bookmark } from "lucide-react";
+import {
+  getTiles, saveTiles, type TileItem,
+  getCustomFields, saveCustomFields, type CustomFieldDef, type CustomFieldType,
+} from "@/lib/storage";
+
+const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
+  text: "Tekst krótki",
+  textarea: "Tekst długi",
+  date: "Data",
+  number: "Liczba",
+};
 
 export default function ManageTiles() {
   const navigate = useNavigate();
   const [tiles, setTiles] = useState<TileItem[]>(getTiles);
   const [newLabel, setNewLabel] = useState("");
+  const [customFields, setCustomFields] = useState<CustomFieldDef[]>(getCustomFields);
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldType, setNewFieldType] = useState<CustomFieldType>("text");
+  const [tab, setTab] = useState<"tiles" | "fields">("tiles");
 
-  const save = (next: TileItem[]) => {
+  const saveTilesState = (next: TileItem[]) => {
     setTiles(next);
     saveTiles(next);
   };
 
-  const add = () => {
+  const addTile = () => {
     if (!newLabel.trim()) return;
-    save([...tiles, { id: Date.now().toString(), label: newLabel.trim() }]);
+    saveTilesState([...tiles, { id: Date.now().toString(), label: newLabel.trim() }]);
     setNewLabel("");
   };
 
-  const remove = (id: string) => {
-    save(tiles.filter((t) => t.id !== id));
+  const removeTile = (id: string) => saveTilesState(tiles.filter((t) => t.id !== id));
+
+  const saveFieldsState = (next: CustomFieldDef[]) => {
+    setCustomFields(next);
+    saveCustomFields(next);
+  };
+
+  const addField = () => {
+    if (!newFieldLabel.trim()) return;
+    saveFieldsState([
+      ...customFields,
+      { id: Date.now().toString(), label: newFieldLabel.trim(), type: newFieldType, remember: false },
+    ]);
+    setNewFieldLabel("");
+  };
+
+  const removeField = (id: string) => saveFieldsState(customFields.filter((f) => f.id !== id));
+
+  const toggleRemember = (id: string) => {
+    saveFieldsState(customFields.map((f) => f.id === id ? { ...f, remember: !f.remember } : f));
   };
 
   return (
@@ -30,43 +62,127 @@ export default function ManageTiles() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl">Zarządzaj kafelkami</h1>
+        <h1 className="text-xl">Ustawienia raportu</h1>
       </header>
 
+      {/* Tab switcher */}
+      <div className="px-5 flex gap-2 mb-4">
+        <Button
+          variant={tab === "tiles" ? "accent" : "outline"}
+          size="sm"
+          onClick={() => setTab("tiles")}
+          className="flex-1"
+        >
+          Czynności
+        </Button>
+        <Button
+          variant={tab === "fields" ? "accent" : "outline"}
+          size="sm"
+          onClick={() => setTab("fields")}
+          className="flex-1"
+        >
+          Dodatkowe pola
+        </Button>
+      </div>
+
       <main className="flex-1 px-5 space-y-4 pb-8">
-        {/* Add new */}
-        <div className="flex gap-2">
-          <input
-            className="flex-1 h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            placeholder="Nowa czynność..."
-            onKeyDown={(e) => e.key === "Enter" && add()}
-          />
-          <Button variant="accent" size="icon" onClick={add} className="h-12 w-12">
-            <Plus className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* List */}
-        <div className="space-y-2">
-          {tiles.map((tile) => (
-            <div
-              key={tile.id}
-              className="flex items-center justify-between rounded-lg border-2 border-border bg-card px-4 py-3"
-            >
-              <span className="text-base font-medium">{tile.label}</span>
-              <button onClick={() => remove(tile.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                <X className="h-5 w-5" />
-              </button>
+        {tab === "tiles" && (
+          <>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Nowa czynność..."
+                onKeyDown={(e) => e.key === "Enter" && addTile()}
+              />
+              <Button variant="accent" size="icon" onClick={addTile} className="h-12 w-12">
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
-          ))}
-        </div>
 
-        {tiles.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            Brak kafelków. Dodaj pierwszą czynność powyżej.
-          </p>
+            <div className="space-y-2">
+              {tiles.map((tile) => (
+                <div
+                  key={tile.id}
+                  className="flex items-center justify-between rounded-lg border-2 border-border bg-card px-4 py-3"
+                >
+                  <span className="text-base font-medium">{tile.label}</span>
+                  <button onClick={() => removeTile(tile.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              ))}
+              {tiles.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground py-8">
+                  Brak kafelków. Dodaj pierwszą czynność powyżej.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {tab === "fields" && (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Dodaj własne pola, które pojawią się w formularzu raportu i w PDF.
+            </p>
+
+            <div className="space-y-2">
+              <input
+                className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                value={newFieldLabel}
+                onChange={(e) => setNewFieldLabel(e.target.value)}
+                placeholder="Nazwa pola (np. Nr seryjny)"
+                onKeyDown={(e) => e.key === "Enter" && addField()}
+              />
+              <div className="flex gap-2">
+                <select
+                  className="flex-1 h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                  value={newFieldType}
+                  onChange={(e) => setNewFieldType(e.target.value as CustomFieldType)}
+                >
+                  {Object.entries(FIELD_TYPE_LABELS).map(([val, lbl]) => (
+                    <option key={val} value={val}>{lbl}</option>
+                  ))}
+                </select>
+                <Button variant="accent" size="icon" onClick={addField} className="h-12 w-12">
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {customFields.map((field) => (
+                <div
+                  key={field.id}
+                  className="flex items-center justify-between rounded-lg border-2 border-border bg-card px-4 py-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className="text-base font-medium block truncate">{field.label}</span>
+                    <span className="text-xs text-muted-foreground">{FIELD_TYPE_LABELS[field.type]}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => toggleRemember(field.id)}
+                      className={`transition-colors ${field.remember ? "text-accent" : "text-muted-foreground hover:text-accent"}`}
+                      title="Zapamiętaj na stałe"
+                    >
+                      <Bookmark className="h-5 w-5" fill={field.remember ? "currentColor" : "none"} />
+                    </button>
+                    <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {customFields.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground py-8">
+                  Brak dodatkowych pól. Dodaj pierwsze pole powyżej.
+                </p>
+              )}
+            </div>
+          </>
         )}
       </main>
     </div>

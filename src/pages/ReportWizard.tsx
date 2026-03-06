@@ -1,31 +1,76 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, ArrowRight, FileDown, Check } from "lucide-react";
-import { getDraft, saveDraft, clearDraft, getTiles, getProfile, type ReportDraft } from "@/lib/storage";
+import { ArrowLeft, ArrowRight, FileDown, Check, Trash2 } from "lucide-react";
+import {
+  getDraft, saveDraft, clearDraft, getEmptyDraft, hasDraft,
+  getTiles, getProfile, getCustomFields,
+  type ReportDraft,
+} from "@/lib/storage";
 import { generateReport } from "@/lib/pdf-generator";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const STEPS = ["Klient", "Czynności", "Zdjęcia", "Podpis"];
 
 export default function ReportWizard() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState<ReportDraft>(getDraft);
+  const [draft, setDraft] = useState<ReportDraft>(getEmptyDraft);
+  const [showResume, setShowResume] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const tiles = getTiles();
+  const customFields = getCustomFields();
+  const autoSaveRef = useRef<ReturnType<typeof setInterval>>();
 
-  // Auto-save
+  // On mount: check for existing draft
   useEffect(() => {
-    saveDraft(draft);
-  }, [draft]);
+    if (hasDraft()) {
+      setShowResume(true);
+    } else {
+      setDraft(getEmptyDraft());
+      setInitialized(true);
+    }
+  }, []);
 
-  const update = (partial: Partial<ReportDraft>) => {
-    setDraft((d) => ({ ...d, ...partial }));
+  const handleResume = () => {
+    setDraft(getDraft());
+    setShowResume(false);
+    setInitialized(true);
   };
+
+  const handleNewDraft = () => {
+    clearDraft();
+    setDraft(getEmptyDraft());
+    setShowResume(false);
+    setInitialized(true);
+  };
+
+  // Auto-save every 10 seconds
+  useEffect(() => {
+    if (!initialized) return;
+    autoSaveRef.current = setInterval(() => {
+      saveDraft(draft);
+    }, 10_000);
+    return () => clearInterval(autoSaveRef.current);
+  }, [draft, initialized]);
+
+  // Also save on every change
+  const update = useCallback((partial: Partial<ReportDraft>) => {
+    setDraft((d) => {
+      const next = { ...d, ...partial };
+      saveDraft(next);
+      return next;
+    });
+  }, []);
 
   const toggleTile = (id: string) => {
     update({
@@ -33,6 +78,10 @@ export default function ReportWizard() {
         ? draft.selectedTiles.filter((t) => t !== id)
         : [...draft.selectedTiles, id],
     });
+  };
+
+  const updateCustomField = (fieldId: string, value: string) => {
+    update({ customFields: { ...draft.customFields, [fieldId]: value } });
   };
 
   const canNext = () => {
@@ -48,19 +97,45 @@ export default function ReportWizard() {
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
-    } catch (err) {
+    } catch {
       toast.error("Błąd generowania PDF");
     }
   };
 
+  const handleClearDraft = () => {
+    clearDraft();
+    setDraft(getEmptyDraft());
+    setStep(0);
+    toast.success("Szkic wyczyszczony");
+  };
+
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
+      {/* Resume dialog */}
+      <AlertDialog open={showResume} onOpenChange={setShowResume}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Niedokończony raport</AlertDialogTitle>
+            <AlertDialogDescription>
+              Masz niedokończony raport. Czy chcesz go kontynuować?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleNewDraft}>Zacznij od nowa</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResume}>Kontynuuj</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl">Nowy raport</h1>
+        <h1 className="text-xl flex-1">Nowy raport</h1>
+        <Button variant="ghost" size="icon" onClick={handleClearDraft} title="Wyczyść szkic">
+          <Trash2 className="h-5 w-5 text-destructive" />
+        </Button>
       </header>
 
       <StepIndicator steps={STEPS} current={step} />
@@ -97,6 +172,32 @@ export default function ReportWizard() {
                 onChange={(e) => update({ date: e.target.value })}
               />
             </div>
+
+            {/* Custom fields on step 0 */}
+            {customFields.map((field) => (
+              <div key={field.id}>
+                <label className="text-sm font-medium mb-1.5 block">
+                  {field.label}
+                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                </label>
+                {field.type === "textarea" ? (
+                  <textarea
+                    className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent transition-colors resize-none"
+                    value={draft.customFields[field.id] || ""}
+                    onChange={(e) => updateCustomField(field.id, e.target.value)}
+                    placeholder={field.label}
+                  />
+                ) : (
+                  <input
+                    type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+                    className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                    value={draft.customFields[field.id] || ""}
+                    onChange={(e) => updateCustomField(field.id, e.target.value)}
+                    placeholder={field.label}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         )}
 

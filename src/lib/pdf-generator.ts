@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import type { CompanyProfile, ReportDraft } from "./storage";
-import { getTiles } from "./storage";
+import { getTiles, getCustomFields } from "./storage";
 
 export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
   const doc = new jsPDF("p", "mm", "a4");
@@ -59,7 +59,7 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
   if (selectedLabels.length > 0) {
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("Czynności wykonane:", margin, y);
+    doc.text("Czynnosci wykonane:", margin, y);
     y += 6;
 
     doc.setFontSize(10);
@@ -70,7 +70,7 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
     doc.rect(margin, y, contentW, 7, "F");
     doc.setTextColor(255);
     doc.text("Lp.", margin + 2, y + 5);
-    doc.text("Opis czynności", margin + 15, y + 5);
+    doc.text("Opis czynnosci", margin + 15, y + 5);
     doc.setTextColor(0);
     y += 7;
 
@@ -97,6 +97,40 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
     const lines = doc.splitTextToSize(draft.note, contentW);
     doc.text(lines, margin, y);
     y += lines.length * 5 + 4;
+  }
+
+  // Custom fields - "Informacje dodatkowe"
+  const customFields = getCustomFields();
+  const filledCustom = customFields.filter((f) => draft.customFields[f.id]?.trim());
+
+  if (filledCustom.length > 0) {
+    if (y > 240) { doc.addPage(); y = margin; }
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Informacje dodatkowe:", margin, y);
+    y += 6;
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+
+    filledCustom.forEach((field) => {
+      const value = draft.customFields[field.id];
+      if (y > 270) { doc.addPage(); y = margin; }
+
+      if (field.type === "textarea") {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${field.label}:`, margin, y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(value, contentW);
+        doc.text(lines, margin, y);
+        y += lines.length * 5 + 3;
+      } else {
+        doc.text(`${field.label}: ${value}`, margin, y);
+        y += 6;
+      }
+    });
+    y += 4;
   }
 
   // Photos (2x3 grid)
