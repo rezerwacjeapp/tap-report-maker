@@ -54,8 +54,8 @@ const Index = () => {
             className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98]"
           >
             <Settings className="h-6 w-6 text-muted-foreground mb-2" />
-            <h3 className="text-sm font-semibold">Kafelki</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Zarządzaj czynnościami</p>
+            <h3 className="text-sm font-semibold">Ustawienia</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Czynności i pola</p>
           </button>
         </div>
 
