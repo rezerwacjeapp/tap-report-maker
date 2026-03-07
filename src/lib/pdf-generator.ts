@@ -37,83 +37,15 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
   doc.text("RAPORT SERWISOWY", W / 2, y, { align: "center" });
   y += 10;
 
-  // Client info
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Data: ${draft.date}`, margin, y);
-  y += 6;
-  doc.text(`Klient: ${draft.clientName}`, margin, y);
-  y += 6;
-  if (draft.clientAddress) {
-    doc.text(`Adres: ${draft.clientAddress}`, margin, y);
-    y += 6;
-  }
-  y += 4;
-
-  // Activities table
-  const allTiles = getTiles();
-  const selectedLabels = draft.selectedTiles
-    .map((id) => allTiles.find((t) => t.id === id)?.label)
-    .filter(Boolean);
-
-  if (selectedLabels.length > 0) {
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("Czynnosci wykonane:", margin, y);
-    y += 6;
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-
-    // Table header
-    doc.setFillColor(30, 42, 56);
-    doc.rect(margin, y, contentW, 7, "F");
-    doc.setTextColor(255);
-    doc.text("Lp.", margin + 2, y + 5);
-    doc.text("Opis czynnosci", margin + 15, y + 5);
-    doc.setTextColor(0);
-    y += 7;
-
-    selectedLabels.forEach((label, i) => {
-      if (i % 2 === 0) {
-        doc.setFillColor(237, 240, 244);
-        doc.rect(margin, y, contentW, 7, "F");
-      }
-      doc.text(`${i + 1}.`, margin + 2, y + 5);
-      doc.text(label!, margin + 15, y + 5);
-      y += 7;
-    });
-    y += 4;
-  }
-
-  // Note
-  if (draft.note) {
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("Uwagi:", margin, y);
-    y += 6;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const lines = doc.splitTextToSize(draft.note, contentW);
-    doc.text(lines, margin, y);
-    y += lines.length * 5 + 4;
-  }
-
-  // Custom fields - "Informacje dodatkowe"
+  // All custom fields
   const customFields = getCustomFields();
-  const filledCustom = customFields.filter((f) => draft.customFields[f.id]?.trim());
+  const filledFields = customFields.filter((f) => draft.customFields[f.id]?.trim());
 
-  if (filledCustom.length > 0) {
-    if (y > 240) { doc.addPage(); y = margin; }
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("Informacje dodatkowe:", margin, y);
-    y += 6;
-
+  if (filledFields.length > 0) {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
 
-    filledCustom.forEach((field) => {
+    filledFields.forEach((field) => {
       const value = draft.customFields[field.id];
       if (y > 270) { doc.addPage(); y = margin; }
 
@@ -129,6 +61,43 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
         doc.text(`${field.label}: ${value}`, margin, y);
         y += 6;
       }
+    });
+    y += 4;
+  }
+
+  // Activities table
+  const allTiles = getTiles();
+  const selectedLabels = draft.selectedTiles
+    .map((id) => allTiles.find((t) => t.id === id)?.label)
+    .filter(Boolean);
+
+  if (selectedLabels.length > 0) {
+    if (y > 240) { doc.addPage(); y = margin; }
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Czynnosci wykonane:", margin, y);
+    y += 6;
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+
+    doc.setFillColor(30, 42, 56);
+    doc.rect(margin, y, contentW, 7, "F");
+    doc.setTextColor(255);
+    doc.text("Lp.", margin + 2, y + 5);
+    doc.text("Opis czynnosci", margin + 15, y + 5);
+    doc.setTextColor(0);
+    y += 7;
+
+    selectedLabels.forEach((label, i) => {
+      if (y > 270) { doc.addPage(); y = margin; }
+      if (i % 2 === 0) {
+        doc.setFillColor(237, 240, 244);
+        doc.rect(margin, y, contentW, 7, "F");
+      }
+      doc.text(`${i + 1}.`, margin + 2, y + 5);
+      doc.text(label!, margin + 15, y + 5);
+      y += 7;
     });
     y += 4;
   }
@@ -150,7 +119,7 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
       const px = margin + col * (photoW + 5);
       const py = y + row * (photoH + 5);
 
-      if (py + photoH > 280) return; // skip if overflow
+      if (py + photoH > 280) return;
 
       try {
         doc.addImage(photo, "JPEG", px, py, photoW, photoH);
@@ -176,7 +145,11 @@ export function generateReport(profile: CompanyProfile, draft: ReportDraft) {
     } catch { /* skip */ }
   }
 
-  // Save
-  const filename = `raport_${draft.clientName.replace(/\s+/g, "_") || "serwis"}_${draft.date}.pdf`;
+  // Build filename from first text field or fallback
+  const firstTextField = customFields.find((f) => f.type === "text" && draft.customFields[f.id]?.trim());
+  const dateField = customFields.find((f) => f.type === "date" && draft.customFields[f.id]?.trim());
+  const namepart = firstTextField ? draft.customFields[firstTextField.id].replace(/\s+/g, "_") : "serwis";
+  const datepart = dateField ? draft.customFields[dateField.id] : new Date().toISOString().split("T")[0];
+  const filename = `raport_${namepart}_${datepart}.pdf`;
   doc.save(filename);
 }

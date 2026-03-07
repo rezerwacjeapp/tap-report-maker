@@ -18,19 +18,16 @@ export interface CustomFieldDef {
   id: string;
   label: string;
   type: CustomFieldType;
-  remember: boolean; // "Zapamiętaj na stałe"
+  remember: boolean;
+  order: number;
 }
 
 export interface ReportDraft {
-  clientName: string;
-  clientAddress: string;
-  date: string;
   selectedTiles: string[];
-  note: string;
   photos: string[]; // base64
   signature: string | null; // base64
   customFields: Record<string, string>; // fieldId -> value
-  _lastSaved?: number; // timestamp
+  _lastSaved?: number;
 }
 
 const KEYS = {
@@ -48,8 +45,14 @@ const DEFAULT_TILES: TileItem[] = [
   { id: "4", label: "Kontrola ciśnienia" },
   { id: "5", label: "Uzupełnienie czynnika" },
   { id: "6", label: "Kontrola elektryczna" },
-  { id: "7", label: "Wymiana termostatu" },
-  { id: "8", label: "Serwis sprężarki" },
+];
+
+const DEFAULT_FIELDS: CustomFieldDef[] = [
+  { id: "df_client", label: "Nazwa klienta", type: "text", remember: false, order: 0 },
+  { id: "df_address", label: "Adres obiektu", type: "text", remember: false, order: 1 },
+  { id: "df_date", label: "Data", type: "date", remember: false, order: 2 },
+  { id: "df_nip", label: "NIP klienta", type: "text", remember: false, order: 3 },
+  { id: "df_notes", label: "Uwagi", type: "textarea", remember: false, order: 4 },
 ];
 
 function get<T>(key: string, fallback: T): T {
@@ -77,9 +80,15 @@ export function saveTiles(t: TileItem[]) { set(KEYS.TILES, t); }
 
 // Custom fields
 export function getCustomFields(): CustomFieldDef[] {
-  return get<CustomFieldDef[]>(KEYS.CUSTOM_FIELDS, []);
+  const fields = get<CustomFieldDef[]>(KEYS.CUSTOM_FIELDS, DEFAULT_FIELDS);
+  // Ensure order property exists (migration)
+  return fields
+    .map((f, i) => ({ ...f, order: f.order ?? i }))
+    .sort((a, b) => a.order - b.order);
 }
-export function saveCustomFields(f: CustomFieldDef[]) { set(KEYS.CUSTOM_FIELDS, f); }
+export function saveCustomFields(f: CustomFieldDef[]) {
+  set(KEYS.CUSTOM_FIELDS, f.map((field, i) => ({ ...field, order: i })));
+}
 
 // Remembered values for fields with remember=true
 export function getRememberedValues(): Record<string, string> {
@@ -93,18 +102,18 @@ function buildDefaultCustomFields(): Record<string, string> {
   const remembered = getRememberedValues();
   const result: Record<string, string> = {};
   fields.forEach((f) => {
-    result[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : "";
+    if (f.type === "date") {
+      result[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : new Date().toISOString().split("T")[0];
+    } else {
+      result[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : "";
+    }
   });
   return result;
 }
 
 export function getEmptyDraft(): ReportDraft {
   return {
-    clientName: "",
-    clientAddress: "",
-    date: new Date().toISOString().split("T")[0],
     selectedTiles: [],
-    note: "",
     photos: [],
     signature: null,
     customFields: buildDefaultCustomFields(),
@@ -114,13 +123,16 @@ export function getEmptyDraft(): ReportDraft {
 export function getDraft(): ReportDraft {
   const saved = get<ReportDraft | null>(KEYS.DRAFT, null);
   if (!saved) return getEmptyDraft();
-  // Ensure customFields has all current field keys
   const fields = getCustomFields();
   const remembered = getRememberedValues();
   const cf = { ...saved.customFields };
   fields.forEach((f) => {
     if (!(f.id in cf)) {
-      cf[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : "";
+      if (f.type === "date") {
+        cf[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : new Date().toISOString().split("T")[0];
+      } else {
+        cf[f.id] = f.remember && remembered[f.id] ? remembered[f.id] : "";
+      }
     }
   });
   return { ...saved, customFields: cf };
@@ -132,8 +144,6 @@ export function hasDraft(): boolean {
 
 export function saveDraft(d: ReportDraft) {
   set(KEYS.DRAFT, { ...d, _lastSaved: Date.now() });
-
-  // Update remembered values for fields with remember=true
   const fields = getCustomFields();
   const remembered = getRememberedValues();
   let changed = false;

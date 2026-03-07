@@ -19,7 +19,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const STEPS = ["Klient", "Czynności", "Zdjęcia", "Podpis"];
+const STEPS = ["Dane i czynności", "Zdjęcia i podpis"];
 
 export default function ReportWizard() {
   const navigate = useNavigate();
@@ -31,7 +31,6 @@ export default function ReportWizard() {
   const customFields = getCustomFields();
   const autoSaveRef = useRef<ReturnType<typeof setInterval>>();
 
-  // On mount: check for existing draft
   useEffect(() => {
     if (hasDraft()) {
       setShowResume(true);
@@ -54,7 +53,6 @@ export default function ReportWizard() {
     setInitialized(true);
   };
 
-  // Auto-save every 10 seconds
   useEffect(() => {
     if (!initialized) return;
     autoSaveRef.current = setInterval(() => {
@@ -63,7 +61,6 @@ export default function ReportWizard() {
     return () => clearInterval(autoSaveRef.current);
   }, [draft, initialized]);
 
-  // Also save on every change
   const update = useCallback((partial: Partial<ReportDraft>) => {
     setDraft((d) => {
       const next = { ...d, ...partial };
@@ -82,12 +79,6 @@ export default function ReportWizard() {
 
   const updateCustomField = (fieldId: string, value: string) => {
     update({ customFields: { ...draft.customFields, [fieldId]: value } });
-  };
-
-  const canNext = () => {
-    if (step === 0) return !!draft.clientName.trim();
-    if (step === 1) return draft.selectedTiles.length > 0;
-    return true;
   };
 
   const handleGenerate = () => {
@@ -111,7 +102,6 @@ export default function ReportWizard() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      {/* Resume dialog */}
       <AlertDialog open={showResume} onOpenChange={setShowResume}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -127,7 +117,6 @@ export default function ReportWizard() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Header */}
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
@@ -140,40 +129,11 @@ export default function ReportWizard() {
 
       <StepIndicator steps={STEPS} current={step} />
 
-      {/* Content */}
       <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto">
-        {/* Step 0: Client */}
+        {/* Step 0: All data fields + tiles */}
         {step === 0 && (
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Nazwa klienta *</label>
-              <input
-                className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
-                value={draft.clientName}
-                onChange={(e) => update({ clientName: e.target.value })}
-                placeholder="Jan Kowalski / Firma ABC"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Adres obiektu</label>
-              <input
-                className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
-                value={draft.clientAddress}
-                onChange={(e) => update({ clientAddress: e.target.value })}
-                placeholder="ul. Przykładowa 1, Warszawa"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Data</label>
-              <input
-                type="date"
-                className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
-                value={draft.date}
-                onChange={(e) => update({ date: e.target.value })}
-              />
-            </div>
-
-            {/* Custom fields on step 0 */}
+            {/* Dynamic custom fields */}
             {customFields.map((field) => (
               <div key={field.id}>
                 <label className="text-sm font-medium mb-1.5 block">
@@ -181,12 +141,20 @@ export default function ReportWizard() {
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
                 {field.type === "textarea" ? (
-                  <textarea
-                    className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent transition-colors resize-none"
-                    value={draft.customFields[field.id] || ""}
-                    onChange={(e) => updateCustomField(field.id, e.target.value)}
-                    placeholder={field.label}
-                  />
+                  <div className="space-y-2">
+                    <textarea
+                      className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent transition-colors resize-none"
+                      value={draft.customFields[field.id] || ""}
+                      onChange={(e) => updateCustomField(field.id, e.target.value)}
+                      placeholder={field.label}
+                    />
+                    <VoiceButton
+                      onResult={(text) => {
+                        const current = draft.customFields[field.id] || "";
+                        updateCustomField(field.id, current ? `${current} ${text}` : text);
+                      }}
+                    />
+                  </div>
                 ) : (
                   <input
                     type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
@@ -198,54 +166,44 @@ export default function ReportWizard() {
                 )}
               </div>
             ))}
+
+            {/* Tiles section */}
+            {tiles.length > 0 && (
+              <>
+                <div className="pt-2">
+                  <label className="text-sm font-medium block mb-2">Wykonane czynności</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {tiles.map((tile) => (
+                      <Button
+                        key={tile.id}
+                        variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"}
+                        size="lg"
+                        className="h-auto py-4 text-sm leading-tight text-center whitespace-normal"
+                        onClick={() => toggleTile(tile.id)}
+                      >
+                        {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
+                        {tile.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* Step 1: Tiles */}
+        {/* Step 1: Photos + Signature */}
         {step === 1 && (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Wybierz wykonane czynności:</p>
-            <div className="grid grid-cols-2 gap-3">
-              {tiles.map((tile) => (
-                <Button
-                  key={tile.id}
-                  variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"}
-                  size="lg"
-                  className="h-auto py-4 text-sm leading-tight text-center whitespace-normal"
-                  onClick={() => toggleTile(tile.id)}
-                >
-                  {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
-                  {tile.label}
-                </Button>
-              ))}
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Dokumentacja fotograficzna (max 6):</p>
+              <PhotoGallery photos={draft.photos} onChange={(photos) => update({ photos })} />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">Dodatkowe uwagi</label>
-              <textarea
-                className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent transition-colors resize-none"
-                value={draft.note}
-                onChange={(e) => update({ note: e.target.value })}
-                placeholder="Opcjonalne uwagi..."
-              />
-              <VoiceButton onResult={(text) => update({ note: draft.note ? `${draft.note} ${text}` : text })} />
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Podpis klienta:</p>
+              <SignatureCanvas value={draft.signature} onChange={(signature) => update({ signature })} />
             </div>
-          </div>
-        )}
-
-        {/* Step 2: Photos */}
-        {step === 2 && (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Dodaj dokumentację fotograficzną (max 6):</p>
-            <PhotoGallery photos={draft.photos} onChange={(photos) => update({ photos })} />
-          </div>
-        )}
-
-        {/* Step 3: Signature */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Poproś klienta o podpis:</p>
-            <SignatureCanvas value={draft.signature} onChange={(signature) => update({ signature })} />
           </div>
         )}
       </main>
@@ -262,7 +220,6 @@ export default function ReportWizard() {
             variant="accent"
             size="lg"
             onClick={() => setStep(step + 1)}
-            disabled={!canNext()}
             className="flex-1"
           >
             Dalej <ArrowRight className="h-4 w-4 ml-1" />

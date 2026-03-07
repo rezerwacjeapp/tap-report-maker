@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, X, Bookmark } from "lucide-react";
+import { ArrowLeft, Plus, X, Bookmark, GripVertical } from "lucide-react";
 import {
   getTiles, saveTiles, type TileItem,
   getCustomFields, saveCustomFields, type CustomFieldDef, type CustomFieldType,
@@ -22,6 +22,10 @@ export default function ManageTiles() {
   const [newFieldLabel, setNewFieldLabel] = useState("");
   const [newFieldType, setNewFieldType] = useState<CustomFieldType>("text");
   const [tab, setTab] = useState<"tiles" | "fields">("tiles");
+
+  // Drag state
+  const dragItemRef = useRef<number | null>(null);
+  const dragOverRef = useRef<number | null>(null);
 
   const saveTilesState = (next: TileItem[]) => {
     setTiles(next);
@@ -45,7 +49,7 @@ export default function ManageTiles() {
     if (!newFieldLabel.trim()) return;
     saveFieldsState([
       ...customFields,
-      { id: Date.now().toString(), label: newFieldLabel.trim(), type: newFieldType, remember: false },
+      { id: Date.now().toString(), label: newFieldLabel.trim(), type: newFieldType, remember: false, order: customFields.length },
     ]);
     setNewFieldLabel("");
   };
@@ -54,6 +58,58 @@ export default function ManageTiles() {
 
   const toggleRemember = (id: string) => {
     saveFieldsState(customFields.map((f) => f.id === id ? { ...f, remember: !f.remember } : f));
+  };
+
+  // Drag handlers for tiles
+  const handleTileDragStart = (index: number) => { dragItemRef.current = index; };
+  const handleTileDragEnter = (index: number) => { dragOverRef.current = index; };
+  const handleTileDragEnd = () => {
+    if (dragItemRef.current === null || dragOverRef.current === null) return;
+    const items = [...tiles];
+    const [dragged] = items.splice(dragItemRef.current, 1);
+    items.splice(dragOverRef.current, 0, dragged);
+    dragItemRef.current = null;
+    dragOverRef.current = null;
+    saveTilesState(items);
+  };
+
+  // Drag handlers for fields
+  const handleFieldDragStart = (index: number) => { dragItemRef.current = index; };
+  const handleFieldDragEnter = (index: number) => { dragOverRef.current = index; };
+  const handleFieldDragEnd = () => {
+    if (dragItemRef.current === null || dragOverRef.current === null) return;
+    const items = [...customFields];
+    const [dragged] = items.splice(dragItemRef.current, 1);
+    items.splice(dragOverRef.current, 0, dragged);
+    dragItemRef.current = null;
+    dragOverRef.current = null;
+    saveFieldsState(items);
+  };
+
+  // Touch drag state
+  const [touchDragIndex, setTouchDragIndex] = useState<number | null>(null);
+
+  const handleTouchStart = (index: number) => {
+    setTouchDragIndex(index);
+    dragItemRef.current = index;
+  };
+
+  const handleTouchMoveList = (e: React.TouchEvent, listType: "tiles" | "fields") => {
+    if (dragItemRef.current === null) return;
+    const touch = e.touches[0];
+    const elements = document.querySelectorAll(`[data-drag-${listType}]`);
+    elements.forEach((el, i) => {
+      const rect = el.getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        dragOverRef.current = i;
+      }
+    });
+  };
+
+  const handleTouchEnd = (listType: "tiles" | "fields") => {
+    setTouchDragIndex(null);
+    if (listType === "tiles") handleTileDragEnd();
+    else handleFieldDragEnd();
   };
 
   return (
@@ -81,7 +137,7 @@ export default function ManageTiles() {
           onClick={() => setTab("fields")}
           className="flex-1"
         >
-          Dodatkowe pola
+          Pola raportu
         </Button>
       </div>
 
@@ -101,13 +157,29 @@ export default function ManageTiles() {
               </Button>
             </div>
 
-            <div className="space-y-2">
-              {tiles.map((tile) => (
+            <p className="text-xs text-muted-foreground">Przeciągnij aby zmienić kolejność</p>
+
+            <div
+              className="space-y-2"
+              onTouchMove={(e) => handleTouchMoveList(e, "tiles")}
+              onTouchEnd={() => handleTouchEnd("tiles")}
+            >
+              {tiles.map((tile, index) => (
                 <div
                   key={tile.id}
-                  className="flex items-center justify-between rounded-lg border-2 border-border bg-card px-4 py-3"
+                  data-drag-tiles
+                  draggable
+                  onDragStart={() => handleTileDragStart(index)}
+                  onDragEnter={() => handleTileDragEnter(index)}
+                  onDragEnd={handleTileDragEnd}
+                  onDragOver={(e) => e.preventDefault()}
+                  onTouchStart={() => handleTouchStart(index)}
+                  className={`flex items-center gap-2 rounded-lg border-2 border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
+                    touchDragIndex === index ? "opacity-50 scale-95" : ""
+                  }`}
                 >
-                  <span className="text-base font-medium">{tile.label}</span>
+                  <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <span className="text-base font-medium flex-1">{tile.label}</span>
                   <button onClick={() => removeTile(tile.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                     <X className="h-5 w-5" />
                   </button>
@@ -125,7 +197,7 @@ export default function ManageTiles() {
         {tab === "fields" && (
           <>
             <p className="text-sm text-muted-foreground">
-              Dodaj własne pola, które pojawią się w formularzu raportu i w PDF.
+              Zdefiniuj pola, które pojawią się w formularzu i PDF (np. Nazwa klienta, NIP, Adres, Data, Uwagi).
             </p>
 
             <div className="space-y-2">
@@ -152,12 +224,28 @@ export default function ManageTiles() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              {customFields.map((field) => (
+            <p className="text-xs text-muted-foreground">Przeciągnij aby zmienić kolejność</p>
+
+            <div
+              className="space-y-2"
+              onTouchMove={(e) => handleTouchMoveList(e, "fields")}
+              onTouchEnd={() => handleTouchEnd("fields")}
+            >
+              {customFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex items-center justify-between rounded-lg border-2 border-border bg-card px-4 py-3"
+                  data-drag-fields
+                  draggable
+                  onDragStart={() => handleFieldDragStart(index)}
+                  onDragEnter={() => handleFieldDragEnter(index)}
+                  onDragEnd={handleFieldDragEnd}
+                  onDragOver={(e) => e.preventDefault()}
+                  onTouchStart={() => handleTouchStart(index)}
+                  className={`flex items-center gap-2 rounded-lg border-2 border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
+                    touchDragIndex === index ? "opacity-50 scale-95" : ""
+                  }`}
                 >
+                  <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-base font-medium block truncate">{field.label}</span>
                     <span className="text-xs text-muted-foreground">{FIELD_TYPE_LABELS[field.type]}</span>
@@ -178,7 +266,7 @@ export default function ManageTiles() {
               ))}
               {customFields.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground py-8">
-                  Brak dodatkowych pól. Dodaj pierwsze pole powyżej.
+                  Brak pól. Dodaj pierwsze pole powyżej.
                 </p>
               )}
             </div>
