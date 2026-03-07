@@ -30,12 +30,26 @@ export interface ReportDraft {
   _lastSaved?: number;
 }
 
+export interface ReportHistoryItem {
+  id: string;
+  filename: string;
+  date: string;
+  clientName: string;
+  templateName: string;
+  selectedTiles: string[];
+  customFields: Record<string, string>;
+  photosCount: number;
+  hasSignature: boolean;
+  createdAt: number;
+}
+
 const KEYS = {
   PROFILE: "docswift_profile",
   TILES: "docswift_tiles",
   DRAFT: "docswift_draft",
   CUSTOM_FIELDS: "docswift_custom_fields",
   REMEMBERED_VALUES: "docswift_remembered_values",
+  REPORT_HISTORY: "docswift_report_history",
 } as const;
 
 const DEFAULT_TILES: TileItem[] = [
@@ -157,3 +171,28 @@ export function saveDraft(d: ReportDraft) {
 }
 
 export function clearDraft() { localStorage.removeItem(KEYS.DRAFT); }
+
+// Report history
+export function getReportHistory(): ReportHistoryItem[] {
+  return get<ReportHistoryItem[]>(KEYS.REPORT_HISTORY, [])
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export function addReportToHistory(report: Omit<ReportHistoryItem, "createdAt">): ReportHistoryItem {
+  const history = get<ReportHistoryItem[]>(KEYS.REPORT_HISTORY, []);
+  const item: ReportHistoryItem = { ...report, createdAt: Date.now() };
+  history.push(item);
+  // Keep max 100 reports
+  if (history.length > 100) history.splice(0, history.length - 100);
+  set(KEYS.REPORT_HISTORY, history);
+  return item;
+}
+
+export function removeReportFromHistory(id: string) {
+  const history = get<ReportHistoryItem[]>(KEYS.REPORT_HISTORY, []);
+  set(KEYS.REPORT_HISTORY, history.filter((r) => r.id !== id));
+}
+
+export function clearReportHistory() {
+  localStorage.removeItem(KEYS.REPORT_HISTORY);
+}
