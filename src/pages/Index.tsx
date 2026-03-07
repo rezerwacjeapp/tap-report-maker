@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FileText, User, Settings, ClipboardList } from "lucide-react";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getReportHistory } from "@/lib/storage";
 
 const Index = () => {
   const navigate = useNavigate();
   const profile = getProfile();
   const hasProfile = !!profile.companyName;
+  const reportCount = getReportHistory().length;
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -39,6 +40,17 @@ const Index = () => {
         {/* Grid */}
         <div className="grid grid-cols-2 gap-3">
           <button
+            onClick={() => navigate("/reports")}
+            className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98]"
+          >
+            <ClipboardList className="h-6 w-6 text-muted-foreground mb-2" />
+            <h3 className="text-sm font-semibold">Historia</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {reportCount > 0 ? `${reportCount} raportów` : "Brak raportów"}
+            </p>
+          </button>
+
+          <button
             onClick={() => navigate("/profile")}
             className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98]"
           >
@@ -51,11 +63,11 @@ const Index = () => {
 
           <button
             onClick={() => navigate("/tiles")}
-            className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98]"
+            className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98] col-span-2"
           >
             <Settings className="h-6 w-6 text-muted-foreground mb-2" />
-            <h3 className="text-sm font-semibold">Ustawienia</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Czynności i pola</p>
+            <h3 className="text-sm font-semibold">Ustawienia raportu</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Czynności i pola formularza</p>
           </button>
         </div>
 
