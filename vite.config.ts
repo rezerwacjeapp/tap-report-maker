@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallbackDenylist: [/^\/~oauth/],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB — pdfmake fonts are ~2MB
       },
       manifest: {
         name: "DocSwift - Generator Raportów",
@@ -39,6 +40,15 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pdfmake: ["pdfmake"],
+        },
+      },
     },
   },
 }));
