@@ -8,7 +8,7 @@ import { VoiceButton } from "@/components/VoiceButton";
 import { ArrowLeft, ArrowRight, FileDown, Check, Trash2 } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, getEmptyDraft, hasDraft,
-  getTiles, getProfile, getCustomFields,
+  getTiles, getProfile, getCustomFields, addReportToHistory,
   type ReportDraft,
 } from "@/lib/storage";
 import { generateReport } from "@/lib/pdf-generator";
@@ -84,11 +84,13 @@ export default function ReportWizard() {
   const handleGenerate = () => {
     const profile = getProfile();
     try {
-      generateReport(profile, draft);
+      const meta = generateReport(profile, draft);
+      addReportToHistory(meta);
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
-    } catch {
+    } catch (err) {
+      console.error("PDF generation error:", err);
       toast.error("Błąd generowania PDF");
     }
   };
