@@ -141,6 +141,9 @@ export default function Reports() {
                     <Calendar className="h-3 w-3" />
                     {formatDate(report.date)}
                   </span>
+                  <span className="font-medium text-accent">
+                    {report.templateName}
+                  </span>
                   {report.photosCount > 0 && (
                     <span className="flex items-center gap-1">
                       <Camera className="h-3 w-3" />
