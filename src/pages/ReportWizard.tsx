@@ -96,8 +96,12 @@ export default function ReportWizard() {
   const [showResume, setShowResume] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setInterval>>();
+  const didCheckDraft = useRef(false);
 
   useEffect(() => {
+    if (didCheckDraft.current) return;
+    didCheckDraft.current = true;
+
     if (hasDraft()) {
       const saved = getDraft();
       if (saved.templateId === templateId) {
