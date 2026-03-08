@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import ManageTiles from "./pages/ManageTiles";
+import SelectTemplate from "./pages/SelectTemplate";
 import ReportWizard from "./pages/ReportWizard";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/tiles" element={<ManageTiles />} />
+          <Route path="/select-template" element={<SelectTemplate />} />
           <Route path="/report" element={<ReportWizard />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<NotFound />} />
