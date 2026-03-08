@@ -27,6 +27,7 @@ export interface ReportDraft {
   photos: string[]; // base64
   signature: string | null; // base64
   customFields: Record<string, string>; // fieldId -> value
+  templateId?: string;
   _lastSaved?: number;
 }
 
