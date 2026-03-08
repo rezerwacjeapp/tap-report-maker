@@ -26,7 +26,9 @@ export interface GeneratedReport {
   clientName: string;
   templateName: string;
   selectedTiles: string[];
+  tileLabels: string[];
   customFields: Record<string, string>;
+  fieldLabels: Record<string, string>;
   photosCount: number;
   hasSignature: boolean;
 }
@@ -246,9 +248,13 @@ export function generateReport(
 
   // Build metadata for report history
   const clientField = customFields.find(
-    (f) => f.id === "df_client" || f.label.toLowerCase().includes("klient")
+    (f) => f.id === "df_client" || f.id.includes("_client") || f.label.toLowerCase().includes("klient") || f.label.toLowerCase().includes("zleceniodawca")
   );
   const clientName = clientField ? draft.customFields[clientField.id] || "—" : "—";
+
+  // Build label maps for history display
+  const fieldLabels: Record<string, string> = {};
+  customFields.forEach((f) => { fieldLabels[f.id] = f.label; });
 
   return {
     id: Date.now().toString(),
@@ -257,7 +263,9 @@ export function generateReport(
     clientName,
     templateName,
     selectedTiles: [...draft.selectedTiles],
+    tileLabels: selectedLabels,
     customFields: { ...draft.customFields },
+    fieldLabels,
     photosCount: draft.photos.length,
     hasSignature: !!draft.signature,
   };
