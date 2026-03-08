@@ -38,7 +38,9 @@ export interface ReportHistoryItem {
   clientName: string;
   templateName: string;
   selectedTiles: string[];
+  tileLabels: string[];
   customFields: Record<string, string>;
+  fieldLabels: Record<string, string>; // fieldId -> label
   photosCount: number;
   hasSignature: boolean;
   createdAt: number;
@@ -53,22 +55,9 @@ const KEYS = {
   REPORT_HISTORY: "docswift_report_history",
 } as const;
 
-const DEFAULT_TILES: TileItem[] = [
-  { id: "1", label: "Przegląd szczelności" },
-  { id: "2", label: "Wymiana filtrów" },
-  { id: "3", label: "Czyszczenie jednostki" },
-  { id: "4", label: "Kontrola ciśnienia" },
-  { id: "5", label: "Uzupełnienie czynnika" },
-  { id: "6", label: "Kontrola elektryczna" },
-];
+const DEFAULT_TILES: TileItem[] = [];
 
-const DEFAULT_FIELDS: CustomFieldDef[] = [
-  { id: "df_client", label: "Nazwa klienta", type: "text", remember: false, order: 0 },
-  { id: "df_address", label: "Adres obiektu", type: "text", remember: false, order: 1 },
-  { id: "df_date", label: "Data", type: "date", remember: false, order: 2 },
-  { id: "df_nip", label: "NIP klienta", type: "text", remember: false, order: 3 },
-  { id: "df_notes", label: "Uwagi", type: "textarea", remember: false, order: 4 },
-];
+const DEFAULT_FIELDS: CustomFieldDef[] = [];
 
 function get<T>(key: string, fallback: T): T {
   try {
