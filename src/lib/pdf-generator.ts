@@ -31,12 +31,22 @@ export interface GeneratedReport {
   hasSignature: boolean;
 }
 
+export interface TemplateOptions {
+  pdfTitle: string;
+  templateName: string;
+  fields: import("./storage").CustomFieldDef[];
+  tiles: import("./storage").TileItem[];
+}
+
 export function generateReport(
   profile: CompanyProfile,
-  draft: ReportDraft
+  draft: ReportDraft,
+  options?: TemplateOptions
 ): GeneratedReport {
-  const customFields = getCustomFields();
-  const allTiles = getTiles();
+  const customFields = options?.fields ?? getCustomFields();
+  const allTiles = options?.tiles ?? getTiles();
+  const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
+  const templateName = options?.templateName ?? "Raport serwisowy";
   const selectedLabels = draft.selectedTiles
     .map((id) => allTiles.find((t) => t.id === id)?.label)
     .filter(Boolean) as string[];
@@ -101,7 +111,7 @@ export function generateReport(
   // Title row
   content.push({
     columns: [
-      { text: "RAPORT SERWISOWY", style: "title", width: "*" },
+      { text: pdfTitle, style: "title", width: "*" },
       { text: reportNum, style: "reportNumber", width: "auto", alignment: "right" as const },
     ],
     margin: [0, 0, 0, 16] as [number, number, number, number],
@@ -245,7 +255,7 @@ export function generateReport(
     filename,
     date: datepart,
     clientName,
-    templateName: "Raport serwisowy",
+    templateName,
     selectedTiles: [...draft.selectedTiles],
     customFields: { ...draft.customFields },
     photosCount: draft.photos.length,
