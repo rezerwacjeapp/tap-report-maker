@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, User, Settings, ClipboardList } from "lucide-react";
+import { FileText, User, Settings, ClipboardList, LayoutTemplate } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
+import { getUserTemplates } from "@/lib/templates";
 
 const Index = () => {
   const navigate = useNavigate();
   const profile = getProfile();
   const hasProfile = !!profile.companyName;
   const reportCount = getReportHistory().length;
+  const userTemplateCount = getUserTemplates().length;
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -62,12 +64,14 @@ const Index = () => {
           </button>
 
           <button
-            onClick={() => navigate("/tiles")}
+            onClick={() => navigate("/select-template")}
             className="rounded-xl border-2 border-border bg-card p-5 text-left hover:shadow-md transition-all active:scale-[0.98] col-span-2"
           >
-            <Settings className="h-6 w-6 text-muted-foreground mb-2" />
-            <h3 className="text-sm font-semibold">Ustawienia raportu</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Czynności i pola formularza</p>
+            <LayoutTemplate className="h-6 w-6 text-muted-foreground mb-2" />
+            <h3 className="text-sm font-semibold">Szablony raportów</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {userTemplateCount > 0 ? `${userTemplateCount} własnych + 3 branżowe` : "3 branżowe • stwórz własny"}
+            </p>
           </button>
         </div>
 
