@@ -104,7 +104,14 @@ export default function ReportWizard() {
 
     if (hasDraft()) {
       const saved = getDraft();
-      if (saved.templateId === templateId) {
+      // Only offer resume if same template AND draft has real content
+      const hasContent =
+        saved.selectedTiles.length > 0 ||
+        saved.photos.length > 0 ||
+        !!saved.signature ||
+        Object.values(saved.customFields).some((v) => v?.trim() && v !== new Date().toISOString().split("T")[0]);
+
+      if (saved.templateId === templateId && hasContent) {
         setShowResume(true);
       } else {
         clearDraft();
