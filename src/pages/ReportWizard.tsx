@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
@@ -11,6 +11,7 @@ import {
   getTiles, getProfile, getCustomFields, addReportToHistory,
   type ReportDraft,
 } from "@/lib/storage";
+import { getTemplateById } from "@/lib/templates";
 import { generateReport } from "@/lib/pdf-generator";
 import { toast } from "sonner";
 import {
@@ -23,22 +24,65 @@ const STEPS = ["Dane i czynności", "Zdjęcia i podpis"];
 
 export default function ReportWizard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const templateId = searchParams.get("template") || "tpl_custom";
+  const template = getTemplateById(templateId);
+
+  // Determine fields and tiles based on template
+  const { activeFields, activeTiles, pdfTitle, templateName } = useMemo(() => {
+    if (template && templateId !== "tpl_custom" && template.fields.length > 0) {
+      return {
+        activeFields: template.fields,
+        activeTiles: template.tiles,
+        pdfTitle: template.pdfTitle,
+        templateName: template.name,
+      };
+    }
+    // Fallback: user's custom fields/tiles from settings
+    return {
+      activeFields: getCustomFields(),
+      activeTiles: getTiles(),
+      pdfTitle: "RAPORT SERWISOWY",
+      templateName: "Raport serwisowy",
+    };
+  }, [template, templateId]);
+
+  const buildEmptyDraft = useCallback((): ReportDraft => {
+    const base = getEmptyDraft();
+    // Pre-fill date fields and initialize all template fields
+    const cf: Record<string, string> = {};
+    activeFields.forEach((f) => {
+      if (f.type === "date") {
+        cf[f.id] = new Date().toISOString().split("T")[0];
+      } else {
+        cf[f.id] = "";
+      }
+    });
+    return { ...base, customFields: cf, templateId };
+  }, [activeFields, templateId]);
+
   const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState<ReportDraft>(getEmptyDraft);
+  const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
   const [showResume, setShowResume] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const tiles = getTiles();
-  const customFields = getCustomFields();
   const autoSaveRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
     if (hasDraft()) {
-      setShowResume(true);
+      const saved = getDraft();
+      // Only offer to resume if it's the same template
+      if (saved.templateId === templateId) {
+        setShowResume(true);
+      } else {
+        clearDraft();
+        setDraft(buildEmptyDraft());
+        setInitialized(true);
+      }
     } else {
-      setDraft(getEmptyDraft());
+      setDraft(buildEmptyDraft());
       setInitialized(true);
     }
-  }, []);
+  }, [templateId, buildEmptyDraft]);
 
   const handleResume = () => {
     setDraft(getDraft());
@@ -48,7 +92,7 @@ export default function ReportWizard() {
 
   const handleNewDraft = () => {
     clearDraft();
-    setDraft(getEmptyDraft());
+    setDraft(buildEmptyDraft());
     setShowResume(false);
     setInitialized(true);
   };
@@ -84,7 +128,12 @@ export default function ReportWizard() {
   const handleGenerate = () => {
     const profile = getProfile();
     try {
-      const meta = generateReport(profile, draft);
+      const meta = generateReport(profile, draft, {
+        pdfTitle,
+        templateName,
+        fields: activeFields,
+        tiles: activeTiles,
+      });
       addReportToHistory(meta);
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
@@ -97,7 +146,7 @@ export default function ReportWizard() {
 
   const handleClearDraft = () => {
     clearDraft();
-    setDraft(getEmptyDraft());
+    setDraft(buildEmptyDraft());
     setStep(0);
     toast.success("Szkic wyczyszczony");
   };
@@ -109,7 +158,7 @@ export default function ReportWizard() {
           <AlertDialogHeader>
             <AlertDialogTitle>Niedokończony raport</AlertDialogTitle>
             <AlertDialogDescription>
-              Masz niedokończony raport. Czy chcesz go kontynuować?
+              Masz niedokończony raport ({templateName}). Czy chcesz go kontynuować?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -120,10 +169,15 @@ export default function ReportWizard() {
       </AlertDialog>
 
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl flex-1">Nowy raport</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl truncate">{templateName}</h1>
+          {templateId !== "tpl_custom" && (
+            <p className="text-xs text-muted-foreground">Szablon branżowy</p>
+          )}
+        </div>
         <Button variant="ghost" size="icon" onClick={handleClearDraft} title="Wyczyść szkic">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
@@ -135,8 +189,8 @@ export default function ReportWizard() {
         {/* Step 0: All data fields + tiles */}
         {step === 0 && (
           <div className="space-y-4">
-            {/* Dynamic custom fields */}
-            {customFields.map((field) => (
+            {/* Dynamic fields (from template or user settings) */}
+            {activeFields.map((field) => (
               <div key={field.id}>
                 <label className="text-sm font-medium mb-1.5 block">
                   {field.label}
@@ -170,26 +224,24 @@ export default function ReportWizard() {
             ))}
 
             {/* Tiles section */}
-            {tiles.length > 0 && (
-              <>
-                <div className="pt-2">
-                  <label className="text-sm font-medium block mb-2">Wykonane czynności</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {tiles.map((tile) => (
-                      <Button
-                        key={tile.id}
-                        variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"}
-                        size="lg"
-                        className="h-auto py-4 text-sm leading-tight text-center whitespace-normal"
-                        onClick={() => toggleTile(tile.id)}
-                      >
-                        {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
-                        {tile.label}
-                      </Button>
-                    ))}
-                  </div>
+            {activeTiles.length > 0 && (
+              <div className="pt-2">
+                <label className="text-sm font-medium block mb-2">Wykonane czynności</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {activeTiles.map((tile) => (
+                    <Button
+                      key={tile.id}
+                      variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"}
+                      size="lg"
+                      className="h-auto py-4 text-sm leading-tight text-center whitespace-normal"
+                      onClick={() => toggleTile(tile.id)}
+                    >
+                      {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
+                      {tile.label}
+                    </Button>
+                  ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
