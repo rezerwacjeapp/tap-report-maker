@@ -23,7 +23,7 @@ const Index = () => {
       <main className="flex-1 px-5 py-4 space-y-4">
         {/* New report - hero tile */}
         <button
-          onClick={() => navigate("/report")}
+          onClick={() => navigate("/select-template")}
           className="w-full rounded-xl border-2 border-border bg-card p-6 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group"
         >
           <div className="flex items-center gap-4">
