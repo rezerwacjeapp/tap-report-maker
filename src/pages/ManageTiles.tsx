@@ -186,9 +186,14 @@ export default function ManageTiles() {
                 </div>
               ))}
               {tiles.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Brak kafelków. Dodaj pierwszą czynność powyżej.
-                </p>
+                <div className="text-center py-6 space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Brak czynności. Dodaj własne lub użyj gotowych szablonów branżowych.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Przykłady: Przegląd szczelności, Wymiana filtrów, Czyszczenie jednostki, Kontrola ciśnienia, Pomiar temperatury
+                  </p>
+                </div>
               )}
             </div>
           </>
@@ -265,9 +270,14 @@ export default function ManageTiles() {
                 </div>
               ))}
               {customFields.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Brak pól. Dodaj pierwsze pole powyżej.
-                </p>
+                <div className="text-center py-6 space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Brak pól. Te pola dotyczą tylko szablonu „Raport serwisowy" (własny).
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Przykłady: Nazwa klienta, Adres obiektu, NIP, Data, Nr seryjny, Uwagi
+                  </p>
+                </div>
               )}
             </div>
           </>
