@@ -5,7 +5,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, ArrowRight, FileDown, Check, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileDown, Check, Trash2, SlidersHorizontal, Eye, EyeOff } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, getEmptyDraft, hasDraft,
   getTiles, getProfile, getCustomFields, addReportToHistory,
@@ -19,47 +19,77 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+} from "@/components/ui/sheet";
 
 const STEPS = ["Dane i czynności", "Zdjęcia i podpis"];
 
 export default function ReportWizard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const templateId = searchParams.get("template") || "tpl_custom";
+  const templateId = searchParams.get("template") || "";
   const template = getTemplateById(templateId);
 
-  // Determine fields and tiles based on template
-  const { activeFields, activeTiles, pdfTitle, templateName } = useMemo(() => {
-    if (template && templateId !== "tpl_custom" && template.fields.length > 0) {
+  // Resolve fields and tiles from template
+  const { allFields, allTiles, pdfTitle, templateName } = useMemo(() => {
+    if (template && template.fields.length > 0) {
       return {
-        activeFields: template.fields,
-        activeTiles: template.tiles,
+        allFields: template.fields,
+        allTiles: template.tiles,
         pdfTitle: template.pdfTitle,
         templateName: template.name,
       };
     }
-    // Fallback: user's custom fields/tiles from settings
+    // Fallback: user's custom fields/tiles from settings (legacy)
     return {
-      activeFields: getCustomFields(),
-      activeTiles: getTiles(),
+      allFields: getCustomFields(),
+      allTiles: getTiles(),
       pdfTitle: "RAPORT SERWISOWY",
       templateName: "Raport serwisowy",
     };
-  }, [template, templateId]);
+  }, [template]);
 
+  // --- Field filter (session-only, not saved) ---
+  const [hiddenFieldIds, setHiddenFieldIds] = useState<Set<string>>(new Set());
+  const [hiddenTileIds, setHiddenTileIds] = useState<Set<string>>(new Set());
+
+  const visibleFields = useMemo(
+    () => allFields.filter((f) => !hiddenFieldIds.has(f.id)),
+    [allFields, hiddenFieldIds]
+  );
+  const visibleTiles = useMemo(
+    () => allTiles.filter((t) => !hiddenTileIds.has(t.id)),
+    [allTiles, hiddenTileIds]
+  );
+
+  const toggleFieldVisibility = (fieldId: string) => {
+    setHiddenFieldIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(fieldId)) next.delete(fieldId); else next.add(fieldId);
+      return next;
+    });
+  };
+
+  const toggleTileVisibility = (tileId: string) => {
+    setHiddenTileIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(tileId)) next.delete(tileId); else next.add(tileId);
+      return next;
+    });
+  };
+
+  const hiddenCount = hiddenFieldIds.size + hiddenTileIds.size;
+
+  // --- Draft ---
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const base = getEmptyDraft();
-    // Pre-fill date fields and initialize all template fields
     const cf: Record<string, string> = {};
-    activeFields.forEach((f) => {
-      if (f.type === "date") {
-        cf[f.id] = new Date().toISOString().split("T")[0];
-      } else {
-        cf[f.id] = "";
-      }
+    allFields.forEach((f) => {
+      cf[f.id] = f.type === "date" ? new Date().toISOString().split("T")[0] : "";
     });
     return { ...base, customFields: cf, templateId };
-  }, [activeFields, templateId]);
+  }, [allFields, templateId]);
 
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
@@ -70,7 +100,6 @@ export default function ReportWizard() {
   useEffect(() => {
     if (hasDraft()) {
       const saved = getDraft();
-      // Only offer to resume if it's the same template
       if (saved.templateId === templateId) {
         setShowResume(true);
       } else {
@@ -99,9 +128,7 @@ export default function ReportWizard() {
 
   useEffect(() => {
     if (!initialized) return;
-    autoSaveRef.current = setInterval(() => {
-      saveDraft(draft);
-    }, 10_000);
+    autoSaveRef.current = setInterval(() => { saveDraft(draft); }, 10_000);
     return () => clearInterval(autoSaveRef.current);
   }, [draft, initialized]);
 
@@ -131,8 +158,8 @@ export default function ReportWizard() {
       const meta = generateReport(profile, draft, {
         pdfTitle,
         templateName,
-        fields: activeFields,
-        tiles: activeTiles,
+        fields: allFields, // Use ALL fields (not just visible) so PDF has everything filled
+        tiles: allTiles,
       });
       addReportToHistory(meta);
       toast.success("Raport PDF wygenerowany!");
@@ -168,16 +195,107 @@ export default function ReportWizard() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <header className="flex items-center gap-3 px-5 pt-6 pb-2">
+      <header className="flex items-center gap-2 px-5 pt-6 pb-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1 min-w-0">
           <h1 className="text-xl truncate">{templateName}</h1>
-          {templateId !== "tpl_custom" && (
-            <p className="text-xs text-muted-foreground">Szablon branżowy</p>
-          )}
         </div>
+
+        {/* Field filter trigger */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative" title="Dostosuj widoczne pola">
+              <SlidersHorizontal className="h-5 w-5" />
+              {hiddenCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
+                  {hiddenCount}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Dostosuj pola i czynności</SheetTitle>
+              <p className="text-sm text-muted-foreground">
+                Ukryj pola, które nie dotyczą tego zlecenia. Szablon się nie zmieni.
+              </p>
+            </SheetHeader>
+
+            <div className="mt-4 space-y-4">
+              {/* Fields toggles */}
+              {allFields.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Pola ({visibleFields.length}/{allFields.length})
+                  </p>
+                  <div className="space-y-1">
+                    {allFields.map((field) => {
+                      const isVisible = !hiddenFieldIds.has(field.id);
+                      return (
+                        <button
+                          key={field.id}
+                          onClick={() => toggleFieldVisibility(field.id)}
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                        >
+                          <span className={`text-sm ${isVisible ? "text-foreground" : "text-muted-foreground line-through"}`}>
+                            {field.label}
+                          </span>
+                          {isVisible
+                            ? <Eye className="h-4 w-4 text-accent shrink-0" />
+                            : <EyeOff className="h-4 w-4 text-muted-foreground shrink-0" />
+                          }
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tiles toggles */}
+              {allTiles.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Czynności ({visibleTiles.length}/{allTiles.length})
+                  </p>
+                  <div className="space-y-1">
+                    {allTiles.map((tile) => {
+                      const isVisible = !hiddenTileIds.has(tile.id);
+                      return (
+                        <button
+                          key={tile.id}
+                          onClick={() => toggleTileVisibility(tile.id)}
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                        >
+                          <span className={`text-sm ${isVisible ? "text-foreground" : "text-muted-foreground line-through"}`}>
+                            {tile.label}
+                          </span>
+                          {isVisible
+                            ? <Eye className="h-4 w-4 text-accent shrink-0" />
+                            : <EyeOff className="h-4 w-4 text-muted-foreground shrink-0" />
+                          }
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {hiddenCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => { setHiddenFieldIds(new Set()); setHiddenTileIds(new Set()); }}
+                >
+                  Pokaż wszystko ({hiddenCount} ukrytych)
+                </Button>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+
         <Button variant="ghost" size="icon" onClick={handleClearDraft} title="Wyczyść szkic">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
@@ -186,11 +304,23 @@ export default function ReportWizard() {
       <StepIndicator steps={STEPS} current={step} />
 
       <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto">
-        {/* Step 0: All data fields + tiles */}
+        {/* Step 0: Fields + tiles */}
         {step === 0 && (
           <div className="space-y-4">
-            {/* Dynamic fields (from template or user settings) */}
-            {activeFields.map((field) => (
+            {visibleFields.length === 0 && allFields.length === 0 && (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                Ten szablon nie ma pól. Wróć i dodaj je w edytorze szablonu.
+              </div>
+            )}
+
+            {visibleFields.length === 0 && allFields.length > 0 && (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                Wszystkie pola ukryte. Kliknij <SlidersHorizontal className="h-4 w-4 inline" /> aby przywrócić.
+              </div>
+            )}
+
+            {/* Dynamic fields */}
+            {visibleFields.map((field) => (
               <div key={field.id}>
                 <label className="text-sm font-medium mb-1.5 block">
                   {field.label}
@@ -224,11 +354,11 @@ export default function ReportWizard() {
             ))}
 
             {/* Tiles section */}
-            {activeTiles.length > 0 && (
+            {visibleTiles.length > 0 && (
               <div className="pt-2">
                 <label className="text-sm font-medium block mb-2">Wykonane czynności</label>
                 <div className="grid grid-cols-2 gap-3">
-                  {activeTiles.map((tile) => (
+                  {visibleTiles.map((tile) => (
                     <Button
                       key={tile.id}
                       variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"}
@@ -270,12 +400,7 @@ export default function ReportWizard() {
           </Button>
         )}
         {step < STEPS.length - 1 ? (
-          <Button
-            variant="accent"
-            size="lg"
-            onClick={() => setStep(step + 1)}
-            className="flex-1"
-          >
+          <Button variant="accent" size="lg" onClick={() => setStep(step + 1)} className="flex-1">
             Dalej <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         ) : (
