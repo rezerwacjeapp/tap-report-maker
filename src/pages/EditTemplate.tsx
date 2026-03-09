@@ -4,18 +4,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, Camera, PenTool } from "lucide-react";
 import {
   getTemplateById, saveUserTemplate, createBlankTemplate, duplicateTemplate,
-  FIELD_CATALOG, TILE_CATALOG, getActiveFieldBlockIds, getActiveTileBlockIds,
-  getFieldCategories, getTileCategories, STARTER_TEMPLATES,
+  FIELD_CATALOG, getActiveFieldBlockIds,
+  getFieldCategories, STARTER_TEMPLATES, countTileOptions,
   type ReportTemplate, type SignatureFieldDef,
 } from "@/lib/templates";
 import type { CustomFieldDef, TileItem, CustomFieldType } from "@/lib/storage";
 import { toast } from "sonner";
 
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
-  text: "Tekst", textarea: "Tekst długi", date: "Data", number: "Liczba",
+  text: "Tekst", textarea: "Tekst długi", date: "Data", number: "Liczba", tiles: "Czynności",
 };
 
-type TabType = "fields" | "tiles" | "options";
+type TabType = "fields" | "options";
 
 export default function EditTemplate() {
   const navigate = useNavigate();
@@ -29,7 +29,9 @@ export default function EditTemplate() {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [newFieldLabel, setNewFieldLabel] = useState("");
   const [newFieldType, setNewFieldType] = useState<CustomFieldType>("text");
-  const [newTileLabel, setNewTileLabel] = useState("");
+
+  // For adding tile options to a tiles-type field
+  const [newTileOptionLabel, setNewTileOptionLabel] = useState<Record<string, string>>({});
 
   // Drag state
   const dragItemRef = useRef<number | null>(null);
@@ -55,9 +57,8 @@ export default function EditTemplate() {
   if (!template) return null;
 
   const activeFieldBlocks = getActiveFieldBlockIds(template);
-  const activeTileBlocks = getActiveTileBlockIds(template);
 
-  // --- Field/Tile block toggles ---
+  // --- Field block toggles ---
   const toggleFieldBlock = (blockId: string) => {
     const block = FIELD_CATALOG.find((b) => b.id === blockId);
     if (!block) return;
@@ -74,21 +75,6 @@ export default function EditTemplate() {
     setTemplate({ ...template, fields: newFields.map((f, i) => ({ ...f, order: i })) });
   };
 
-  const toggleTileBlock = (blockId: string) => {
-    const block = TILE_CATALOG.find((b) => b.id === blockId);
-    if (!block) return;
-    const isActive = activeTileBlocks.has(blockId);
-    let newTiles: TileItem[];
-    if (isActive) {
-      const ids = new Set(block.tiles.map((t) => t.id));
-      newTiles = template.tiles.filter((t) => !ids.has(t.id));
-    } else {
-      const existing = new Set(template.tiles.map((t) => t.id));
-      newTiles = [...template.tiles, ...block.tiles.filter((t) => !existing.has(t.id))];
-    }
-    setTemplate({ ...template, tiles: newTiles });
-  };
-
   const toggleCategory = (cat: string) => {
     const next = new Set(expandedCats);
     if (next.has(cat)) next.delete(cat); else next.add(cat);
@@ -98,20 +84,46 @@ export default function EditTemplate() {
   // --- Custom add ---
   const addCustomField = () => {
     if (!newFieldLabel.trim()) return;
-    const f: CustomFieldDef = { id: `cf_${Date.now()}`, label: newFieldLabel.trim(), type: newFieldType, remember: false, order: template.fields.length };
+    const f: CustomFieldDef = {
+      id: `cf_${Date.now()}`,
+      label: newFieldLabel.trim(),
+      type: newFieldType,
+      remember: false,
+      order: template.fields.length,
+      ...(newFieldType === "tiles" ? { tileOptions: [] } : {}),
+    };
     setTemplate({ ...template, fields: [...template.fields, f] });
     setNewFieldLabel("");
   };
 
-  const addCustomTile = () => {
-    if (!newTileLabel.trim()) return;
-    setTemplate({ ...template, tiles: [...template.tiles, { id: `ct_${Date.now()}`, label: newTileLabel.trim() }] });
-    setNewTileLabel("");
-  };
-
   // --- Remove ---
   const removeField = (id: string) => setTemplate({ ...template, fields: template.fields.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i })) });
-  const removeTile = (id: string) => setTemplate({ ...template, tiles: template.tiles.filter((t) => t.id !== id) });
+
+  // --- Tile options management within a tiles-type field ---
+  const addTileOption = (fieldId: string) => {
+    const label = (newTileOptionLabel[fieldId] || "").trim();
+    if (!label) return;
+    setTemplate({
+      ...template,
+      fields: template.fields.map((f) =>
+        f.id === fieldId
+          ? { ...f, tileOptions: [...(f.tileOptions || []), { id: `to_${Date.now()}`, label }] }
+          : f
+      ),
+    });
+    setNewTileOptionLabel({ ...newTileOptionLabel, [fieldId]: "" });
+  };
+
+  const removeTileOption = (fieldId: string, tileId: string) => {
+    setTemplate({
+      ...template,
+      fields: template.fields.map((f) =>
+        f.id === fieldId
+          ? { ...f, tileOptions: (f.tileOptions || []).filter((t) => t.id !== tileId) }
+          : f
+      ),
+    });
+  };
 
   // --- Drag reorder ---
   const handleDragStart = (index: number) => { dragItemRef.current = index; };
@@ -125,16 +137,6 @@ export default function EditTemplate() {
     dragItemRef.current = null;
     dragOverRef.current = null;
     setTemplate({ ...template, fields: items.map((f, i) => ({ ...f, order: i })) });
-  };
-
-  const handleTileDragEnd = () => {
-    if (dragItemRef.current === null || dragOverRef.current === null) return;
-    const items = [...template.tiles];
-    const [dragged] = items.splice(dragItemRef.current, 1);
-    items.splice(dragOverRef.current, 0, dragged);
-    dragItemRef.current = null;
-    dragOverRef.current = null;
-    setTemplate({ ...template, tiles: items });
   };
 
   // --- Signature fields ---
@@ -169,6 +171,9 @@ export default function EditTemplate() {
     </div>
   );
 
+  const nonTileFieldCount = template.fields.filter((f) => f.type !== "tiles").length;
+  const tileOptionCount = countTileOptions(template);
+
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="px-5 pt-6 pb-2 space-y-2">
@@ -187,14 +192,14 @@ export default function EditTemplate() {
       </header>
 
       <div className="px-5 py-1 text-xs text-muted-foreground">
-        {template.fields.length} pól • {template.tiles.length} czynności • {(template.signatureFields || []).length} podpisów
+        {nonTileFieldCount} pól • {tileOptionCount} czynności • {(template.signatureFields || []).length} podpisów
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — only fields + options */}
       <div className="px-5 flex gap-1.5 mb-3">
-        {(["fields", "tiles", "options"] as TabType[]).map((t) => (
+        {(["fields", "options"] as TabType[]).map((t) => (
           <Button key={t} variant={tab === t ? "accent" : "outline"} size="sm" onClick={() => setTab(t)} className="flex-1 text-xs">
-            {t === "fields" ? `Pola (${template.fields.length})` : t === "tiles" ? `Czynności (${template.tiles.length})` : "Opcje"}
+            {t === "fields" ? `Pola (${template.fields.length})` : "Opcje"}
           </Button>
         ))}
       </div>
@@ -204,7 +209,7 @@ export default function EditTemplate() {
         {/* === FIELDS TAB === */}
         {tab === "fields" && (
           <>
-            <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Przeciągnij aby zmienić kolejność.</p>
+            <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Wybierz typ „Czynności" aby dodać sekcję z checkboxami.</p>
 
             {getFieldCategories().map((cat) => {
               const blocks = FIELD_CATALOG.filter((b) => b.category === cat);
@@ -243,6 +248,9 @@ export default function EditTemplate() {
                 </select>
                 <Button variant="accent" size="icon" onClick={addCustomField} className="h-11 w-11"><Plus className="h-5 w-5" /></Button>
               </div>
+              {newFieldType === "tiles" && (
+                <p className="text-xs text-muted-foreground">Po dodaniu pola typu „Czynności" będziesz mógł zdefiniować listę czynności do odhaczania.</p>
+              )}
             </div>
 
             {/* Current fields — draggable */}
@@ -250,68 +258,40 @@ export default function EditTemplate() {
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wybrane pola ({template.fields.length})</p>
                 {template.fields.map((field, index) => (
-                  <div key={field.id} draggable onDragStart={() => handleDragStart(index)} onDragEnter={() => handleDragEnter(index)} onDragEnd={handleFieldDragEnd} onDragOver={(e) => e.preventDefault()}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-2 cursor-grab active:cursor-grabbing">
-                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm flex-1 truncate">{field.label}</span>
-                    <span className="text-xs text-muted-foreground">{FIELD_TYPE_LABELS[field.type]}</span>
-                    <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* === TILES TAB === */}
-        {tab === "tiles" && (
-          <>
-            <p className="text-xs text-muted-foreground">Włącz czynności lub dodaj własne. Przeciągnij aby zmienić kolejność.</p>
-
-            {getTileCategories().map((cat) => {
-              const blocks = TILE_CATALOG.filter((b) => b.category === cat);
-              const isExpanded = expandedCats.has(cat);
-              const activeCount = blocks.filter((b) => activeTileBlocks.has(b.id)).length;
-              return (
-                <div key={cat} className="rounded-xl border-2 border-border bg-card overflow-hidden">
-                  <button onClick={() => toggleCategory(cat)} className="w-full flex items-center justify-between p-3 text-left">
-                    <div className="flex items-center gap-2">
-                      {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                      <span className="text-sm font-semibold">{cat}</span>
+                  <div key={field.id}>
+                    <div draggable onDragStart={() => handleDragStart(index)} onDragEnter={() => handleDragEnter(index)} onDragEnd={handleFieldDragEnd} onDragOver={(e) => e.preventDefault()}
+                      className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-2 cursor-grab active:cursor-grabbing">
+                      <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm flex-1 truncate">{field.label}</span>
+                      <span className="text-xs text-muted-foreground">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : ""}</span>
+                      <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
                     </div>
-                    {activeCount > 0 && <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">{activeCount}/{blocks.length}</span>}
-                  </button>
-                  {isExpanded && (
-                    <div className="border-t border-border">
-                      {blocks.map((block) => (
-                        <button key={block.id} onClick={() => toggleTileBlock(block.id)} className="w-full flex items-center justify-between px-4 py-3 border-b border-border last:border-b-0 text-left hover:bg-muted/50 transition-colors">
-                          <span className="text-sm">{block.label}</span>
-                          {renderToggle(activeTileBlocks.has(block.id))}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
 
-            <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-2">
-              <p className="text-sm font-semibold">Dodaj własną czynność</p>
-              <div className="flex gap-2">
-                <input className="flex-1 h-11 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent" value={newTileLabel} onChange={(e) => setNewTileLabel(e.target.value)} placeholder="Nazwa czynności" onKeyDown={(e) => e.key === "Enter" && addCustomTile()} />
-                <Button variant="accent" size="icon" onClick={addCustomTile} className="h-11 w-11"><Plus className="h-5 w-5" /></Button>
-              </div>
-            </div>
-
-            {template.tiles.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wybrane czynności ({template.tiles.length})</p>
-                {template.tiles.map((tile, index) => (
-                  <div key={tile.id} draggable onDragStart={() => handleDragStart(index)} onDragEnter={() => handleDragEnter(index)} onDragEnd={handleTileDragEnd} onDragOver={(e) => e.preventDefault()}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-2 cursor-grab active:cursor-grabbing">
-                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm flex-1 truncate">{tile.label}</span>
-                    <button onClick={() => removeTile(tile.id)} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
+                    {/* Tile options editor for tiles-type fields */}
+                    {field.type === "tiles" && (
+                      <div className="ml-6 mt-1 mb-2 space-y-1.5 border-l-2 border-accent/30 pl-3">
+                        {(field.tileOptions || []).length === 0 && (
+                          <p className="text-xs text-muted-foreground py-1">Brak czynności — dodaj poniżej.</p>
+                        )}
+                        {(field.tileOptions || []).map((tile) => (
+                          <div key={tile.id} className="flex items-center gap-2 text-sm">
+                            <span className="text-accent">•</span>
+                            <span className="flex-1 truncate">{tile.label}</span>
+                            <button onClick={() => removeTileOption(field.id, tile.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+                          </div>
+                        ))}
+                        <div className="flex gap-1.5">
+                          <input
+                            className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
+                            placeholder="Nazwa czynności"
+                            value={newTileOptionLabel[field.id] || ""}
+                            onChange={(e) => setNewTileOptionLabel({ ...newTileOptionLabel, [field.id]: e.target.value })}
+                            onKeyDown={(e) => e.key === "Enter" && addTileOption(field.id)}
+                          />
+                          <Button variant="accent" size="icon" onClick={() => addTileOption(field.id)} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
