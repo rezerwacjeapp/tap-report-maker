@@ -171,18 +171,19 @@ export default function EditTemplate() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="flex items-center gap-3 px-5 pt-6 pb-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <input
-            className="text-xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground font-display"
-            value={template.name}
-            onChange={(e) => setTemplate({ ...template, name: e.target.value, pdfTitle: e.target.value.toUpperCase() })}
-            placeholder="Nazwa szablonu"
-          />
+      <header className="px-5 pt-6 pb-2 space-y-2">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <span className="text-sm text-muted-foreground">Edytor szablonu</span>
         </div>
+        <input
+          className="text-xl font-bold w-full h-12 rounded-lg border-2 border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
+          value={template.name}
+          onChange={(e) => setTemplate({ ...template, name: e.target.value })}
+          placeholder="Wpisz nazwę szablonu..."
+        />
       </header>
 
       <div className="px-5 py-1 text-xs text-muted-foreground">
