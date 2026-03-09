@@ -29,9 +29,14 @@ export default function ReportWizard() {
 
   const { allFields, allTiles, pdfTitle, templateName, hasPhotos, signatureFields } = useMemo(() => {
     if (template && template.fields.length > 0) {
+      // Collect all tile options from tiles-type fields + legacy template.tiles
+      const tilesFromFields = template.fields
+        .filter((f) => f.type === "tiles")
+        .flatMap((f) => f.tileOptions || []);
+      const legacyTiles = template.tiles || [];
       return {
         allFields: template.fields,
-        allTiles: template.tiles,
+        allTiles: [...tilesFromFields, ...legacyTiles],
         pdfTitle: template.pdfTitle,
         templateName: template.name,
         hasPhotos: template.hasPhotos ?? true,
@@ -53,13 +58,10 @@ export default function ReportWizard() {
 
   // Field filter
   const [hiddenFieldIds, setHiddenFieldIds] = useState<Set<string>>(new Set());
-  const [hiddenTileIds, setHiddenTileIds] = useState<Set<string>>(new Set());
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
-  const visibleTiles = useMemo(() => allTiles.filter((t) => !hiddenTileIds.has(t.id)), [allTiles, hiddenTileIds]);
-  const hiddenCount = hiddenFieldIds.size + hiddenTileIds.size;
+  const hiddenCount = hiddenFieldIds.size;
 
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const toggleTileVis = (id: string) => setHiddenTileIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   // Draft
   const buildEmptyDraft = useCallback((): ReportDraft => {
@@ -172,22 +174,8 @@ export default function ReportWizard() {
                 })}
               </div>
             )}
-            {allTiles.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Czynności ({visibleTiles.length}/{allTiles.length})</p>
-                {allTiles.map((t) => {
-                  const vis = !hiddenTileIds.has(t.id);
-                  return (
-                    <button key={t.id} onClick={() => toggleTileVis(t.id)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted/50 text-left">
-                      <span className={`text-sm ${vis ? "" : "text-muted-foreground line-through"}`}>{t.label}</span>
-                      {vis ? <Eye className="h-4 w-4 text-accent" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
             {hiddenCount > 0 && (
-              <Button variant="outline" size="sm" className="w-full" onClick={() => { setHiddenFieldIds(new Set()); setHiddenTileIds(new Set()); }}>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => { setHiddenFieldIds(new Set()); }}>
                 Pokaż wszystko ({hiddenCount} ukrytych)
               </Button>
             )}
@@ -203,41 +191,49 @@ export default function ReportWizard() {
           <div className="space-y-4">
             {visibleFields.map((field) => (
               <div key={field.id}>
-                <label className="text-sm font-medium mb-1.5 block">
-                  {field.label}
-                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
-                </label>
-                {field.type === "textarea" ? (
-                  <div className="space-y-2">
-                    <textarea className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
-                    <VoiceButton onResult={(text) => { const cur = draft.customFields[field.id] || ""; updateField(field.id, cur ? `${cur} ${text}` : text); }} />
-                  </div>
-                ) : field.type === "text" ? (
-                  <div className="space-y-2">
-                    <input type="text" className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
-                    <VoiceButton onResult={(text) => { updateField(field.id, text); }} />
+                {/* --- TILES-TYPE FIELD: render as grouped checkboxes --- */}
+                {field.type === "tiles" ? (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">{field.label}</label>
+                    {(field.tileOptions || []).length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {(field.tileOptions || []).map((tile) => (
+                          <Button key={tile.id} variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"} size="lg" className="h-auto py-4 text-sm leading-tight text-center whitespace-normal" onClick={() => toggleTile(tile.id)}>
+                            {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
+                            {tile.label}
+                          </Button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Brak zdefiniowanych czynności w tej sekcji.</p>
+                    )}
                   </div>
                 ) : (
-                  <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                  /* --- REGULAR FIELD --- */
+                  <>
+                    <label className="text-sm font-medium mb-1.5 block">
+                      {field.label}
+                      {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                    </label>
+                    {field.type === "textarea" ? (
+                      <div className="space-y-2">
+                        <textarea className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                        <VoiceButton onResult={(text) => { const cur = draft.customFields[field.id] || ""; updateField(field.id, cur ? `${cur} ${text}` : text); }} />
+                      </div>
+                    ) : field.type === "text" ? (
+                      <div className="space-y-2">
+                        <input type="text" className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                        <VoiceButton onResult={(text) => { updateField(field.id, text); }} />
+                      </div>
+                    ) : (
+                      <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                    )}
+                  </>
                 )}
               </div>
             ))}
 
-            {visibleTiles.length > 0 && (
-              <div className="pt-2">
-                <label className="text-sm font-medium block mb-2">Wykonane czynności</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {visibleTiles.map((tile) => (
-                    <Button key={tile.id} variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"} size="lg" className="h-auto py-4 text-sm leading-tight text-center whitespace-normal" onClick={() => toggleTile(tile.id)}>
-                      {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
-                      {tile.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* If no step 2, show signatures and photos inline */}
+            {/* If no step 2, show note */}
             {!hasStep2 && (
               <p className="text-xs text-muted-foreground text-center pt-4">Ten szablon nie zawiera zdjęć ani podpisów.</p>
             )}
