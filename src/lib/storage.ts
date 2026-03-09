@@ -25,7 +25,7 @@ export interface CustomFieldDef {
 export interface ReportDraft {
   selectedTiles: string[];
   photos: string[]; // base64
-  signature: string | null; // base64
+  signatures: Record<string, string | null>; // signatureFieldId -> base64
   customFields: Record<string, string>; // fieldId -> value
   templateId?: string;
   _lastSaved?: number;
@@ -37,12 +37,16 @@ export interface ReportHistoryItem {
   date: string;
   clientName: string;
   templateName: string;
+  templateId?: string;
+  pdfTitle?: string;
   selectedTiles: string[];
   tileLabels: string[];
   customFields: Record<string, string>;
-  fieldLabels: Record<string, string>; // fieldId -> label
+  fieldLabels: Record<string, string>;
+  signatures: Record<string, string | null>;
+  signatureLabels: Record<string, string>;
   photosCount: number;
-  hasSignature: boolean;
+  hasPhotos: boolean;
   createdAt: number;
 }
 
@@ -119,13 +123,13 @@ export function getEmptyDraft(): ReportDraft {
   return {
     selectedTiles: [],
     photos: [],
-    signature: null,
+    signatures: {},
     customFields: buildDefaultCustomFields(),
   };
 }
 
 export function getDraft(): ReportDraft {
-  const saved = get<ReportDraft | null>(KEYS.DRAFT, null);
+  const saved = get<any>(KEYS.DRAFT, null);
   if (!saved) return getEmptyDraft();
   const fields = getCustomFields();
   const remembered = getRememberedValues();
@@ -139,7 +143,9 @@ export function getDraft(): ReportDraft {
       }
     }
   });
-  return { ...saved, customFields: cf };
+  // Migrate old single signature to new format
+  const signatures = saved.signatures ?? (saved.signature ? { sig_client: saved.signature } : {});
+  return { ...saved, customFields: cf, signatures };
 }
 
 export function hasDraft(): boolean {
