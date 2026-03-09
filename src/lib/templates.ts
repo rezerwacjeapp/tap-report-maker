@@ -101,36 +101,30 @@ export const FIELD_CATALOG: FieldBlock[] = [
     fields: [{ id: "f_contract", label: "Numer umowy / zlecenia", type: "text", remember: false, order: 0 }],
   },
 
-  // --- Urządzenie ---
+  // --- Obiekt / miejsce ---
   {
-    id: "fb_device_model",
-    category: "Urządzenie",
-    label: "Model urządzenia",
-    fields: [{ id: "f_dev_model", label: "Model urządzenia", type: "text", remember: false, order: 0 }],
+    id: "fb_object_name",
+    category: "Obiekt / miejsce",
+    label: "Nazwa obiektu",
+    fields: [{ id: "f_obj_name", label: "Nazwa obiektu", type: "text", remember: false, order: 0 }],
   },
   {
-    id: "fb_device_serial",
-    category: "Urządzenie",
-    label: "Numer seryjny",
-    fields: [{ id: "f_dev_serial", label: "Numer seryjny", type: "text", remember: false, order: 0 }],
+    id: "fb_object_location",
+    category: "Obiekt / miejsce",
+    label: "Lokalizacja",
+    fields: [{ id: "f_obj_loc", label: "Lokalizacja", type: "text", remember: false, order: 0 }],
   },
   {
-    id: "fb_device_manufacturer",
-    category: "Urządzenie",
-    label: "Producent",
-    fields: [{ id: "f_dev_mfr", label: "Producent", type: "text", remember: false, order: 0 }],
+    id: "fb_object_number",
+    category: "Obiekt / miejsce",
+    label: "Numer / oznaczenie",
+    fields: [{ id: "f_obj_num", label: "Numer / oznaczenie", type: "text", remember: false, order: 0 }],
   },
   {
-    id: "fb_device_location",
-    category: "Urządzenie",
-    label: "Lokalizacja urządzenia",
-    fields: [{ id: "f_dev_loc", label: "Lokalizacja urządzenia", type: "text", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_device_year",
-    category: "Urządzenie",
-    label: "Rok produkcji",
-    fields: [{ id: "f_dev_year", label: "Rok produkcji", type: "number", remember: false, order: 0 }],
+    id: "fb_object_desc",
+    category: "Obiekt / miejsce",
+    label: "Opis",
+    fields: [{ id: "f_obj_desc", label: "Opis", type: "textarea", remember: false, order: 0 }],
   },
 
   // --- Inne ---
@@ -158,18 +152,7 @@ export const FIELD_CATALOG: FieldBlock[] = [
 // TILE CATALOG — ready-made activity groups
 // ============================================================
 
-export const TILE_CATALOG: TileBlock[] = [
-  { id: "tb_gen_visual", category: "Ogólne", label: "Oględziny wizualne", tiles: [{ id: "t_gen_visual", label: "Oględziny wizualne" }] },
-  { id: "tb_gen_clean", category: "Ogólne", label: "Czyszczenie", tiles: [{ id: "t_gen_clean", label: "Czyszczenie" }] },
-  { id: "tb_gen_test", category: "Ogólne", label: "Test działania", tiles: [{ id: "t_gen_test", label: "Test działania" }] },
-  { id: "tb_gen_replace", category: "Ogólne", label: "Wymiana elementu", tiles: [{ id: "t_gen_replace", label: "Wymiana elementu" }] },
-  { id: "tb_gen_repair", category: "Ogólne", label: "Naprawa", tiles: [{ id: "t_gen_repair", label: "Naprawa" }] },
-  { id: "tb_gen_calibrate", category: "Ogólne", label: "Kalibracja", tiles: [{ id: "t_gen_calib", label: "Kalibracja" }] },
-  { id: "tb_gen_measure", category: "Ogólne", label: "Pomiar", tiles: [{ id: "t_gen_measure", label: "Pomiar" }] },
-  { id: "tb_gen_check", category: "Ogólne", label: "Kontrola / sprawdzenie", tiles: [{ id: "t_gen_check", label: "Kontrola / sprawdzenie" }] },
-  { id: "tb_gen_install", category: "Ogólne", label: "Montaż / instalacja", tiles: [{ id: "t_gen_install", label: "Montaż / instalacja" }] },
-  { id: "tb_gen_demount", category: "Ogólne", label: "Demontaż", tiles: [{ id: "t_gen_demount", label: "Demontaż" }] },
-];
+export const TILE_CATALOG: TileBlock[] = [];
 
 // ============================================================
 // BUILT-IN TEMPLATE STARTERS (presets)
@@ -194,22 +177,23 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "f_dev_loc", label: "Lokalizacja jednostki", type: "text", remember: false, order: 6 },
       { id: "f_refrig", label: "Rodzaj czynnika", type: "text", remember: true, order: 7 },
       { id: "f_refrig_amt", label: "Ilość czynnika [kg]", type: "number", remember: false, order: 8 },
-      { id: "f_notes", label: "Uwagi", type: "textarea", remember: false, order: 9 },
+      { id: "f_klima_tiles", label: "Czynności serwisowe", type: "tiles", remember: false, order: 9, tileOptions: [
+        { id: "t_klima_leak", label: "Sprawdzenie szczelności" },
+        { id: "t_klima_pres", label: "Kontrola ciśnienia" },
+        { id: "t_klima_refill", label: "Uzupełnienie czynnika" },
+        { id: "t_klima_filt", label: "Czyszczenie filtrów" },
+        { id: "t_klima_int", label: "Czyszczenie jednostki wewnętrznej" },
+        { id: "t_klima_ext", label: "Czyszczenie jednostki zewnętrznej" },
+        { id: "t_klima_drain", label: "Kontrola odpływu skroplin" },
+        { id: "t_klima_elec", label: "Kontrola połączeń elektrycznych" },
+        { id: "t_klima_cool", label: "Test w trybie chłodzenia" },
+        { id: "t_klima_heat", label: "Test w trybie grzania" },
+        { id: "t_klima_remote", label: "Test pilota / sterowania" },
+        { id: "t_klima_temp", label: "Pomiar temperatur" },
+      ]},
+      { id: "f_notes", label: "Uwagi", type: "textarea", remember: false, order: 10 },
     ],
-    tiles: [
-      { id: "t_klima_leak", label: "Sprawdzenie szczelności" },
-      { id: "t_klima_pres", label: "Kontrola ciśnienia" },
-      { id: "t_klima_refill", label: "Uzupełnienie czynnika" },
-      { id: "t_klima_filt", label: "Czyszczenie filtrów" },
-      { id: "t_klima_int", label: "Czyszczenie jednostki wewnętrznej" },
-      { id: "t_klima_ext", label: "Czyszczenie jednostki zewnętrznej" },
-      { id: "t_klima_drain", label: "Kontrola odpływu skroplin" },
-      { id: "t_klima_elec", label: "Kontrola połączeń elektrycznych" },
-      { id: "t_klima_cool", label: "Test w trybie chłodzenia" },
-      { id: "t_klima_heat", label: "Test w trybie grzania" },
-      { id: "t_klima_remote", label: "Test pilota / sterowania" },
-      { id: "t_klima_temp", label: "Pomiar temperatur" },
-    ],
+    tiles: [],
     hasPhotos: true,
     signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
   },
@@ -230,18 +214,19 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "f_meter_sn", label: "Nr seryjny miernika", type: "text", remember: true, order: 5 },
       { id: "f_meter_cert", label: "Data ważności świadectwa", type: "date", remember: true, order: 6 },
       { id: "f_result", label: "Wynik ogólny", type: "text", remember: false, order: 7 },
-      { id: "f_notes", label: "Uwagi i zalecenia", type: "textarea", remember: false, order: 8 },
+      { id: "f_elec_tiles", label: "Wykonane pomiary", type: "tiles", remember: false, order: 8, tileOptions: [
+        { id: "t_elec_insp", label: "Oględziny instalacji" },
+        { id: "t_elec_insul", label: "Pomiar rezystancji izolacji" },
+        { id: "t_elec_loop", label: "Pomiar impedancji pętli zwarcia" },
+        { id: "t_elec_gnd", label: "Pomiar rezystancji uziemienia" },
+        { id: "t_elec_rcd", label: "Sprawdzenie wyłączników RCD" },
+        { id: "t_elec_pe", label: "Sprawdzenie ciągłości PE" },
+        { id: "t_elec_volt", label: "Pomiar napięcia i częstotliwości" },
+        { id: "t_elec_brkr", label: "Sprawdzenie zabezpieczeń nadprądowych" },
+      ]},
+      { id: "f_notes", label: "Uwagi i zalecenia", type: "textarea", remember: false, order: 9 },
     ],
-    tiles: [
-      { id: "t_elec_insp", label: "Oględziny instalacji" },
-      { id: "t_elec_insul", label: "Pomiar rezystancji izolacji" },
-      { id: "t_elec_loop", label: "Pomiar impedancji pętli zwarcia" },
-      { id: "t_elec_gnd", label: "Pomiar rezystancji uziemienia" },
-      { id: "t_elec_rcd", label: "Sprawdzenie wyłączników RCD" },
-      { id: "t_elec_pe", label: "Sprawdzenie ciągłości PE" },
-      { id: "t_elec_volt", label: "Pomiar napięcia i częstotliwości" },
-      { id: "t_elec_brkr", label: "Sprawdzenie zabezpieczeń nadprądowych" },
-    ],
+    tiles: [],
     hasPhotos: true,
     signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
   },
@@ -264,19 +249,20 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "f_meter_gas", label: "Stan licznika gazowego", type: "text", remember: false, order: 7 },
       { id: "f_meter_water", label: "Stan licznika wody", type: "text", remember: false, order: 8 },
       { id: "f_keys", label: "Liczba przekazanych kluczy", type: "number", remember: false, order: 9 },
-      { id: "f_condition", label: "Stan ogólny lokalu", type: "textarea", remember: false, order: 10 },
-      { id: "f_notes", label: "Uwagi i zastrzeżenia", type: "textarea", remember: false, order: 11 },
+      { id: "f_prop_tiles", label: "Stan lokalu", type: "tiles", remember: false, order: 10, tileOptions: [
+        { id: "t_prop_walls", label: "Ściany i sufity — bez uszkodzeń" },
+        { id: "t_prop_floors", label: "Podłogi — bez uszkodzeń" },
+        { id: "t_prop_win", label: "Okna i drzwi — sprawne" },
+        { id: "t_prop_elec", label: "Instalacja elektryczna — sprawna" },
+        { id: "t_prop_plumb", label: "Instalacja wod-kan — sprawna" },
+        { id: "t_prop_heat", label: "Ogrzewanie — sprawne" },
+        { id: "t_prop_kitchen", label: "Kuchnia — kompletne wyposażenie" },
+        { id: "t_prop_bath", label: "Łazienka — kompletne wyposażenie" },
+      ]},
+      { id: "f_condition", label: "Stan ogólny lokalu", type: "textarea", remember: false, order: 11 },
+      { id: "f_notes", label: "Uwagi i zastrzeżenia", type: "textarea", remember: false, order: 12 },
     ],
-    tiles: [
-      { id: "t_prop_walls", label: "Ściany i sufity — bez uszkodzeń" },
-      { id: "t_prop_floors", label: "Podłogi — bez uszkodzeń" },
-      { id: "t_prop_win", label: "Okna i drzwi — sprawne" },
-      { id: "t_prop_elec", label: "Instalacja elektryczna — sprawna" },
-      { id: "t_prop_plumb", label: "Instalacja wod-kan — sprawna" },
-      { id: "t_prop_heat", label: "Ogrzewanie — sprawne" },
-      { id: "t_prop_kitchen", label: "Kuchnia — kompletne wyposażenie" },
-      { id: "t_prop_bath", label: "Łazienka — kompletne wyposażenie" },
-    ],
+    tiles: [],
     hasPhotos: true,
     signatureFields: [
       { id: "sig_owner", label: "Podpis przekazującego" },
@@ -393,4 +379,18 @@ export function getActiveTileBlockIds(template: ReportTemplate): Set<string> {
     }
   });
   return active;
+}
+
+/** Count total tile options across all tiles-type fields */
+export function countTileOptions(template: ReportTemplate): number {
+  return template.fields
+    .filter((f) => f.type === "tiles")
+    .reduce((sum, f) => sum + (f.tileOptions?.length || 0), 0);
+}
+
+/** Get all tile options from all tiles-type fields (flat) */
+export function getAllTileOptions(template: ReportTemplate): import("./storage").TileItem[] {
+  return template.fields
+    .filter((f) => f.type === "tiles")
+    .flatMap((f) => f.tileOptions || []);
 }
