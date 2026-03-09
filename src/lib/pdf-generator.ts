@@ -161,8 +161,51 @@ export function generateReport(
     });
   }
 
-  // === ACTIVITIES TABLE ===
-  if (selectedLabels.length > 0) {
+  // === ACTIVITIES TABLES — one per tiles-type field ===
+  const tilesFields = customFields.filter((f) => f.type === "tiles" && f.tileOptions?.length);
+  
+  tilesFields.forEach((tilesField) => {
+    const fieldTileIds = new Set((tilesField.tileOptions || []).map((t) => t.id));
+    const selectedInField = draft.selectedTiles.filter((id) => fieldTileIds.has(id));
+    const selectedFieldLabels = selectedInField
+      .map((id) => (tilesField.tileOptions || []).find((t) => t.id === id)?.label)
+      .filter(Boolean) as string[];
+
+    if (selectedFieldLabels.length === 0) return;
+
+    content.push({ text: tilesField.label, style: "sectionHeader", margin: [0, 0, 0, 8] as [number, number, number, number] });
+
+    const body: any[][] = [
+      [
+        { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
+        { text: "Opis czynności", style: "tableHeader", fillColor: COLORS.primary },
+        { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
+      ],
+    ];
+
+    selectedFieldLabels.forEach((label, i) => {
+      const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
+      body.push([
+        { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
+        { text: label, style: "tableCell", fillColor: bg },
+        { text: "✔", style: "tableCell", fillColor: bg, alignment: "center" as const, color: COLORS.accent, bold: true },
+      ]);
+    });
+
+    content.push({
+      table: { headerRows: 1, widths: [30, "*", 45], body },
+      layout: {
+        hLineWidth: () => 0.5,
+        vLineWidth: () => 0.5,
+        hLineColor: () => "#d1d5db",
+        vLineColor: () => "#d1d5db",
+      },
+      margin: [0, 0, 0, 16] as [number, number, number, number],
+    });
+  });
+
+  // === LEGACY: flat activities table for templates with old-style tiles ===
+  if (selectedLabels.length > 0 && tilesFields.length === 0) {
     content.push({ text: "Wykonane czynności", style: "sectionHeader", margin: [0, 0, 0, 8] as [number, number, number, number] });
 
     const body: any[][] = [
