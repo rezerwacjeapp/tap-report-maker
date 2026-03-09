@@ -25,12 +25,16 @@ export interface GeneratedReport {
   date: string;
   clientName: string;
   templateName: string;
+  templateId?: string;
+  pdfTitle?: string;
   selectedTiles: string[];
   tileLabels: string[];
   customFields: Record<string, string>;
   fieldLabels: Record<string, string>;
+  signatures: Record<string, string | null>;
+  signatureLabels: Record<string, string>;
   photosCount: number;
-  hasSignature: boolean;
+  hasPhotos: boolean;
 }
 
 export interface TemplateOptions {
@@ -38,6 +42,7 @@ export interface TemplateOptions {
   templateName: string;
   fields: import("./storage").CustomFieldDef[];
   tiles: import("./storage").TileItem[];
+  signatureFields: { id: string; label: string }[];
 }
 
 export function generateReport(
@@ -49,6 +54,7 @@ export function generateReport(
   const allTiles = options?.tiles ?? getTiles();
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
   const templateName = options?.templateName ?? "Raport serwisowy";
+  const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Podpis klienta" }];
   const selectedLabels = draft.selectedTiles
     .map((id) => allTiles.find((t) => t.id === id)?.label)
     .filter(Boolean) as string[];
@@ -207,15 +213,19 @@ export function generateReport(
     content.push({ text: "", margin: [0, 0, 0, 10] as [number, number, number, number] });
   }
 
-  // === SIGNATURE ===
-  if (draft.signature) {
-    content.push({ text: "Podpis klienta", style: "sectionHeader", margin: [0, 10, 0, 6] as [number, number, number, number] });
-    content.push({ image: draft.signature, width: 150, height: 75 });
-    content.push({
-      canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
-      margin: [0, 2, 0, 0] as [number, number, number, number],
-    });
-  }
+  // === SIGNATURES ===
+  const draftSigs: Record<string, string | null> = (draft as any).signatures ?? ((draft as any).signature ? { sig_client: (draft as any).signature } : {});
+  signatureFields.forEach((sf) => {
+    const sigData = draftSigs[sf.id];
+    if (sigData) {
+      content.push({ text: sf.label, style: "sectionHeader", margin: [0, 10, 0, 6] as [number, number, number, number] });
+      content.push({ image: sigData, width: 150, height: 75 });
+      content.push({
+        canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
+        margin: [0, 2, 0, 8] as [number, number, number, number],
+      });
+    }
+  });
 
   // === DOCUMENT DEFINITION ===
   const docDefinition: any = {
@@ -256,51 +266,63 @@ export function generateReport(
   const fieldLabels: Record<string, string> = {};
   customFields.forEach((f) => { fieldLabels[f.id] = f.label; });
 
+  const signatureLabels: Record<string, string> = {};
+  const draftSignatures: Record<string, string | null> = (draft as any).signatures ?? {};
+  signatureFields.forEach((sf) => { signatureLabels[sf.id] = sf.label; });
+
   return {
     id: Date.now().toString(),
     filename,
     date: datepart,
     clientName,
     templateName,
+    templateId: draft.templateId,
+    pdfTitle,
     selectedTiles: [...draft.selectedTiles],
     tileLabels: selectedLabels,
     customFields: { ...draft.customFields },
     fieldLabels,
+    signatures: { ...draftSignatures },
+    signatureLabels,
     photosCount: draft.photos.length,
-    hasSignature: !!draft.signature,
+    hasPhotos: draft.photos.length > 0,
   };
 }
 
 /**
- * Share PDF via Web Share API (mobile) or download fallback
+ * Regenerate PDF from history item (without photos)
  */
-export async function shareReport(
+export function regenerateFromHistory(
   profile: CompanyProfile,
-  draft: ReportDraft
-): Promise<GeneratedReport> {
-  const customFields = getCustomFields();
-  const dateField = customFields.find((f) => f.type === "date" && draft.customFields[f.id]?.trim());
-  const firstTextField = customFields.find((f) => f.type === "text" && draft.customFields[f.id]?.trim());
-  const namepart = firstTextField
-    ? draft.customFields[firstTextField.id].replace(/\s+/g, "_").replace(/[^a-zA-Z0-9ąęśźćłóżńĄĘŚŹĆŁÓŻŃ_-]/g, "")
-    : "serwis";
-  const datepart = dateField
-    ? draft.customFields[dateField.id]
-    : new Date().toISOString().split("T")[0];
-  const filename = `raport_${namepart}_${datepart}.pdf`;
+  item: import("./storage").ReportHistoryItem
+) {
+  // Build fields from fieldLabels
+  const fields = Object.entries(item.fieldLabels || {}).map(([id, label], i) => ({
+    id, label, type: "text" as const, remember: false, order: i,
+  }));
 
-  // Build the same doc definition but get blob instead of downloading
-  const meta = generateReport(profile, draft);
+  // Build tiles from tileLabels
+  const tiles = (item.tileLabels || []).map((label, i) => ({
+    id: item.selectedTiles[i] || `t_${i}`, label,
+  }));
 
-  // Try Web Share API
-  if (navigator.share && navigator.canShare) {
-    try {
-      // We need to regenerate to get blob — for now, the download already happened
-      // Future: refactor to get blob first, then decide share vs download
-    } catch {
-      // Fallback: download already happened
-    }
-  }
+  // Build signature fields from signatureLabels
+  const signatureFields = Object.entries(item.signatureLabels || {}).map(([id, label]) => ({ id, label }));
 
-  return meta;
+  // Build a fake draft
+  const draft: ReportDraft = {
+    selectedTiles: item.selectedTiles,
+    photos: [], // photos not stored in history
+    signatures: item.signatures || {},
+    customFields: item.customFields,
+    templateId: item.templateId,
+  };
+
+  generateReport(profile, draft, {
+    pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
+    templateName: item.templateName,
+    fields,
+    tiles,
+    signatureFields,
+  });
 }
