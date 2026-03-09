@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, Wind, Zap, Home, FileText, Plus,
-  ChevronRight, Pencil, Trash2, Copy,
+  ChevronRight, ChevronDown, Pencil, Trash2, Copy,
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -22,6 +22,7 @@ export default function SelectTemplate() {
   const navigate = useNavigate();
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showStarters, setShowStarters] = useState(false);
 
   const handleUseTemplate = (template: ReportTemplate) => {
     navigate(`/report?template=${template.id}`);
@@ -141,11 +142,21 @@ export default function SelectTemplate() {
           </div>
         </button>
 
-        {/* === STARTER TEMPLATES === */}
+        {/* === STARTER TEMPLATES — collapsible === */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Szablony branżowe — użyj jako bazę
-          </p>
+          <button
+            onClick={() => setShowStarters(!showStarters)}
+            className="w-full flex items-center justify-between py-3 text-left"
+          >
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Gotowe szablony branżowe
+            </p>
+            {showStarters
+              ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              : <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            }
+          </button>
+          {showStarters && (
           <div className="space-y-2">
             {STARTER_TEMPLATES.map((starter) => {
               const Icon = ICON_MAP[starter.icon] || FileText;
@@ -187,6 +198,7 @@ export default function SelectTemplate() {
               );
             })}
           </div>
+          )}
         </div>
       </main>
 
