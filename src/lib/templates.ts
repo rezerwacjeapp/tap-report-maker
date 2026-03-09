@@ -133,94 +133,6 @@ export const FIELD_CATALOG: FieldBlock[] = [
     fields: [{ id: "f_dev_year", label: "Rok produkcji", type: "number", remember: false, order: 0 }],
   },
 
-  // --- Klimatyzacja / HVAC ---
-  {
-    id: "fb_refrigerant",
-    category: "Klimatyzacja / HVAC",
-    label: "Rodzaj czynnika",
-    fields: [{ id: "f_refrig", label: "Rodzaj czynnika", type: "text", remember: true, order: 0 }],
-  },
-  {
-    id: "fb_refrigerant_amount",
-    category: "Klimatyzacja / HVAC",
-    label: "Ilość czynnika [kg]",
-    fields: [{ id: "f_refrig_amt", label: "Ilość czynnika [kg]", type: "number", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_pressure",
-    category: "Klimatyzacja / HVAC",
-    label: "Ciśnienie [bar]",
-    fields: [{ id: "f_pressure", label: "Ciśnienie [bar]", type: "text", remember: false, order: 0 }],
-  },
-
-  // --- Pomiary / Elektryka ---
-  {
-    id: "fb_meter_type",
-    category: "Pomiary",
-    label: "Typ miernika",
-    fields: [{ id: "f_meter_type", label: "Typ miernika", type: "text", remember: true, order: 0 }],
-  },
-  {
-    id: "fb_meter_serial",
-    category: "Pomiary",
-    label: "Nr seryjny miernika",
-    fields: [{ id: "f_meter_sn", label: "Nr seryjny miernika", type: "text", remember: true, order: 0 }],
-  },
-  {
-    id: "fb_meter_cert",
-    category: "Pomiary",
-    label: "Data ważności świadectwa wzorcowania",
-    fields: [{ id: "f_meter_cert", label: "Data ważności świadectwa", type: "date", remember: true, order: 0 }],
-  },
-  {
-    id: "fb_result",
-    category: "Pomiary",
-    label: "Wynik ogólny (pozytywny/negatywny)",
-    fields: [{ id: "f_result", label: "Wynik ogólny", type: "text", remember: false, order: 0 }],
-  },
-
-  // --- Nieruchomości ---
-  {
-    id: "fb_owner",
-    category: "Nieruchomości",
-    label: "Przekazujący (właściciel)",
-    fields: [{ id: "f_owner", label: "Przekazujący (właściciel)", type: "text", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_tenant",
-    category: "Nieruchomości",
-    label: "Przejmujący (najemca)",
-    fields: [{ id: "f_tenant", label: "Przejmujący (najemca)", type: "text", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_area",
-    category: "Nieruchomości",
-    label: "Powierzchnia [m²]",
-    fields: [{ id: "f_area", label: "Powierzchnia [m²]", type: "number", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_rooms",
-    category: "Nieruchomości",
-    label: "Liczba pomieszczeń",
-    fields: [{ id: "f_rooms", label: "Liczba pomieszczeń", type: "number", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_meters",
-    category: "Nieruchomości",
-    label: "Stany liczników (prąd, gaz, woda)",
-    fields: [
-      { id: "f_meter_elec", label: "Stan licznika elektrycznego", type: "text", remember: false, order: 0 },
-      { id: "f_meter_gas", label: "Stan licznika gazowego", type: "text", remember: false, order: 1 },
-      { id: "f_meter_water", label: "Stan licznika wody", type: "text", remember: false, order: 2 },
-    ],
-  },
-  {
-    id: "fb_keys",
-    category: "Nieruchomości",
-    label: "Liczba kluczy",
-    fields: [{ id: "f_keys", label: "Liczba przekazanych kluczy", type: "number", remember: false, order: 0 }],
-  },
-
   // --- Inne ---
   {
     id: "fb_notes",
@@ -247,47 +159,16 @@ export const FIELD_CATALOG: FieldBlock[] = [
 // ============================================================
 
 export const TILE_CATALOG: TileBlock[] = [
-  // --- Klimatyzacja ---
-  { id: "tb_klima_leak", category: "Klimatyzacja", label: "Sprawdzenie szczelności", tiles: [{ id: "t_klima_leak", label: "Sprawdzenie szczelności" }] },
-  { id: "tb_klima_pressure", category: "Klimatyzacja", label: "Kontrola ciśnienia", tiles: [{ id: "t_klima_pres", label: "Kontrola ciśnienia" }] },
-  { id: "tb_klima_refill", category: "Klimatyzacja", label: "Uzupełnienie czynnika", tiles: [{ id: "t_klima_refill", label: "Uzupełnienie czynnika" }] },
-  { id: "tb_klima_filters", category: "Klimatyzacja", label: "Czyszczenie filtrów", tiles: [{ id: "t_klima_filt", label: "Czyszczenie filtrów" }] },
-  { id: "tb_klima_int", category: "Klimatyzacja", label: "Czyszczenie jedn. wewnętrznej", tiles: [{ id: "t_klima_int", label: "Czyszczenie jednostki wewnętrznej" }] },
-  { id: "tb_klima_ext", category: "Klimatyzacja", label: "Czyszczenie jedn. zewnętrznej", tiles: [{ id: "t_klima_ext", label: "Czyszczenie jednostki zewnętrznej" }] },
-  { id: "tb_klima_drain", category: "Klimatyzacja", label: "Kontrola odpływu skroplin", tiles: [{ id: "t_klima_drain", label: "Kontrola odpływu skroplin" }] },
-  { id: "tb_klima_elec", category: "Klimatyzacja", label: "Kontrola połączeń elektrycznych", tiles: [{ id: "t_klima_elec", label: "Kontrola połączeń elektrycznych" }] },
-  { id: "tb_klima_cool", category: "Klimatyzacja", label: "Test chłodzenia", tiles: [{ id: "t_klima_cool", label: "Test w trybie chłodzenia" }] },
-  { id: "tb_klima_heat", category: "Klimatyzacja", label: "Test grzania", tiles: [{ id: "t_klima_heat", label: "Test w trybie grzania" }] },
-  { id: "tb_klima_remote", category: "Klimatyzacja", label: "Test pilota / sterowania", tiles: [{ id: "t_klima_remote", label: "Test pilota / sterowania" }] },
-  { id: "tb_klima_temp", category: "Klimatyzacja", label: "Pomiar temperatur", tiles: [{ id: "t_klima_temp", label: "Pomiar temperatur" }] },
-
-  // --- Elektryka ---
-  { id: "tb_elec_inspect", category: "Elektryka", label: "Oględziny instalacji", tiles: [{ id: "t_elec_insp", label: "Oględziny instalacji" }] },
-  { id: "tb_elec_insul", category: "Elektryka", label: "Pomiar rezystancji izolacji", tiles: [{ id: "t_elec_insul", label: "Pomiar rezystancji izolacji" }] },
-  { id: "tb_elec_loop", category: "Elektryka", label: "Pomiar impedancji pętli zwarcia", tiles: [{ id: "t_elec_loop", label: "Pomiar impedancji pętli zwarcia" }] },
-  { id: "tb_elec_ground", category: "Elektryka", label: "Pomiar rezystancji uziemienia", tiles: [{ id: "t_elec_gnd", label: "Pomiar rezystancji uziemienia" }] },
-  { id: "tb_elec_rcd", category: "Elektryka", label: "Sprawdzenie wyłączników RCD", tiles: [{ id: "t_elec_rcd", label: "Sprawdzenie wyłączników RCD" }] },
-  { id: "tb_elec_pe", category: "Elektryka", label: "Sprawdzenie ciągłości PE", tiles: [{ id: "t_elec_pe", label: "Sprawdzenie ciągłości PE" }] },
-  { id: "tb_elec_voltage", category: "Elektryka", label: "Pomiar napięcia i częstotliwości", tiles: [{ id: "t_elec_volt", label: "Pomiar napięcia i częstotliwości" }] },
-  { id: "tb_elec_breakers", category: "Elektryka", label: "Sprawdzenie zabezpieczeń nadprądowych", tiles: [{ id: "t_elec_brkr", label: "Sprawdzenie zabezpieczeń nadprądowych" }] },
-
-  // --- Nieruchomości ---
-  { id: "tb_prop_walls", category: "Nieruchomości", label: "Ściany i sufity", tiles: [{ id: "t_prop_walls", label: "Ściany i sufity — bez uszkodzeń" }] },
-  { id: "tb_prop_floors", category: "Nieruchomości", label: "Podłogi", tiles: [{ id: "t_prop_floors", label: "Podłogi — bez uszkodzeń" }] },
-  { id: "tb_prop_windows", category: "Nieruchomości", label: "Okna i drzwi", tiles: [{ id: "t_prop_win", label: "Okna i drzwi — sprawne" }] },
-  { id: "tb_prop_electric", category: "Nieruchomości", label: "Instalacja elektryczna", tiles: [{ id: "t_prop_elec", label: "Instalacja elektryczna — sprawna" }] },
-  { id: "tb_prop_plumbing", category: "Nieruchomości", label: "Instalacja wod-kan", tiles: [{ id: "t_prop_plumb", label: "Instalacja wod-kan — sprawna" }] },
-  { id: "tb_prop_heating", category: "Nieruchomości", label: "Ogrzewanie", tiles: [{ id: "t_prop_heat", label: "Ogrzewanie — sprawne" }] },
-  { id: "tb_prop_kitchen", category: "Nieruchomości", label: "Kuchnia", tiles: [{ id: "t_prop_kitchen", label: "Kuchnia — kompletne wyposażenie" }] },
-  { id: "tb_prop_bathroom", category: "Nieruchomości", label: "Łazienka", tiles: [{ id: "t_prop_bath", label: "Łazienka — kompletne wyposażenie" }] },
-
-  // --- Ogólne ---
   { id: "tb_gen_visual", category: "Ogólne", label: "Oględziny wizualne", tiles: [{ id: "t_gen_visual", label: "Oględziny wizualne" }] },
   { id: "tb_gen_clean", category: "Ogólne", label: "Czyszczenie", tiles: [{ id: "t_gen_clean", label: "Czyszczenie" }] },
   { id: "tb_gen_test", category: "Ogólne", label: "Test działania", tiles: [{ id: "t_gen_test", label: "Test działania" }] },
   { id: "tb_gen_replace", category: "Ogólne", label: "Wymiana elementu", tiles: [{ id: "t_gen_replace", label: "Wymiana elementu" }] },
   { id: "tb_gen_repair", category: "Ogólne", label: "Naprawa", tiles: [{ id: "t_gen_repair", label: "Naprawa" }] },
   { id: "tb_gen_calibrate", category: "Ogólne", label: "Kalibracja", tiles: [{ id: "t_gen_calib", label: "Kalibracja" }] },
+  { id: "tb_gen_measure", category: "Ogólne", label: "Pomiar", tiles: [{ id: "t_gen_measure", label: "Pomiar" }] },
+  { id: "tb_gen_check", category: "Ogólne", label: "Kontrola / sprawdzenie", tiles: [{ id: "t_gen_check", label: "Kontrola / sprawdzenie" }] },
+  { id: "tb_gen_install", category: "Ogólne", label: "Montaż / instalacja", tiles: [{ id: "t_gen_install", label: "Montaż / instalacja" }] },
+  { id: "tb_gen_demount", category: "Ogólne", label: "Demontaż", tiles: [{ id: "t_gen_demount", label: "Demontaż" }] },
 ];
 
 // ============================================================
