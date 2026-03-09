@@ -212,8 +212,13 @@ export default function ReportWizard() {
                     <textarea className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
                     <VoiceButton onResult={(text) => { const cur = draft.customFields[field.id] || ""; updateField(field.id, cur ? `${cur} ${text}` : text); }} />
                   </div>
+                ) : field.type === "text" ? (
+                  <div className="space-y-2">
+                    <input type="text" className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                    <VoiceButton onResult={(text) => { updateField(field.id, text); }} />
+                  </div>
                 ) : (
-                  <input type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"} className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                  <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
                 )}
               </div>
             ))}
@@ -254,6 +259,7 @@ export default function ReportWizard() {
                 <SignatureCanvas
                   value={draft.signatures[sf.id] || null}
                   onChange={(data) => updateSignature(sf.id, data)}
+                  label={sf.label}
                 />
               </div>
             ))}
