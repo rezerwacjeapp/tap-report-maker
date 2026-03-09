@@ -4,6 +4,11 @@ import type { CustomFieldDef, TileItem } from "./storage";
 // DATA MODEL
 // ============================================================
 
+export interface SignatureFieldDef {
+  id: string;
+  label: string;
+}
+
 export interface ReportTemplate {
   id: string;
   name: string;
@@ -14,6 +19,8 @@ export interface ReportTemplate {
   pdfTitle: string;
   fields: CustomFieldDef[];
   tiles: TileItem[];
+  hasPhotos: boolean;
+  signatureFields: SignatureFieldDef[];
 }
 
 // A catalog block = a group of related fields or tiles the user can toggle on/off
@@ -322,6 +329,8 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "t_klima_remote", label: "Test pilota / sterowania" },
       { id: "t_klima_temp", label: "Pomiar temperatur" },
     ],
+    hasPhotos: true,
+    signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
   },
   {
     id: "starter_elektr",
@@ -352,6 +361,8 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "t_elec_volt", label: "Pomiar napięcia i częstotliwości" },
       { id: "t_elec_brkr", label: "Sprawdzenie zabezpieczeń nadprądowych" },
     ],
+    hasPhotos: true,
+    signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
   },
   {
     id: "starter_zdawczo",
@@ -384,6 +395,11 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       { id: "t_prop_heat", label: "Ogrzewanie — sprawne" },
       { id: "t_prop_kitchen", label: "Kuchnia — kompletne wyposażenie" },
       { id: "t_prop_bath", label: "Łazienka — kompletne wyposażenie" },
+    ],
+    hasPhotos: true,
+    signatureFields: [
+      { id: "sig_owner", label: "Podpis przekazującego" },
+      { id: "sig_tenant", label: "Podpis przejmującego" },
     ],
   },
 ];
@@ -449,6 +465,8 @@ export function createBlankTemplate(name: string): ReportTemplate {
     pdfTitle: name.toUpperCase(),
     fields: [],
     tiles: [],
+    hasPhotos: true,
+    signatureFields: [{ id: `sig_${Date.now()}`, label: "Podpis klienta" }],
   });
 }
 
