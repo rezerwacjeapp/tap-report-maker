@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, FileText, Search, Trash2, Calendar, Camera,
-  PenTool, ChevronDown, ChevronUp, CheckCircle2,
+  PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown,
 } from "lucide-react";
-import { getReportHistory, removeReportFromHistory, type ReportHistoryItem } from "@/lib/storage";
+import { getReportHistory, removeReportFromHistory, getProfile, type ReportHistoryItem } from "@/lib/storage";
+import { regenerateFromHistory } from "@/lib/pdf-generator";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -168,10 +169,10 @@ export default function Reports() {
                         {report.photosCount} zdjęć
                       </span>
                     )}
-                    {report.hasSignature && (
+                    {(report.hasSignature || (report.signatures && Object.values(report.signatures).some((v) => !!v))) && (
                       <span className="flex items-center gap-1">
                         <PenTool className="h-3 w-3" />
-                        Podpis
+                        {report.signatures ? `${Object.values(report.signatures).filter((v) => !!v).length} podp.` : "Podpis"}
                       </span>
                     )}
                   </div>
@@ -214,11 +215,27 @@ export default function Reports() {
                       </div>
                     )}
 
-                    {/* File info */}
-                    <div className="pt-1">
-                      <p className="text-xs text-muted-foreground font-mono">
+                    {/* File info + regenerate */}
+                    <div className="pt-2 flex items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground font-mono truncate flex-1">
                         {report.filename}
                       </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try {
+                            const profile = getProfile();
+                            regenerateFromHistory(profile, report);
+                            toast.success("PDF wygenerowany ponownie!");
+                          } catch {
+                            toast.error("Nie udało się wygenerować PDF");
+                          }
+                        }}
+                      >
+                        <FileDown className="h-3.5 w-3.5 mr-1.5" /> Pobierz PDF
+                      </Button>
                     </div>
                   </div>
                 )}
