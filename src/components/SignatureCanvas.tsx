@@ -5,9 +5,10 @@ import { Eraser } from "lucide-react";
 interface Props {
   value: string | null;
   onChange: (data: string | null) => void;
+  label?: string;
 }
 
-export function SignatureCanvas({ value, onChange }: Props) {
+export function SignatureCanvas({ value, onChange, label }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawing, setDrawing] = useState(false);
 
@@ -86,7 +87,7 @@ export function SignatureCanvas({ value, onChange }: Props) {
           onTouchEnd={end}
         />
         <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground pointer-events-none select-none">
-          Podpis klienta
+          {label || "Podpis"}
         </p>
       </div>
       <Button variant="outline" size="sm" onClick={clear} className="w-full">
