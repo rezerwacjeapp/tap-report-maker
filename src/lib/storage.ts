@@ -12,7 +12,7 @@ export interface TileItem {
   label: string;
 }
 
-export type CustomFieldType = "text" | "textarea" | "date" | "number";
+export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles";
 
 export interface CustomFieldDef {
   id: string;
@@ -20,6 +20,7 @@ export interface CustomFieldDef {
   type: CustomFieldType;
   remember: boolean;
   order: number;
+  tileOptions?: TileItem[];
 }
 
 export interface ReportDraft {
