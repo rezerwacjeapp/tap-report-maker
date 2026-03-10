@@ -54,7 +54,7 @@ export default function ReportWizard() {
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
     allFields.forEach((f) => { if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0]; else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = ""; });
-    return { selectedTiles: [], photos: [], signatures: {}, customFields: cf, templateId };
+    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, templateId };
   }, [allFields, templateId]);
 
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
@@ -69,6 +69,7 @@ export default function ReportWizard() {
     if (hasDraft()) {
       const saved = getDraft();
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
+        Object.values(saved.photosByField || {}).some((arr) => arr.length > 0) ||
         Object.values(saved.signatures || {}).some((v) => !!v) ||
         Object.values(saved.customFields).some((v) => v?.trim() && v !== new Date().toISOString().split("T")[0]);
       if (saved.templateId === templateId && hasContent) {
@@ -170,7 +171,7 @@ export default function ReportWizard() {
             ) : field.type === "photos" ? (
               <div>
                 <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
-                <PhotoGallery photos={draft.photos} onChange={(photos) => update({ photos })} />
+                <PhotoGallery photos={draft.photosByField[field.id] || []} onChange={(photos) => update({ photosByField: { ...draft.photosByField, [field.id]: photos } })} />
               </div>
 
             /* SIGNATURE */
