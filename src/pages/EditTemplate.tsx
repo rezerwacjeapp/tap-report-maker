@@ -39,6 +39,35 @@ export default function EditTemplate() {
   const [newFieldType, setNewFieldType] = useState<CustomFieldType>("text");
   const [newTileOptionLabel, setNewTileOptionLabel] = useState<Record<string, string>>({});
 
+  // Staging area for building a tiles section before adding
+  const [stagingTilesName, setStagingTilesName] = useState("");
+  const [stagingTiles, setStagingTiles] = useState<{id: string; label: string}[]>([]);
+  const [stagingTileInput, setStagingTileInput] = useState("");
+
+  const addStagingTile = () => {
+    if (!stagingTileInput.trim()) return;
+    setStagingTiles((prev) => [...prev, { id: `to_${Date.now()}`, label: stagingTileInput.trim() }]);
+    setStagingTileInput("");
+  };
+
+  const removeStagingTile = (id: string) => setStagingTiles((prev) => prev.filter((t) => t.id !== id));
+
+  const commitTilesSection = () => {
+    if (!stagingTilesName.trim()) return;
+    const f: CustomFieldDef = {
+      id: `cf_${Date.now()}`,
+      label: stagingTilesName.trim(),
+      type: "tiles",
+      remember: false,
+      order: template!.fields.length,
+      tileOptions: [...stagingTiles],
+    };
+    setTemplate({ ...template!, fields: [...template!.fields, f] });
+    setStagingTilesName("");
+    setStagingTiles([]);
+    setStagingTileInput("");
+  };
+
   const dragItemRef = useRef<number | null>(null);
   const dragOverRef = useRef<number | null>(null);
 
@@ -271,16 +300,35 @@ export default function EditTemplate() {
             </div>
           </div>
 
-          {/* === CZYNNOŚCI — name + immediate activity entry === */}
+          {/* === CZYNNOŚCI — inline builder === */}
           <div className="rounded-lg border-2 border-border p-3 space-y-2">
             <p className="text-sm font-medium">Czynności</p>
-            <p className="text-[11px] text-muted-foreground">Sekcja z checkboxami do odhaczania. Nazwij sekcję i dodaj czynności:</p>
-            <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe, Wykonane pomiary" value={newFieldType === "tiles" ? newFieldLabel : ""} onChange={(e) => { setNewFieldType("tiles"); setNewFieldLabel(e.target.value); }}
-              onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) { addCustomField("tiles"); } }} />
-            <Button variant="accent" size="sm" onClick={() => { if (newFieldLabel.trim()) addCustomField("tiles"); }} className="w-full" disabled={!(newFieldType === "tiles" && newFieldLabel.trim())}>
-              <Plus className="h-4 w-4 mr-1" /> Dodaj sekcję czynności
+            <p className="text-[11px] text-muted-foreground">Sekcja z checkboxami do odhaczania. Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
+            <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
+
+            {/* Staged tiles list */}
+            {stagingTiles.length > 0 && (
+              <div className="space-y-1 border-l-2 border-accent/30 pl-3 ml-1">
+                {stagingTiles.map((tile) => (
+                  <div key={tile.id} className="flex items-center gap-2 text-xs">
+                    <span className="text-accent">•</span>
+                    <span className="flex-1">{tile.label}</span>
+                    <button onClick={() => removeStagingTile(tile.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add activity input */}
+            <div className="flex gap-1.5">
+              <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności — np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") addStagingTile(); }} />
+              <Button variant="outline" size="icon" onClick={addStagingTile} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+            </div>
+
+            <Button variant="accent" size="sm" onClick={commitTilesSection} className="w-full" disabled={!stagingTilesName.trim()}>
+              <Plus className="h-4 w-4 mr-1" /> Dodaj do raportu {stagingTiles.length > 0 && `(${stagingTiles.length} czynności)`}
             </Button>
-            <p className="text-[11px] text-muted-foreground">Po dodaniu sekcji, wpiszesz poszczególne czynności poniżej na liście.</p>
           </div>
         </div>
 
