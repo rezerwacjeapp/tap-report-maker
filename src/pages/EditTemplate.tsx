@@ -16,6 +16,16 @@ const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   tiles: "Czynności", photos: "Zdjęcia", signature: "Podpis",
 };
 
+const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
+  text: "Krótkie pole tekstowe — np. nazwa klienta, adres, numer seryjny.",
+  textarea: "Długie pole na opis — np. uwagi, zalecenia, stan techniczny.",
+  date: "Pole daty — np. data wykonania, data następnego przeglądu.",
+  number: "Pole liczbowe — np. powierzchnia, ilość, rok produkcji.",
+  tiles: "Sekcja z checkboxami do odhaczania — np. lista czynności serwisowych.",
+  photos: "Dokumentacja fotograficzna — osobne zdjęcia dla tej sekcji raportu.",
+  signature: "Pole na podpis palcem — np. podpis klienta, serwisanta, inspektora.",
+};
+
 export default function EditTemplate() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -221,9 +231,7 @@ export default function EditTemplate() {
             </select>
             <Button variant="accent" size="icon" onClick={addCustomField} className="h-11 w-11"><Plus className="h-5 w-5" /></Button>
           </div>
-          {newFieldType === "tiles" && (
-            <p className="text-xs text-muted-foreground">Po dodaniu pola typu „Czynności" będziesz mógł zdefiniować listę czynności do odhaczania.</p>
-          )}
+          <p className="text-xs text-muted-foreground italic">{FIELD_TYPE_HINTS[newFieldType]}</p>
         </div>
 
         {/* Current fields — draggable with up/down */}
