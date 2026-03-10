@@ -59,10 +59,6 @@ export function generateReport(
     .map((id) => allTiles.find((t) => t.id === id)?.label)
     .filter(Boolean) as string[];
 
-  const filledFields = customFields.filter(
-    (f) => draft.customFields[f.id]?.trim()
-  );
-
   // Build filename
   const firstTextField = customFields.find(
     (f) => f.type === "text" && draft.customFields[f.id]?.trim()
@@ -125,29 +121,14 @@ export function generateReport(
     margin: [0, 0, 0, 16] as [number, number, number, number],
   });
 
-  // === CUSTOM FIELDS ===
-  if (filledFields.length > 0) {
-    const rows: any[][] = [];
+  // === CONTENT IN FIELD ORDER ===
+  // Collect consecutive data fields into a table, then flush when we hit a special type
+  let pendingDataRows: any[][] = [];
 
-    filledFields.forEach((field) => {
-      const value = draft.customFields[field.id];
-      if (field.type === "textarea") {
-        rows.push([
-          { text: field.label, style: "fieldLabel", colSpan: 2, border: [false, false, false, false] }, {},
-        ]);
-        rows.push([
-          { text: value, style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
-        ]);
-      } else {
-        rows.push([
-          { text: field.label, style: "fieldLabel", border: [false, false, false, true] },
-          { text: value, style: "fieldValue", border: [false, false, false, true] },
-        ]);
-      }
-    });
-
+  const flushDataRows = () => {
+    if (pendingDataRows.length === 0) return;
     content.push({
-      table: { widths: [130, "*"], body: rows },
+      table: { widths: [130, "*"], body: [...pendingDataRows] },
       layout: {
         hLineWidth: () => 0.5,
         vLineWidth: () => 0,
@@ -157,111 +138,101 @@ export function generateReport(
         paddingTop: () => 5,
         paddingBottom: () => 5,
       },
-      margin: [0, 0, 0, 16] as [number, number, number, number],
+      margin: [0, 0, 0, 12] as [number, number, number, number],
     });
-  }
+    pendingDataRows = [];
+  };
 
-  // === ACTIVITIES TABLES — one per tiles-type field ===
-  const tilesFields = customFields.filter((f) => f.type === "tiles" && f.tileOptions?.length);
-  
-  tilesFields.forEach((tilesField) => {
-    const fieldTileIds = new Set((tilesField.tileOptions || []).map((t) => t.id));
-    const selectedInField = draft.selectedTiles.filter((id) => fieldTileIds.has(id));
-    const selectedFieldLabels = selectedInField
-      .map((id) => (tilesField.tileOptions || []).find((t) => t.id === id)?.label)
-      .filter(Boolean) as string[];
+  customFields.forEach((field) => {
+    // --- DATA FIELDS (text, textarea, date, number) ---
+    if (["text", "textarea", "date", "number"].includes(field.type)) {
+      const value = draft.customFields[field.id];
+      if (!value?.trim()) return;
 
-    if (selectedFieldLabels.length === 0) return;
-
-    content.push({ text: tilesField.label, style: "sectionHeader", margin: [0, 0, 0, 8] as [number, number, number, number] });
-
-    const body: any[][] = [
-      [
-        { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
-        { text: "Opis czynności", style: "tableHeader", fillColor: COLORS.primary },
-        { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
-      ],
-    ];
-
-    selectedFieldLabels.forEach((label, i) => {
-      const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-      body.push([
-        { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
-        { text: label, style: "tableCell", fillColor: bg },
-        { text: "✔", style: "tableCell", fillColor: bg, alignment: "center" as const, color: COLORS.accent, bold: true },
-      ]);
-    });
-
-    content.push({
-      table: { headerRows: 1, widths: [30, "*", 45], body },
-      layout: {
-        hLineWidth: () => 0.5,
-        vLineWidth: () => 0.5,
-        hLineColor: () => "#d1d5db",
-        vLineColor: () => "#d1d5db",
-      },
-      margin: [0, 0, 0, 16] as [number, number, number, number],
-    });
-  });
-
-  // === LEGACY: flat activities table for templates with old-style tiles ===
-  if (selectedLabels.length > 0 && tilesFields.length === 0) {
-    content.push({ text: "Wykonane czynności", style: "sectionHeader", margin: [0, 0, 0, 8] as [number, number, number, number] });
-
-    const body: any[][] = [
-      [
-        { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
-        { text: "Opis czynności", style: "tableHeader", fillColor: COLORS.primary },
-        { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
-      ],
-    ];
-
-    selectedLabels.forEach((label, i) => {
-      const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-      body.push([
-        { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
-        { text: label, style: "tableCell", fillColor: bg },
-        { text: "✔", style: "tableCell", fillColor: bg, alignment: "center" as const, color: COLORS.accent, bold: true },
-      ]);
-    });
-
-    content.push({
-      table: { headerRows: 1, widths: [30, "*", 45], body },
-      layout: {
-        hLineWidth: () => 0.5,
-        vLineWidth: () => 0.5,
-        hLineColor: () => "#d1d5db",
-        vLineColor: () => "#d1d5db",
-      },
-      margin: [0, 0, 0, 16] as [number, number, number, number],
-    });
-  }
-
-  // === PHOTOS ===
-  if (draft.photos.length > 0) {
-    content.push({ text: "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 0, 0, 8] as [number, number, number, number] });
-
-    for (let i = 0; i < draft.photos.length; i += 2) {
-      const cols: any[] = [
-        { image: draft.photos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
-      ];
-      if (draft.photos[i + 1]) {
-        cols.push({ image: draft.photos[i + 1], width: 240, height: 180, margin: [5, 0, 0, 5] as [number, number, number, number] });
+      if (field.type === "textarea") {
+        pendingDataRows.push([
+          { text: field.label, style: "fieldLabel", colSpan: 2, border: [false, false, false, false] }, {},
+        ]);
+        pendingDataRows.push([
+          { text: value, style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
+        ]);
       } else {
-        cols.push({ text: "", width: 240 });
+        pendingDataRows.push([
+          { text: field.label, style: "fieldLabel", border: [false, false, false, true] },
+          { text: value, style: "fieldValue", border: [false, false, false, true] },
+        ]);
       }
-      content.push({ columns: cols });
+      return;
     }
 
-    content.push({ text: "", margin: [0, 0, 0, 10] as [number, number, number, number] });
-  }
+    // --- TILES FIELD: show ALL options with ✔/✗ ---
+    if (field.type === "tiles" && field.tileOptions?.length) {
+      flushDataRows();
 
-  // === SIGNATURES ===
-  const draftSigs: Record<string, string | null> = (draft as any).signatures ?? ((draft as any).signature ? { sig_client: (draft as any).signature } : {});
-  signatureFields.forEach((sf) => {
-    const sigData = draftSigs[sf.id];
-    if (sigData) {
-      content.push({ text: sf.label, style: "sectionHeader", margin: [0, 10, 0, 6] as [number, number, number, number] });
+      content.push({ text: field.label, style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+
+      const body: any[][] = [
+        [
+          { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
+          { text: "Opis czynności", style: "tableHeader", fillColor: COLORS.primary },
+          { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
+        ],
+      ];
+
+      (field.tileOptions || []).forEach((tile, i) => {
+        const isSelected = draft.selectedTiles.includes(tile.id);
+        const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
+        body.push([
+          { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
+          { text: tile.label, style: "tableCell", fillColor: bg },
+          {
+            text: isSelected ? "✔" : "✗",
+            style: "tableCell", fillColor: bg, alignment: "center" as const,
+            color: isSelected ? COLORS.accent : "#ef4444",
+            bold: true,
+          },
+        ]);
+      });
+
+      content.push({
+        table: { headerRows: 1, widths: [30, "*", 45], body },
+        layout: {
+          hLineWidth: () => 0.5, vLineWidth: () => 0.5,
+          hLineColor: () => "#d1d5db", vLineColor: () => "#d1d5db",
+        },
+        margin: [0, 0, 0, 12] as [number, number, number, number],
+      });
+      return;
+    }
+
+    // --- PHOTOS ---
+    if (field.type === "photos" && draft.photos.length > 0) {
+      flushDataRows();
+
+      content.push({ text: field.label || "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+
+      for (let i = 0; i < draft.photos.length; i += 2) {
+        const cols: any[] = [
+          { image: draft.photos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
+        ];
+        if (draft.photos[i + 1]) {
+          cols.push({ image: draft.photos[i + 1], width: 240, height: 180, margin: [5, 0, 0, 5] as [number, number, number, number] });
+        } else {
+          cols.push({ text: "", width: 240 });
+        }
+        content.push({ columns: cols });
+      }
+      content.push({ text: "", margin: [0, 0, 0, 8] as [number, number, number, number] });
+      return;
+    }
+
+    // --- SIGNATURE ---
+    if (field.type === "signature") {
+      const sigData = (draft.signatures || {})[field.id];
+      if (!sigData) return;
+      flushDataRows();
+
+      content.push({ text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] });
       content.push({ image: sigData, width: 150, height: 75 });
       content.push({
         canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
@@ -269,6 +240,9 @@ export function generateReport(
       });
     }
   });
+
+  // Flush any remaining data rows
+  flushDataRows();
 
   // === DOCUMENT DEFINITION ===
   const docDefinition: any = {
