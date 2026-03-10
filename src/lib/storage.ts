@@ -12,7 +12,7 @@ export interface TileItem {
   label: string;
 }
 
-export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles";
+export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles" | "photos" | "signature";
 
 export interface CustomFieldDef {
   id: string;
