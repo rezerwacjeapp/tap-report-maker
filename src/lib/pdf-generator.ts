@@ -206,17 +206,19 @@ export function generateReport(
     }
 
     // --- PHOTOS ---
-    if (field.type === "photos" && draft.photos.length > 0) {
+    if (field.type === "photos") {
+      const fieldPhotos = (draft.photosByField || {})[field.id] || draft.photos || [];
+      if (fieldPhotos.length === 0) return;
       flushDataRows();
 
       content.push({ text: field.label || "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
 
-      for (let i = 0; i < draft.photos.length; i += 2) {
+      for (let i = 0; i < fieldPhotos.length; i += 2) {
         const cols: any[] = [
-          { image: draft.photos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
+          { image: fieldPhotos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
         ];
-        if (draft.photos[i + 1]) {
-          cols.push({ image: draft.photos[i + 1], width: 240, height: 180, margin: [5, 0, 0, 5] as [number, number, number, number] });
+        if (fieldPhotos[i + 1]) {
+          cols.push({ image: fieldPhotos[i + 1], width: 240, height: 180, margin: [5, 0, 0, 5] as [number, number, number, number] });
         } else {
           cols.push({ text: "", width: 240 });
         }
@@ -301,8 +303,8 @@ export function generateReport(
     fieldLabels,
     signatures: { ...draftSignatures },
     signatureLabels,
-    photosCount: draft.photos.length,
-    hasPhotos: draft.photos.length > 0,
+    photosCount: Object.values(draft.photosByField || {}).reduce((sum, arr) => sum + arr.length, 0) || draft.photos.length,
+    hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
   };
 }
 
