@@ -25,7 +25,8 @@ export interface CustomFieldDef {
 
 export interface ReportDraft {
   selectedTiles: string[];
-  photos: string[]; // base64
+  photos: string[]; // base64 — legacy flat array
+  photosByField: Record<string, string[]>; // fieldId -> base64[] — per-field photos
   signatures: Record<string, string | null>; // signatureFieldId -> base64
   customFields: Record<string, string>; // fieldId -> value
   templateId?: string;
@@ -124,6 +125,7 @@ export function getEmptyDraft(): ReportDraft {
   return {
     selectedTiles: [],
     photos: [],
+    photosByField: {},
     signatures: {},
     customFields: buildDefaultCustomFields(),
   };
@@ -146,7 +148,8 @@ export function getDraft(): ReportDraft {
   });
   // Migrate old single signature to new format
   const signatures = saved.signatures ?? (saved.signature ? { sig_client: saved.signature } : {});
-  return { ...saved, customFields: cf, signatures };
+  const photosByField = saved.photosByField ?? {};
+  return { ...saved, customFields: cf, signatures, photosByField };
 }
 
 export function hasDraft(): boolean {
