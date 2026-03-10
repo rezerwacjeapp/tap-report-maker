@@ -85,18 +85,20 @@ export default function EditTemplate() {
     setExpandedCats(next);
   };
 
-  const addCustomField = () => {
+  const addCustomField = (typeOverride?: CustomFieldType) => {
     if (!newFieldLabel.trim()) return;
+    const type = typeOverride || newFieldType;
     const f: CustomFieldDef = {
       id: `cf_${Date.now()}`,
       label: newFieldLabel.trim(),
-      type: newFieldType,
+      type,
       remember: false,
       order: template.fields.length,
-      ...(newFieldType === "tiles" ? { tileOptions: [] } : {}),
+      ...(type === "tiles" ? { tileOptions: [] } : {}),
     };
     setTemplate({ ...template, fields: [...template.fields, f] });
     setNewFieldLabel("");
+    setNewFieldType(type);
   };
 
   const removeField = (id: string) => setTemplate({ ...template, fields: template.fields.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i })) });
@@ -222,16 +224,27 @@ export default function EditTemplate() {
         })}
 
         {/* Custom field adder */}
-        <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-2">
+        <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-3">
           <p className="text-sm font-semibold">Dodaj własne pole</p>
           <input className="w-full h-11 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent" value={newFieldLabel} onChange={(e) => setNewFieldLabel(e.target.value)} placeholder="Nazwa pola" onKeyDown={(e) => e.key === "Enter" && addCustomField()} />
-          <div className="flex gap-2">
-            <select className="flex-1 h-11 rounded-lg border-2 border-border bg-card px-3 text-sm" value={newFieldType} onChange={(e) => setNewFieldType(e.target.value as CustomFieldType)}>
-              {Object.entries(FIELD_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-            <Button variant="accent" size="icon" onClick={addCustomField} className="h-11 w-11"><Plus className="h-5 w-5" /></Button>
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.entries(FIELD_TYPE_LABELS) as [CustomFieldType, string][]).map(([type, label]) => (
+              <button
+                key={type}
+                onClick={() => {
+                  if (newFieldLabel.trim()) {
+                    addCustomField(type);
+                  } else {
+                    setNewFieldType(type);
+                  }
+                }}
+                className={`rounded-lg border-2 p-2.5 text-left transition-all ${newFieldType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+              >
+                <span className="text-sm font-medium block">{label}</span>
+                <span className="text-[11px] text-muted-foreground leading-tight block mt-0.5">{FIELD_TYPE_HINTS[type]}</span>
+              </button>
+            ))}
           </div>
-          <p className="text-xs text-muted-foreground italic">{FIELD_TYPE_HINTS[newFieldType]}</p>
         </div>
 
         {/* Current fields — draggable with up/down */}
