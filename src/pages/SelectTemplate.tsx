@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
+  countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
 import { toast } from "sonner";
@@ -91,7 +92,7 @@ export default function SelectTemplate() {
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-semibold truncate">{template.name}</h3>
                           <p className="text-xs text-muted-foreground">
-                            {template.fields.length} pól • {template.tiles.length} czynności
+                            {template.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} pól • {countTileOptions(template)} czynności
                           </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -174,7 +175,7 @@ export default function SelectTemplate() {
                         <h3 className="text-sm font-semibold">{starter.name}</h3>
                         <p className="text-xs text-muted-foreground">{starter.description}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {starter.fields.length} pól • {starter.tiles.length} czynności
+                          {starter.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} pól • {countTileOptions(starter)} czynności
                         </p>
                       </div>
                     </div>
