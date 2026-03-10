@@ -225,18 +225,22 @@ export default function EditTemplate() {
 
         {/* Custom field adder */}
         <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-3">
-          <p className="text-sm font-semibold">Dodaj własne pole</p>
-          <input className="w-full h-11 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent" value={newFieldLabel} onChange={(e) => setNewFieldLabel(e.target.value)} placeholder="Nazwa pola" onKeyDown={(e) => e.key === "Enter" && addCustomField()} />
+          <p className="text-sm font-semibold">Dodaj pole do raportu</p>
+
+          {/* Basic types - name + click to add */}
+          {newFieldType !== "signature" && newFieldType !== "tiles" && (
+            <input className="w-full h-11 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent" value={newFieldLabel} onChange={(e) => setNewFieldLabel(e.target.value)} placeholder="Nazwa pola" onKeyDown={(e) => e.key === "Enter" && addCustomField()} />
+          )}
+
           <div className="grid grid-cols-2 gap-2">
-            {(Object.entries(FIELD_TYPE_LABELS) as [CustomFieldType, string][]).map(([type, label]) => (
+            {(Object.entries(FIELD_TYPE_LABELS) as [CustomFieldType, string][])
+              .filter(([type]) => type !== "signature" && type !== "tiles")
+              .map(([type, label]) => (
               <button
                 key={type}
                 onClick={() => {
-                  if (newFieldLabel.trim()) {
-                    addCustomField(type);
-                  } else {
-                    setNewFieldType(type);
-                  }
+                  if (newFieldLabel.trim()) { addCustomField(type); }
+                  else { setNewFieldType(type); }
                 }}
                 className={`rounded-lg border-2 p-2.5 text-left transition-all ${newFieldType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
               >
@@ -244,6 +248,39 @@ export default function EditTemplate() {
                 <span className="text-[11px] text-muted-foreground leading-tight block mt-0.5">{FIELD_TYPE_HINTS[type]}</span>
               </button>
             ))}
+          </div>
+
+          {/* === PODPIS — quick-add presets === */}
+          <div className="rounded-lg border-2 border-border p-3 space-y-2">
+            <p className="text-sm font-medium">Podpis</p>
+            <p className="text-[11px] text-muted-foreground">Pole na podpis palcem. Kliknij aby dodać:</p>
+            <div className="flex flex-wrap gap-2">
+              {["Podpis klienta", "Podpis serwisanta", "Podpis inspektora", "Podpis kierownika"].map((label) => (
+                <button key={label} onClick={() => {
+                  const f: CustomFieldDef = { id: `cf_${Date.now()}`, label, type: "signature", remember: false, order: template.fields.length };
+                  setTemplate({ ...template, fields: [...template.fields, f] });
+                }} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all">
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-1.5">
+              <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Inny podpis — wpisz nazwę" value={newFieldType === "signature" ? newFieldLabel : ""} onChange={(e) => { setNewFieldType("signature"); setNewFieldLabel(e.target.value); }}
+                onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) { addCustomField("signature"); } }} />
+              <Button variant="accent" size="icon" onClick={() => { if (newFieldLabel.trim()) addCustomField("signature"); }} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+            </div>
+          </div>
+
+          {/* === CZYNNOŚCI — name + immediate activity entry === */}
+          <div className="rounded-lg border-2 border-border p-3 space-y-2">
+            <p className="text-sm font-medium">Czynności</p>
+            <p className="text-[11px] text-muted-foreground">Sekcja z checkboxami do odhaczania. Nazwij sekcję i dodaj czynności:</p>
+            <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe, Wykonane pomiary" value={newFieldType === "tiles" ? newFieldLabel : ""} onChange={(e) => { setNewFieldType("tiles"); setNewFieldLabel(e.target.value); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) { addCustomField("tiles"); } }} />
+            <Button variant="accent" size="sm" onClick={() => { if (newFieldLabel.trim()) addCustomField("tiles"); }} className="w-full" disabled={!(newFieldType === "tiles" && newFieldLabel.trim())}>
+              <Plus className="h-4 w-4 mr-1" /> Dodaj sekcję czynności
+            </Button>
+            <p className="text-[11px] text-muted-foreground">Po dodaniu sekcji, wpiszesz poszczególne czynności poniżej na liście.</p>
           </div>
         </div>
 
