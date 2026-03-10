@@ -192,10 +192,12 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
         { id: "t_klima_temp", label: "Pomiar temperatur" },
       ]},
       { id: "f_notes", label: "Uwagi", type: "textarea", remember: false, order: 10 },
+      { id: "f_photos", label: "Dokumentacja fotograficzna", type: "photos", remember: false, order: 11 },
+      { id: "sig_client", label: "Podpis klienta", type: "signature", remember: false, order: 12 },
     ],
     tiles: [],
-    hasPhotos: true,
-    signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
+    hasPhotos: false,
+    signatureFields: [],
   },
   {
     id: "starter_elektr",
@@ -225,10 +227,12 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
         { id: "t_elec_brkr", label: "Sprawdzenie zabezpieczeń nadprądowych" },
       ]},
       { id: "f_notes", label: "Uwagi i zalecenia", type: "textarea", remember: false, order: 9 },
+      { id: "f_photos", label: "Dokumentacja fotograficzna", type: "photos", remember: false, order: 10 },
+      { id: "sig_client", label: "Podpis klienta", type: "signature", remember: false, order: 11 },
     ],
     tiles: [],
-    hasPhotos: true,
-    signatureFields: [{ id: "sig_client", label: "Podpis klienta" }],
+    hasPhotos: false,
+    signatureFields: [],
   },
   {
     id: "starter_zdawczo",
@@ -261,13 +265,13 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
       ]},
       { id: "f_condition", label: "Stan ogólny lokalu", type: "textarea", remember: false, order: 11 },
       { id: "f_notes", label: "Uwagi i zastrzeżenia", type: "textarea", remember: false, order: 12 },
+      { id: "f_photos", label: "Dokumentacja fotograficzna", type: "photos", remember: false, order: 13 },
+      { id: "sig_owner", label: "Podpis przekazującego", type: "signature", remember: false, order: 14 },
+      { id: "sig_tenant", label: "Podpis przejmującego", type: "signature", remember: false, order: 15 },
     ],
     tiles: [],
-    hasPhotos: true,
-    signatureFields: [
-      { id: "sig_owner", label: "Podpis przekazującego" },
-      { id: "sig_tenant", label: "Podpis przejmującego" },
-    ],
+    hasPhotos: false,
+    signatureFields: [],
   },
 ];
 
@@ -322,18 +326,22 @@ export function duplicateTemplate(source: ReportTemplate, newName: string): Repo
 }
 
 export function createBlankTemplate(name: string): ReportTemplate {
+  const now = Date.now();
   return saveUserTemplate({
-    id: `user_${Date.now()}`,
+    id: `user_${now}`,
     name,
     description: "",
     icon: "FileText",
     category: "Własne",
     builtIn: false,
     pdfTitle: name.toUpperCase(),
-    fields: [],
+    fields: [
+      { id: `f_photos_${now}`, label: "Dokumentacja fotograficzna", type: "photos", remember: false, order: 0 },
+      { id: `sig_${now}`, label: "Podpis klienta", type: "signature", remember: false, order: 1 },
+    ],
     tiles: [],
-    hasPhotos: true,
-    signatureFields: [{ id: `sig_${Date.now()}`, label: "Podpis klienta" }],
+    hasPhotos: false,
+    signatureFields: [],
   });
 }
 
