@@ -335,10 +335,7 @@ export function createBlankTemplate(name: string): ReportTemplate {
     category: "Własne",
     builtIn: false,
     pdfTitle: name.toUpperCase(),
-    fields: [
-      { id: `f_photos_${now}`, label: "Dokumentacja fotograficzna", type: "photos", remember: false, order: 0 },
-      { id: `sig_${now}`, label: "Podpis klienta", type: "signature", remember: false, order: 1 },
-    ],
+    fields: [],
     tiles: [],
     hasPhotos: false,
     signatureFields: [],
