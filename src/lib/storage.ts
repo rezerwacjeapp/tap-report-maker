@@ -29,6 +29,7 @@ export interface ReportDraft {
   photosByField: Record<string, string[]>; // fieldId -> base64[] — per-field photos
   signatures: Record<string, string | null>; // signatureFieldId -> base64
   customFields: Record<string, string>; // fieldId -> value
+  reportNumber?: string;
   templateId?: string;
   _lastSaved?: number;
 }
@@ -41,6 +42,7 @@ export interface ReportHistoryItem {
   templateName: string;
   templateId?: string;
   pdfTitle?: string;
+  reportNumber?: string;
   selectedTiles: string[];
   tileLabels: string[];
   customFields: Record<string, string>;
@@ -59,6 +61,7 @@ const KEYS = {
   CUSTOM_FIELDS: "docswift_custom_fields",
   REMEMBERED_VALUES: "docswift_remembered_values",
   REPORT_HISTORY: "docswift_report_history",
+  REPORT_COUNTER: "docswift_report_counter",
 } as const;
 
 const DEFAULT_TILES: TileItem[] = [];
@@ -195,4 +198,19 @@ export function removeReportFromHistory(id: string) {
 
 export function clearReportHistory() {
   localStorage.removeItem(KEYS.REPORT_HISTORY);
+}
+
+// Sequential report number
+export function getNextReportNumber(): string {
+  const year = new Date().getFullYear();
+  const counterData = get<{ year: number; count: number }>(KEYS.REPORT_COUNTER, { year, count: 0 });
+  // Reset counter on new year
+  if (counterData.year !== year) {
+    counterData.year = year;
+    counterData.count = 0;
+  }
+  counterData.count += 1;
+  set(KEYS.REPORT_COUNTER, counterData);
+  const num = String(counterData.count).padStart(3, "0");
+  return `${num}/${year}`;
 }
