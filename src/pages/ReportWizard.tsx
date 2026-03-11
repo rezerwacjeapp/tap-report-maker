@@ -7,7 +7,7 @@ import { VoiceButton } from "@/components/VoiceButton";
 import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
-  getProfile, addReportToHistory,
+  getProfile, addReportToHistory, getNextReportNumber,
   type ReportDraft,
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
@@ -54,7 +54,7 @@ export default function ReportWizard() {
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
     allFields.forEach((f) => { if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0]; else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = ""; });
-    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, templateId };
+    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: getNextReportNumber(), templateId };
   }, [allFields, templateId]);
 
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
@@ -138,6 +138,18 @@ export default function ReportWizard() {
       </header>
 
       <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto">
+        {/* Report number — editable */}
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Numer raportu</label>
+          <input
+            type="text"
+            className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+            value={draft.reportNumber || ""}
+            onChange={(e) => update({ reportNumber: e.target.value })}
+            placeholder="np. 001/2026"
+          />
+        </div>
+
         {visibleFields.map((field) => (
           <div key={field.id} className="relative">
             {/* Eye toggle */}
