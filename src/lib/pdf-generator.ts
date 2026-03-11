@@ -27,6 +27,7 @@ export interface GeneratedReport {
   templateName: string;
   templateId?: string;
   pdfTitle?: string;
+  reportNumber?: string;
   selectedTiles: string[];
   tileLabels: string[];
   customFields: Record<string, string>;
@@ -75,7 +76,7 @@ export function generateReport(
   const filename = `raport_${namepart}_${datepart}.pdf`;
 
   // Report number
-  const reportNum = `RS/${new Date().getFullYear()}/${String(Date.now()).slice(-6)}`;
+  const reportNum = draft.reportNumber || `${new Date().getFullYear()}`;
 
   // --- Build PDF content ---
   const content: any[] = [];
@@ -297,6 +298,7 @@ export function generateReport(
     templateName,
     templateId: draft.templateId,
     pdfTitle,
+    reportNumber: reportNum,
     selectedTiles: [...draft.selectedTiles],
     tileLabels: selectedLabels,
     customFields: { ...draft.customFields },
@@ -331,9 +333,11 @@ export function regenerateFromHistory(
   // Build a fake draft
   const draft: ReportDraft = {
     selectedTiles: item.selectedTiles,
-    photos: [], // photos not stored in history
+    photos: [],
+    photosByField: {},
     signatures: item.signatures || {},
     customFields: item.customFields,
+    reportNumber: item.reportNumber,
     templateId: item.templateId,
   };
 
