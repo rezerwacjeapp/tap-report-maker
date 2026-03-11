@@ -160,6 +160,9 @@ export default function Reports() {
                       <Calendar className="h-3 w-3" />
                       {formatDate(report.date)}
                     </span>
+                    {report.reportNumber && (
+                      <span className="font-mono">{report.reportNumber}</span>
+                    )}
                     <span className="font-medium text-accent">
                       {report.templateName}
                     </span>
