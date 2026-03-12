@@ -48,7 +48,6 @@ export interface TemplateOptions {
 
 export interface GenerateResult {
   meta: GeneratedReport;
-  download: () => void;
   getBlob: () => Promise<Blob>;
 }
 
@@ -306,8 +305,6 @@ export function generateReport(
     defaultStyle: { font: "Roboto" },
   };
 
-  const pdfDoc = pdfMake.createPdf(docDefinition);
-
   // Build metadata for report history
   const clientField = customFields.find(
     (f) => f.id === "df_client" || f.id.includes("_client") || f.label.toLowerCase().includes("klient") || f.label.toLowerCase().includes("zleceniodawca")
@@ -343,15 +340,29 @@ export function generateReport(
 
   return {
     meta,
-    download: () => pdfDoc.download(filename),
-    getBlob: () => new Promise<Blob>((resolve) => pdfDoc.getBlob(resolve)),
+    getBlob: () => new Promise<Blob>((resolve, reject) => {
+      try {
+        // Use a fresh pdfDoc to avoid state conflicts
+        const freshDoc = pdfMake.createPdf(docDefinition);
+        freshDoc.getBuffer((buffer: any) => {
+          try {
+            const blob = new Blob([buffer], { type: "application/pdf" });
+            resolve(blob);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      } catch (e) {
+        reject(e);
+      }
+    }),
   };
 }
 
 /**
  * Regenerate PDF from history item (without photos)
  */
-export function regenerateFromHistory(
+export async function regenerateFromHistory(
   profile: CompanyProfile,
   item: import("./storage").ReportHistoryItem
 ) {
@@ -386,5 +397,13 @@ export function regenerateFromHistory(
     tiles,
     signatureFields,
   });
-  result.download();
+  const blob = await result.getBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = item.filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
