@@ -46,11 +46,17 @@ export interface TemplateOptions {
   signatureFields: { id: string; label: string }[];
 }
 
+export interface GenerateResult {
+  meta: GeneratedReport;
+  download: () => void;
+  getBlob: () => Promise<Blob>;
+}
+
 export function generateReport(
   profile: CompanyProfile,
   draft: ReportDraft,
   options?: TemplateOptions
-): GeneratedReport {
+): GenerateResult {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
@@ -77,6 +83,9 @@ export function generateReport(
 
   // Report number
   const reportNum = draft.reportNumber || `${new Date().getFullYear()}`;
+
+  // Generation date for footer (frozen at generation time)
+  const generationDate = new Date().toLocaleDateString("pl-PL");
 
   // --- Build PDF content ---
   const content: any[] = [];
@@ -170,8 +179,6 @@ export function generateReport(
     if (field.type === "tiles" && field.tileOptions?.length) {
       flushDataRows();
 
-      content.push({ text: field.label, style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
-
       const body: any[][] = [
         [
           { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
@@ -195,12 +202,19 @@ export function generateReport(
         ]);
       });
 
+      // Wrap header + table in unbreakable stack so they don't split across pages
       content.push({
-        table: { headerRows: 1, widths: [30, "*", 45], body },
-        layout: {
-          hLineWidth: () => 0.5, vLineWidth: () => 0.5,
-          hLineColor: () => "#d1d5db", vLineColor: () => "#d1d5db",
-        },
+        stack: [
+          { text: field.label, style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
+          {
+            table: { headerRows: 1, widths: [30, "*", 45], body },
+            layout: {
+              hLineWidth: () => 0.5, vLineWidth: () => 0.5,
+              hLineColor: () => "#d1d5db", vLineColor: () => "#d1d5db",
+            },
+          },
+        ],
+        unbreakable: true,
         margin: [0, 0, 0, 12] as [number, number, number, number],
       });
       return;
@@ -212,8 +226,8 @@ export function generateReport(
       if (fieldPhotos.length === 0) return;
       flushDataRows();
 
-      content.push({ text: field.label || "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
-
+      // Each photo pair is wrapped as unbreakable so a single row of photos
+      // never splits across pages. The section header stays with the first pair.
       for (let i = 0; i < fieldPhotos.length; i += 2) {
         const cols: any[] = [
           { image: fieldPhotos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
@@ -223,9 +237,21 @@ export function generateReport(
         } else {
           cols.push({ text: "", width: 240 });
         }
-        content.push({ columns: cols });
+
+        const photoRow: any[] = [{ columns: cols }];
+
+        // First pair gets the section header attached
+        if (i === 0) {
+          photoRow.unshift({ text: field.label || "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+        }
+
+        content.push({
+          stack: photoRow,
+          unbreakable: true,
+          margin: [0, 0, 0, 4] as [number, number, number, number],
+        });
       }
-      content.push({ text: "", margin: [0, 0, 0, 8] as [number, number, number, number] });
+      content.push({ text: "", margin: [0, 0, 0, 4] as [number, number, number, number] });
       return;
     }
 
@@ -235,11 +261,17 @@ export function generateReport(
       if (!sigData) return;
       flushDataRows();
 
-      content.push({ text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] });
-      content.push({ image: sigData, width: 150, height: 75 });
+      // Wrap signature label + image + line as unbreakable
       content.push({
-        canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
-        margin: [0, 2, 0, 8] as [number, number, number, number],
+        stack: [
+          { text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] },
+          { image: sigData, width: 150, height: 75 },
+          {
+            canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
+            margin: [0, 2, 0, 8] as [number, number, number, number],
+          },
+        ],
+        unbreakable: true,
       });
     }
   });
@@ -254,7 +286,7 @@ export function generateReport(
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `Wygenerowano: ${new Date().toLocaleDateString("pl-PL")} • ${profile.companyName || "DocSwift"}`, style: "footer", alignment: "left" as const },
+        { text: `Wygenerowano: ${generationDate} • ${profile.companyName || "DocSwift"}`, style: "footer", alignment: "left" as const },
         { text: `Strona ${currentPage} z ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
@@ -274,7 +306,7 @@ export function generateReport(
     defaultStyle: { font: "Roboto" },
   };
 
-  pdfMake.createPdf(docDefinition).download(filename);
+  const pdfDoc = pdfMake.createPdf(docDefinition);
 
   // Build metadata for report history
   const clientField = customFields.find(
@@ -290,7 +322,7 @@ export function generateReport(
   const draftSignatures: Record<string, string | null> = (draft as any).signatures ?? {};
   signatureFields.forEach((sf) => { signatureLabels[sf.id] = sf.label; });
 
-  return {
+  const meta: GeneratedReport = {
     id: Date.now().toString(),
     filename,
     date: datepart,
@@ -307,6 +339,12 @@ export function generateReport(
     signatureLabels,
     photosCount: Object.values(draft.photosByField || {}).reduce((sum, arr) => sum + arr.length, 0) || draft.photos.length,
     hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
+  };
+
+  return {
+    meta,
+    download: () => pdfDoc.download(filename),
+    getBlob: () => new Promise<Blob>((resolve) => pdfDoc.getBlob(resolve)),
   };
 }
 
