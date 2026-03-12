@@ -105,16 +105,10 @@ export default function ReportWizard() {
       const result = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
       });
-      // Generate blob ONCE, use for both download and storage
       const blob = await result.getBlob();
       downloadBlob(blob, result.meta.filename);
       addReportToHistory(result.meta);
-      // Save PDF blob to IndexedDB for reliable re-download from history
-      try {
-        await savePdfBlob(result.meta.id, blob);
-      } catch (e) {
-        console.warn("Could not save PDF blob to IndexedDB:", e);
-      }
+      savePdfBlob(result.meta.id, blob).catch((e) => console.warn("IndexedDB save failed:", e));
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
