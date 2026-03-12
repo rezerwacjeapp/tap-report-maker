@@ -379,11 +379,12 @@ export function regenerateFromHistory(
     templateId: item.templateId,
   };
 
-  generateReport(profile, draft, {
+  const result = generateReport(profile, draft, {
     pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
     templateName: item.templateName,
     fields,
     tiles,
     signatureFields,
   });
+  result.download();
 }
