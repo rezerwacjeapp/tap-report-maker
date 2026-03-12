@@ -12,6 +12,7 @@ import {
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
 import { generateReport } from "@/lib/pdf-generator";
+import { savePdfBlob } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -109,7 +110,6 @@ export default function ReportWizard() {
       // Save PDF blob to IndexedDB for reliable re-download from history
       try {
         const blob = await result.getBlob();
-        const { savePdfBlob } = await import("@/lib/pdf-store");
         await savePdfBlob(result.meta.id, blob);
       } catch (e) {
         console.warn("Could not save PDF blob to IndexedDB:", e);
