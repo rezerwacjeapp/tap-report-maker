@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { getReportHistory, removeReportFromHistory, getProfile, type ReportHistoryItem } from "@/lib/storage";
 import { regenerateFromHistory } from "@/lib/pdf-generator";
+import { getPdfBlob, downloadBlob, deletePdfBlob } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -35,6 +36,7 @@ export default function Reports() {
 
   const handleDelete = (id: string) => {
     removeReportFromHistory(id);
+    deletePdfBlob(id).catch(() => {}); // clean up IndexedDB
     setReports(getReportHistory());
     setDeleteId(null);
     if (expandedId === id) setExpandedId(null);
@@ -226,14 +228,22 @@ export default function Reports() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
                           try {
-                            const profile = getProfile();
-                            regenerateFromHistory(profile, report);
-                            toast.success("PDF wygenerowany ponownie!");
+                            // Try to download saved blob from IndexedDB
+                            const blob = await getPdfBlob(report.id);
+                            if (blob) {
+                              downloadBlob(blob, report.filename);
+                              toast.success("PDF pobrany!");
+                            } else {
+                              // Fallback: regenerate (old reports without saved blob)
+                              const profile = getProfile();
+                              regenerateFromHistory(profile, report);
+                              toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
+                            }
                           } catch {
-                            toast.error("Nie udało się wygenerować PDF");
+                            toast.error("Nie udało się pobrać PDF");
                           }
                         }}
                       >
