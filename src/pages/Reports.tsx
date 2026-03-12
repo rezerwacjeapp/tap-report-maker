@@ -220,6 +220,43 @@ export default function Reports() {
                       </div>
                     )}
 
+                    {/* Signatures preview */}
+                    {report.signatures && Object.entries(report.signatures).some(([, v]) => !!v) && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          Podpisy
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                          {Object.entries(report.signatures)
+                            .filter(([, v]) => !!v)
+                            .map(([sigId, sigData]) => (
+                              <div key={sigId} className="flex flex-col items-start gap-1">
+                                <span className="text-xs text-muted-foreground">
+                                  {report.signatureLabels?.[sigId] || "Podpis"}
+                                </span>
+                                <img
+                                  src={sigData!}
+                                  alt={report.signatureLabels?.[sigId] || "Podpis"}
+                                  className="h-14 w-auto border border-border rounded bg-white"
+                                />
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Photos info */}
+                    {report.photosCount > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          Zdjęcia
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {report.photosCount} {report.photosCount === 1 ? "zdjęcie zapisane" : "zdjęć zapisanych"} w PDF
+                        </p>
+                      </div>
+                    )}
+
                     {/* File info + regenerate */}
                     <div className="pt-2 flex items-center justify-between gap-3">
                       <p className="text-xs text-muted-foreground font-mono truncate flex-1">
