@@ -98,13 +98,22 @@ export default function ReportWizard() {
   const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const profile = getProfile();
     try {
-      const meta = generateReport(profile, draft, {
+      const result = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
       });
-      addReportToHistory(meta);
+      result.download();
+      addReportToHistory(result.meta);
+      // Save PDF blob to IndexedDB for reliable re-download from history
+      try {
+        const blob = await result.getBlob();
+        const { savePdfBlob } = await import("@/lib/pdf-store");
+        await savePdfBlob(result.meta.id, blob);
+      } catch (e) {
+        console.warn("Could not save PDF blob to IndexedDB:", e);
+      }
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
