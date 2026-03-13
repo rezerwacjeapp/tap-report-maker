@@ -46,11 +46,17 @@ export interface TemplateOptions {
   signatureFields: { id: string; label: string }[];
 }
 
+export interface GenerateResult {
+  meta: GeneratedReport;
+  pdfPromise: Promise<string>;
+  filename: string;
+}
+
 export function generateReport(
   profile: CompanyProfile,
   draft: ReportDraft,
   options?: TemplateOptions,
-): GeneratedReport {
+): GenerateResult {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
@@ -333,16 +339,21 @@ export function generateReport(
     hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
   };
 
-  // Download PDF immediately
-  pdfMake.createPdf(docDefinition).download(filename);
+  // Return meta + a promise that resolves with base64 PDF string.
+  // Caller uses this for both download and storage.
+  const pdfPromise = new Promise<string>((resolve) => {
+    pdfMake.createPdf(docDefinition).getBase64((base64: string) => {
+      resolve(base64);
+    });
+  });
 
-  return meta;
+  return { meta, pdfPromise, filename };
 }
 
 /**
  * Regenerate PDF from history item (without photos)
  */
-export function regenerateFromHistory(
+export async function regenerateFromHistory(
   profile: CompanyProfile,
   item: import("./storage").ReportHistoryItem
 ) {
@@ -370,11 +381,26 @@ export function regenerateFromHistory(
     templateId: item.templateId,
   };
 
-  generateReport(profile, draft, {
+  const { pdfPromise, filename } = generateReport(profile, draft, {
     pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
     templateName: item.templateName,
     fields,
     tiles,
     signatureFields,
   });
+
+  const base64 = await pdfPromise;
+  // Download
+  const byteChars = atob(base64);
+  const byteArr = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+  const blob = new Blob([byteArr], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
