@@ -6,8 +6,8 @@ import {
   PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown,
 } from "lucide-react";
 import { getReportHistory, removeReportFromHistory, getProfile, type ReportHistoryItem } from "@/lib/storage";
-import { regenerateFromHistory } from "@/lib/pdf-generator";
-import { getPdfBlob, downloadBlob, deletePdfBlob } from "@/lib/pdf-store";
+import { generateReport, regenerateFromHistory } from "@/lib/pdf-generator";
+import { getSnapshot, deleteSnapshot } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -36,7 +36,7 @@ export default function Reports() {
 
   const handleDelete = (id: string) => {
     removeReportFromHistory(id);
-    deletePdfBlob(id).catch(() => {}); // clean up IndexedDB
+    deleteSnapshot(id).catch(() => {});
     setReports(getReportHistory());
     setDeleteId(null);
     if (expandedId === id) setExpandedId(null);
@@ -268,13 +268,17 @@ export default function Reports() {
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {
-                            // Try to download saved blob from IndexedDB
-                            const blob = await getPdfBlob(report.id);
-                            if (blob) {
-                              downloadBlob(blob, report.filename);
+                            // Try to re-generate from full snapshot (IndexedDB)
+                            const snapshot = await getSnapshot(report.id);
+                            if (snapshot) {
+                              generateReport(
+                                snapshot.profile,
+                                snapshot.draft,
+                                snapshot.options,
+                              );
                               toast.success("PDF pobrany!");
                             } else {
-                              // Fallback: regenerate (old reports without saved blob)
+                              // Fallback: regenerate from history metadata (no photos/signatures)
                               const profile = getProfile();
                               regenerateFromHistory(profile, report);
                               toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
