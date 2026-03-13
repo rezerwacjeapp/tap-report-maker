@@ -50,7 +50,6 @@ export function generateReport(
   profile: CompanyProfile,
   draft: ReportDraft,
   options?: TemplateOptions,
-  onBlobReady?: (id: string, blob: Blob) => void,
 ): GeneratedReport {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
@@ -334,19 +333,8 @@ export function generateReport(
     hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
   };
 
-  // Download PDF immediately (reliable, proven method)
+  // Download PDF immediately
   pdfMake.createPdf(docDefinition).download(filename);
-
-  // Fire-and-forget: generate blob for IndexedDB storage in background
-  if (onBlobReady) {
-    try {
-      pdfMake.createPdf(docDefinition).getBlob((blob: any) => {
-        if (blob) onBlobReady(meta.id, blob);
-      });
-    } catch (e) {
-      console.warn("Background blob generation failed:", e);
-    }
-  }
 
   return meta;
 }
