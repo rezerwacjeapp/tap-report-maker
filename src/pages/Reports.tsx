@@ -276,7 +276,7 @@ export default function Reports() {
                             } else {
                               // Fallback: regenerate (old reports without saved blob)
                               const profile = getProfile();
-                              await regenerateFromHistory(profile, report);
+                              regenerateFromHistory(profile, report);
                               toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
                             }
                           } catch {
