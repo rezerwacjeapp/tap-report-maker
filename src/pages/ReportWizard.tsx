@@ -12,7 +12,7 @@ import {
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
 import { generateReport } from "@/lib/pdf-generator";
-import { savePdfBlob } from "@/lib/pdf-store";
+import { saveSnapshot } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -104,11 +104,14 @@ export default function ReportWizard() {
     try {
       const meta = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
-      }, (id, blob) => {
-        // Background: save blob to IndexedDB for re-download from history
-        savePdfBlob(id, blob).catch((e) => console.warn("IndexedDB save failed:", e));
       });
       addReportToHistory(meta);
+      // Save full snapshot to IndexedDB in background (for re-download from history)
+      saveSnapshot(meta.id, {
+        draft: { ...draft },
+        profile: { ...profile },
+        options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields },
+      }).catch((e) => console.warn("Snapshot save failed:", e));
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
