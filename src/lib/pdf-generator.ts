@@ -46,16 +46,12 @@ export interface TemplateOptions {
   signatureFields: { id: string; label: string }[];
 }
 
-export interface GenerateResult {
-  meta: GeneratedReport;
-  getBlob: () => Promise<Blob>;
-}
-
 export function generateReport(
   profile: CompanyProfile,
   draft: ReportDraft,
-  options?: TemplateOptions
-): GenerateResult {
+  options?: TemplateOptions,
+  onBlobReady?: (id: string, blob: Blob) => void,
+): GeneratedReport {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
@@ -338,31 +334,27 @@ export function generateReport(
     hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
   };
 
-  return {
-    meta,
-    getBlob: () => new Promise<Blob>((resolve, reject) => {
-      try {
-        // Use a fresh pdfDoc to avoid state conflicts
-        const freshDoc = pdfMake.createPdf(docDefinition);
-        freshDoc.getBuffer((buffer: any) => {
-          try {
-            const blob = new Blob([buffer], { type: "application/pdf" });
-            resolve(blob);
-          } catch (e) {
-            reject(e);
-          }
-        });
-      } catch (e) {
-        reject(e);
-      }
-    }),
-  };
+  // Download PDF immediately (reliable, proven method)
+  pdfMake.createPdf(docDefinition).download(filename);
+
+  // Fire-and-forget: generate blob for IndexedDB storage in background
+  if (onBlobReady) {
+    try {
+      pdfMake.createPdf(docDefinition).getBlob((blob: any) => {
+        if (blob) onBlobReady(meta.id, blob);
+      });
+    } catch (e) {
+      console.warn("Background blob generation failed:", e);
+    }
+  }
+
+  return meta;
 }
 
 /**
  * Regenerate PDF from history item (without photos)
  */
-export async function regenerateFromHistory(
+export function regenerateFromHistory(
   profile: CompanyProfile,
   item: import("./storage").ReportHistoryItem
 ) {
@@ -390,20 +382,11 @@ export async function regenerateFromHistory(
     templateId: item.templateId,
   };
 
-  const result = generateReport(profile, draft, {
+  generateReport(profile, draft, {
     pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
     templateName: item.templateName,
     fields,
     tiles,
     signatureFields,
   });
-  const blob = await result.getBlob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = item.filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
