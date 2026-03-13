@@ -12,7 +12,7 @@ import {
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
 import { generateReport } from "@/lib/pdf-generator";
-import { savePdfBase64, downloadBase64Pdf } from "@/lib/pdf-store";
+import { saveSnapshot } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -99,17 +99,19 @@ export default function ReportWizard() {
   const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     const profile = getProfile();
     try {
-      const { meta, pdfPromise, filename } = generateReport(profile, draft, {
+      const meta = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
       });
-      // Wait for PDF generation, then download + save
-      const base64 = await pdfPromise;
-      downloadBase64Pdf(base64, filename);
       addReportToHistory(meta);
-      savePdfBase64(meta.id, base64).catch((e) => console.warn("IndexedDB save failed:", e));
+      // Save full snapshot to IndexedDB for re-download from history
+      saveSnapshot(meta.id, {
+        draft: { ...draft },
+        profile: { ...profile },
+        options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields },
+      }).catch((e) => console.warn("Snapshot save failed:", e));
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
