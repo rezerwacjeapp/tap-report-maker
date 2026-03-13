@@ -12,7 +12,7 @@ import {
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
 import { generateReport } from "@/lib/pdf-generator";
-import { savePdfBlob, downloadBlob } from "@/lib/pdf-store";
+import { savePdfBlob } from "@/lib/pdf-store";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -99,16 +99,16 @@ export default function ReportWizard() {
   const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     const profile = getProfile();
     try {
-      const result = generateReport(profile, draft, {
+      const meta = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
+      }, (id, blob) => {
+        // Background: save blob to IndexedDB for re-download from history
+        savePdfBlob(id, blob).catch((e) => console.warn("IndexedDB save failed:", e));
       });
-      const blob = await result.getBlob();
-      downloadBlob(blob, result.meta.filename);
-      addReportToHistory(result.meta);
-      savePdfBlob(result.meta.id, blob).catch((e) => console.warn("IndexedDB save failed:", e));
+      addReportToHistory(meta);
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
