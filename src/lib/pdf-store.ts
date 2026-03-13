@@ -1,12 +1,27 @@
 /**
- * IndexedDB storage for PDF blobs.
- * localStorage can't handle large binary data, so we use IndexedDB
- * to persist the generated PDF files for reliable re-download from history.
+ * IndexedDB storage for full report snapshots.
+ * Stores everything needed to re-generate an identical PDF:
+ * draft data (photos base64, signatures base64, fields),
+ * template options, and profile at time of generation.
  */
 
-const DB_NAME = "docswift_pdfs";
+import type { CompanyProfile, ReportDraft, CustomFieldDef, TileItem } from "./storage";
+
+export interface ReportSnapshot {
+  draft: ReportDraft;
+  profile: CompanyProfile;
+  options: {
+    pdfTitle: string;
+    templateName: string;
+    fields: CustomFieldDef[];
+    tiles: TileItem[];
+    signatureFields: { id: string; label: string }[];
+  };
+}
+
+const DB_NAME = "docswift_snapshots";
 const DB_VERSION = 1;
-const STORE_NAME = "pdf_blobs";
+const STORE_NAME = "report_snapshots";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -22,19 +37,17 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-/** Save a PDF blob under the report ID */
-export async function savePdfBlob(reportId: string, blob: Blob): Promise<void> {
+export async function saveSnapshot(reportId: string, snapshot: ReportSnapshot): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
-    tx.objectStore(STORE_NAME).put(blob, reportId);
+    tx.objectStore(STORE_NAME).put(snapshot, reportId);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
 }
 
-/** Get a PDF blob by report ID (returns null if not found) */
-export async function getPdfBlob(reportId: string): Promise<Blob | null> {
+export async function getSnapshot(reportId: string): Promise<ReportSnapshot | null> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
@@ -44,8 +57,7 @@ export async function getPdfBlob(reportId: string): Promise<Blob | null> {
   });
 }
 
-/** Delete a PDF blob by report ID */
-export async function deletePdfBlob(reportId: string): Promise<void> {
+export async function deleteSnapshot(reportId: string): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -53,16 +65,4 @@ export async function deletePdfBlob(reportId: string): Promise<void> {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
-}
-
-/** Download a blob as a file */
-export function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
