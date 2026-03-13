@@ -1,12 +1,11 @@
 /**
- * IndexedDB storage for PDF base64 strings.
- * Stores the exact generated PDF so re-download from history
- * is identical to the original — no re-generation needed.
+ * IndexedDB storage for full report snapshots.
+ * Stores everything needed to re-generate an identical PDF from history.
  */
 
-const DB_NAME = "docswift_pdfs";
+const DB_NAME = "docswift_store";
 const DB_VERSION = 1;
-const STORE_NAME = "pdf_base64";
+const STORE_NAME = "snapshots";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -22,17 +21,17 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function savePdfBase64(reportId: string, base64: string): Promise<void> {
+export async function saveSnapshot(reportId: string, data: unknown): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
-    tx.objectStore(STORE_NAME).put(base64, reportId);
+    tx.objectStore(STORE_NAME).put(data, reportId);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
 }
 
-export async function getPdfBase64(reportId: string): Promise<string | null> {
+export async function getSnapshot(reportId: string): Promise<any | null> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
@@ -42,7 +41,7 @@ export async function getPdfBase64(reportId: string): Promise<string | null> {
   });
 }
 
-export async function deletePdfBase64(reportId: string): Promise<void> {
+export async function deleteSnapshot(reportId: string): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -50,23 +49,4 @@ export async function deletePdfBase64(reportId: string): Promise<void> {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
-}
-
-/** Convert base64 to blob and trigger download */
-export function downloadBase64Pdf(base64: string, filename: string) {
-  const byteChars = atob(base64);
-  const byteNumbers = new Array(byteChars.length);
-  for (let i = 0; i < byteChars.length; i++) {
-    byteNumbers[i] = byteChars.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
