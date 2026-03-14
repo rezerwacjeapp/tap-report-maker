@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown, Type, AlignLeft, Calendar, Hash, Camera, PenTool, ListChecks } from "lucide-react";
 import {
   getTemplateById, saveUserTemplate, createBlankTemplate, duplicateTemplate,
   FIELD_CATALOG, getActiveFieldBlockIds,
@@ -36,7 +36,7 @@ export default function EditTemplate() {
   const [template, setTemplate] = useState<ReportTemplate | null>(null);
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [newFieldLabel, setNewFieldLabel] = useState("");
-  const [newFieldType, setNewFieldType] = useState<CustomFieldType>("text");
+  const [expandedAddType, setExpandedAddType] = useState<CustomFieldType | null>(null);
   const [newTileOptionLabel, setNewTileOptionLabel] = useState<Record<string, string>>({});
 
   // Staging area for building a tiles section before adding
@@ -70,6 +70,7 @@ export default function EditTemplate() {
 
   const dragItemRef = useRef<number | null>(null);
   const dragOverRef = useRef<number | null>(null);
+  const addFieldInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isNew) {
@@ -116,7 +117,7 @@ export default function EditTemplate() {
 
   const addCustomField = (typeOverride?: CustomFieldType) => {
     if (!newFieldLabel.trim()) return;
-    const type = typeOverride || newFieldType;
+    const type = typeOverride || expandedAddType || "text";
     const f: CustomFieldDef = {
       id: `cf_${Date.now()}`,
       label: newFieldLabel.trim(),
@@ -127,7 +128,7 @@ export default function EditTemplate() {
     };
     setTemplate({ ...template, fields: [...template.fields, f] });
     setNewFieldLabel("");
-    setNewFieldType(type);
+    setExpandedAddType(null);
   };
 
   const removeField = (id: string) => setTemplate({ ...template, fields: template.fields.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i })) });
@@ -258,84 +259,138 @@ export default function EditTemplate() {
           );
         })}
 
-        {/* Custom field adder */}
+        {/* === ADD FIELD — type-first approach === */}
         <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-3">
           <p className="text-sm font-semibold">Dodaj pole do raportu</p>
+          <p className="text-[11px] text-muted-foreground">Wybierz typ pola, a następnie wpisz jego nazwę.</p>
 
-          {/* Basic types - name + click to add */}
-          {newFieldType !== "signature" && newFieldType !== "tiles" && (
-            <input className="w-full h-11 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent" value={newFieldLabel} onChange={(e) => setNewFieldLabel(e.target.value)} placeholder="Nazwa pola" onKeyDown={(e) => e.key === "Enter" && addCustomField()} />
-          )}
-
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.entries(FIELD_TYPE_LABELS) as [CustomFieldType, string][])
-              .filter(([type]) => type !== "signature" && type !== "tiles")
-              .map(([type, label]) => (
+          {/* Type cards grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { type: "text" as CustomFieldType, icon: Type, label: "Tekst", hint: "np. nazwa, NIP, adres" },
+              { type: "textarea" as CustomFieldType, icon: AlignLeft, label: "Tekst długi", hint: "np. uwagi, opis" },
+              { type: "date" as CustomFieldType, icon: Calendar, label: "Data", hint: "np. data wykonania" },
+              { type: "number" as CustomFieldType, icon: Hash, label: "Liczba", hint: "np. ilość, powierzchnia" },
+              { type: "photos" as CustomFieldType, icon: Camera, label: "Zdjęcia", hint: "dokumentacja foto" },
+              { type: "signature" as CustomFieldType, icon: PenTool, label: "Podpis", hint: "podpis palcem" },
+            ]).map(({ type, icon: Icon, label, hint }) => (
               <button
                 key={type}
                 onClick={() => {
-                  if (newFieldLabel.trim()) { addCustomField(type); }
-                  else { setNewFieldType(type); }
+                  if (expandedAddType === type) {
+                    setExpandedAddType(null);
+                    setNewFieldLabel("");
+                  } else {
+                    setExpandedAddType(type);
+                    setNewFieldLabel("");
+                    setTimeout(() => addFieldInputRef.current?.focus(), 50);
+                  }
                 }}
-                className={`rounded-lg border-2 p-2.5 text-left transition-all ${newFieldType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+                className={`rounded-lg border-2 p-2.5 text-center transition-all ${expandedAddType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
               >
-                <span className="text-sm font-medium block">{label}</span>
-                <span className="text-[11px] text-muted-foreground leading-tight block mt-0.5">{FIELD_TYPE_HINTS[type]}</span>
+                <Icon className={`h-5 w-5 mx-auto mb-1 ${expandedAddType === type ? "text-accent" : "text-muted-foreground"}`} />
+                <span className="text-xs font-medium block">{label}</span>
+                <span className="text-[10px] text-muted-foreground leading-tight block">{hint}</span>
               </button>
             ))}
           </div>
 
-          {/* === PODPIS — quick-add presets === */}
-          <div className="rounded-lg border-2 border-border p-3 space-y-2">
-            <p className="text-sm font-medium">Podpis</p>
-            <p className="text-[11px] text-muted-foreground">Pole na podpis palcem. Kliknij aby dodać:</p>
-            <div className="flex flex-wrap gap-2">
-              {["Podpis klienta", "Podpis serwisanta", "Podpis inspektora", "Podpis kierownika"].map((label) => (
-                <button key={label} onClick={() => {
-                  const f: CustomFieldDef = { id: `cf_${Date.now()}`, label, type: "signature", remember: false, order: template.fields.length };
-                  setTemplate({ ...template, fields: [...template.fields, f] });
-                }} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all">
-                  {label}
-                </button>
-              ))}
+          {/* Czynności card — separate, wider */}
+          <button
+            onClick={() => {
+              if (expandedAddType === "tiles") {
+                setExpandedAddType(null);
+              } else {
+                setExpandedAddType("tiles");
+              }
+            }}
+            className={`w-full rounded-lg border-2 p-2.5 text-left transition-all flex items-center gap-3 ${expandedAddType === "tiles" ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+          >
+            <ListChecks className={`h-5 w-5 shrink-0 ${expandedAddType === "tiles" ? "text-accent" : "text-muted-foreground"}`} />
+            <div>
+              <span className="text-xs font-medium">Czynności (checkboxy)</span>
+              <span className="text-[10px] text-muted-foreground block">Sekcja z listą czynności do odhaczania</span>
             </div>
-            <div className="flex gap-1.5">
-              <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Inny podpis — wpisz nazwę" value={newFieldType === "signature" ? newFieldLabel : ""} onChange={(e) => { setNewFieldType("signature"); setNewFieldLabel(e.target.value); }}
-                onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) { addCustomField("signature"); } }} />
-              <Button variant="accent" size="icon" onClick={() => { if (newFieldLabel.trim()) addCustomField("signature"); }} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+          </button>
+
+          {/* === Expanded panel for simple types === */}
+          {expandedAddType && !["signature", "tiles"].includes(expandedAddType) && (
+            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+              <p className="text-xs text-muted-foreground">Wpisz nazwę pola typu <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
+              <div className="flex gap-1.5">
+                <input
+                  ref={addFieldInputRef}
+                  className="flex-1 h-10 rounded-lg border-2 border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
+                  value={newFieldLabel}
+                  onChange={(e) => setNewFieldLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField(expandedAddType); }}
+                  placeholder={FIELD_TYPE_HINTS[expandedAddType]}
+                />
+                <Button variant="accent" onClick={() => addCustomField(expandedAddType)} disabled={!newFieldLabel.trim()} className="h-10 px-4 shrink-0">
+                  <Plus className="h-4 w-4 mr-1" /> Dodaj
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* === CZYNNOŚCI — inline builder === */}
-          <div className="rounded-lg border-2 border-border p-3 space-y-2">
-            <p className="text-sm font-medium">Czynności</p>
-            <p className="text-[11px] text-muted-foreground">Sekcja z checkboxami do odhaczania. Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
-            <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
-
-            {/* Staged tiles list */}
-            {stagingTiles.length > 0 && (
-              <div className="space-y-1 border-l-2 border-accent/30 pl-3 ml-1">
-                {stagingTiles.map((tile) => (
-                  <div key={tile.id} className="flex items-center gap-2 text-xs">
-                    <span className="text-accent">•</span>
-                    <span className="flex-1">{tile.label}</span>
-                    <button onClick={() => removeStagingTile(tile.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
-                  </div>
+          {/* === Expanded panel for SIGNATURE === */}
+          {expandedAddType === "signature" && (
+            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+              <p className="text-xs text-muted-foreground">Kliknij gotowy podpis lub wpisz własną nazwę:</p>
+              <div className="flex flex-wrap gap-2">
+                {["Podpis klienta", "Podpis serwisanta", "Podpis inspektora", "Podpis kierownika"].map((label) => (
+                  <button key={label} onClick={() => {
+                    const f: CustomFieldDef = { id: `cf_${Date.now()}`, label, type: "signature", remember: false, order: template.fields.length };
+                    setTemplate({ ...template, fields: [...template.fields, f] });
+                    toast.success(`Dodano: ${label}`);
+                  }} className="rounded-md border border-accent/30 bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/10 transition-all">
+                    {label}
+                  </button>
                 ))}
               </div>
-            )}
-
-            {/* Add activity input */}
-            <div className="flex gap-1.5">
-              <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności — np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") addStagingTile(); }} />
-              <Button variant="outline" size="icon" onClick={addStagingTile} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+              <div className="flex gap-1.5">
+                <input
+                  ref={addFieldInputRef}
+                  className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
+                  placeholder="Inna nazwa — np. Podpis świadka"
+                  value={newFieldLabel}
+                  onChange={(e) => setNewFieldLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField("signature"); }}
+                />
+                <Button variant="accent" size="icon" onClick={() => { if (newFieldLabel.trim()) addCustomField("signature"); }} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+              </div>
             </div>
+          )}
 
-            <Button variant="accent" size="sm" onClick={commitTilesSection} className="w-full" disabled={!stagingTilesName.trim()}>
-              <Plus className="h-4 w-4 mr-1" /> Dodaj do raportu {stagingTiles.length > 0 && `(${stagingTiles.length} czynności)`}
-            </Button>
-          </div>
+          {/* === Expanded panel for TILES/CZYNNOŚCI === */}
+          {expandedAddType === "tiles" && (
+            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+              <p className="text-xs text-muted-foreground">Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
+              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
+
+              {stagingTiles.length > 0 && (
+                <div className="space-y-1 border-l-2 border-accent/30 pl-3 ml-1">
+                  {stagingTiles.map((tile) => (
+                    <div key={tile.id} className="flex items-center gap-2 text-xs">
+                      <span className="text-accent">•</span>
+                      <span className="flex-1">{tile.label}</span>
+                      <button onClick={() => removeStagingTile(tile.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-1.5">
+                <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności — np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") addStagingTile(); }} />
+                <Button variant="outline" size="icon" onClick={addStagingTile} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
+              </div>
+
+              <Button variant="accent" size="sm" onClick={() => { commitTilesSection(); setExpandedAddType(null); }} className="w-full" disabled={!stagingTilesName.trim()}>
+                <Plus className="h-4 w-4 mr-1" /> Dodaj do raportu {stagingTiles.length > 0 && `(${stagingTiles.length} czynności)`}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Current fields — draggable with up/down */}
