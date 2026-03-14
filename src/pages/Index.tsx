@@ -7,7 +7,7 @@ import { getUserTemplates } from "@/lib/templates";
 const Index = () => {
   const navigate = useNavigate();
   const profile = getProfile();
-  const hasProfile = !!profile.companyName;
+  const hasProfile = profile.fields?.some((f) => f.value?.trim());
   const reportCount = getReportHistory().length;
   const userTemplateCount = getUserTemplates().length;
 
