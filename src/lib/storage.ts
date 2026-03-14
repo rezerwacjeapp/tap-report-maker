@@ -1,10 +1,18 @@
 // localStorage helpers with auto-save
 
+export interface ProfileField {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface CompanyProfile {
-  companyName: string;
-  nip: string;
-  address: string;
   logo: string | null; // base64
+  fields: ProfileField[];
+  // Legacy — kept for migration only
+  companyName?: string;
+  nip?: string;
+  address?: string;
 }
 
 export interface TileItem {
@@ -81,8 +89,27 @@ function set(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+const DEFAULT_PROFILE_FIELDS: ProfileField[] = [
+  { id: "pf_name", label: "Nazwa firmy", value: "" },
+  { id: "pf_nip", label: "NIP", value: "" },
+  { id: "pf_address", label: "Adres", value: "" },
+];
+
 export function getProfile(): CompanyProfile {
-  return get<CompanyProfile>(KEYS.PROFILE, { companyName: "", nip: "", address: "", logo: null });
+  const raw = get<any>(KEYS.PROFILE, null);
+  if (!raw) return { logo: null, fields: DEFAULT_PROFILE_FIELDS.map((f) => ({ ...f })) };
+  // Migration from old format (companyName/nip/address) to fields[]
+  if (!raw.fields) {
+    const fields: ProfileField[] = [
+      { id: "pf_name", label: "Nazwa firmy", value: raw.companyName || "" },
+      { id: "pf_nip", label: "NIP", value: raw.nip || "" },
+      { id: "pf_address", label: "Adres", value: raw.address || "" },
+    ];
+    const migrated: CompanyProfile = { logo: raw.logo || null, fields };
+    set(KEYS.PROFILE, migrated);
+    return migrated;
+  }
+  return raw as CompanyProfile;
 }
 export function saveProfile(p: CompanyProfile) { set(KEYS.PROFILE, p); }
 
