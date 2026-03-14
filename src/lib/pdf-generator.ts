@@ -95,11 +95,18 @@ export function generateReport(
     });
   }
 
+  // Build header text from profile fields
+  const profileFields = profile.fields || [];
+  const firstField = profileFields[0];
+  const restFields = profileFields.slice(1).filter((f) => f.value?.trim());
+
   headerCols.push({
     stack: [
-      { text: profile.companyName || "Firma", style: "companyName" },
-      ...(profile.nip ? [{ text: `NIP: ${profile.nip}`, style: "companyDetail" }] : []),
-      ...(profile.address ? [{ text: profile.address, style: "companyDetail" }] : []),
+      { text: firstField?.value || "Firma", style: "companyName" },
+      ...restFields.map((f) => ({
+        text: f.label ? `${f.label}: ${f.value}` : f.value,
+        style: "companyDetail",
+      })),
     ],
     width: "*",
     margin: [profile.logo ? 10 : 0, 2, 0, 0] as [number, number, number, number],
@@ -280,7 +287,7 @@ export function generateReport(
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `Wygenerowano: ${generationDate} • ${profile.companyName || "DocSwift"}`, style: "footer", alignment: "left" as const },
+        { text: `Wygenerowano: ${generationDate} • ${profileFields[0]?.value || "DocSwift"}`, style: "footer", alignment: "left" as const },
         { text: `Strona ${currentPage} z ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
