@@ -204,18 +204,24 @@ export default function EditTemplate() {
           </Button>
           <span className="text-sm text-muted-foreground">Edytor szablonu</span>
         </div>
-        <input
-          className="text-xl font-bold w-full h-12 rounded-lg border-2 border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
-          value={template.name}
-          onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-          placeholder="Wpisz nazwę szablonu..."
-        />
-        <input
-          className="w-full h-10 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
-          value={template.pdfTitle}
-          onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
-          placeholder="Tytuł w PDF (np. PROTOKÓŁ PRZEGLĄDU)"
-        />
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Nazwa szablonu (widoczna tylko w aplikacji)</label>
+          <input
+            className="text-xl font-bold w-full h-12 rounded-lg border-2 border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
+            value={template.name}
+            onChange={(e) => setTemplate({ ...template, name: e.target.value })}
+            placeholder="np. Przegląd klimatyzacji"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Tytuł dokumentu (widoczny w nagłówku PDF)</label>
+          <input
+            className="w-full h-10 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
+            value={template.pdfTitle}
+            onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
+            placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
+          />
+        </div>
       </header>
 
       <div className="px-5 py-1 text-xs text-muted-foreground">
