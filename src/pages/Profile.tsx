@@ -111,10 +111,11 @@ export default function Profile() {
 
                 {/* Editable label */}
                 <input
-                  className="text-xs font-medium text-muted-foreground bg-transparent border-none outline-none flex-1 min-w-0"
+                  className="text-xs font-medium text-muted-foreground bg-transparent border-b border-dashed border-border outline-none flex-1 min-w-0 py-0.5 focus:border-accent focus:text-foreground transition-colors"
                   value={field.label}
                   onChange={(e) => updateField(field.id, { label: e.target.value })}
-                  placeholder="Etykieta..."
+                  placeholder="Wpisz nazwę pola..."
+                  id={`label-${field.id}`}
                 />
 
                 {/* Delete (only if more than 1 field) */}
@@ -163,7 +164,15 @@ export default function Profile() {
           )}
 
           <button
-            onClick={() => addField("Nowe pole")}
+            onClick={() => {
+              const id = `pf_${Date.now()}`;
+              const f: ProfileField = { id, label: "", value: "" };
+              update({ ...profile, fields: [...profile.fields, f] });
+              setTimeout(() => {
+                const el = document.getElementById(`label-${id}`);
+                if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+              }, 50);
+            }}
             className="w-full rounded-md border border-dashed border-border bg-card px-3 py-2 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all"
           >
             <Plus className="h-3 w-3 inline mr-1" /> Inne pole...
