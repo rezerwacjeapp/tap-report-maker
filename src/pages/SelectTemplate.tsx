@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, Wind, Zap, Home, FileText, Plus,
   ChevronRight, ChevronDown, Pencil, Trash2, Copy,
+  Flame, ShieldAlert, Droplets, ArrowUpDown, Thermometer, Sun, Fan,
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -17,7 +18,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const ICON_MAP: Record<string, React.ElementType> = { Wind, Zap, Home, FileText };
+const ICON_MAP: Record<string, React.ElementType> = { Wind, Zap, Home, FileText, Flame, ShieldAlert, Droplets, ArrowUpDown, Thermometer, Sun, Fan };
 
 export default function SelectTemplate() {
   const navigate = useNavigate();
