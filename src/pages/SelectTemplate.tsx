@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText,
+  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw,
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -36,11 +36,42 @@ const INDUSTRY_EMOJI: Record<string, string> = {
   ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
 };
 
+const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
+
+function getHiddenStarters(): Set<string> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_STARTERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveHiddenStarters(ids: Set<string>) {
+  localStorage.setItem(HIDDEN_STARTERS_KEY, JSON.stringify([...ids]));
+}
+
 export default function SelectTemplate() {
   const navigate = useNavigate();
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showStarters, setShowStarters] = useState(true);
+  const [hiddenStarters, setHiddenStarters] = useState<Set<string>>(getHiddenStarters);
+
+  const visibleStarters = STARTER_TEMPLATES.filter((s) => !hiddenStarters.has(s.id));
+  const hiddenCount = STARTER_TEMPLATES.length - visibleStarters.length;
+
+  const hideStarter = (id: string) => {
+    const next = new Set(hiddenStarters);
+    next.add(id);
+    setHiddenStarters(next);
+    saveHiddenStarters(next);
+    toast.success("Szablon ukryty");
+  };
+
+  const restoreAllStarters = () => {
+    setHiddenStarters(new Set());
+    saveHiddenStarters(new Set());
+    toast.success("Przywrócono wszystkie szablony");
+  };
 
   const handleUseTemplate = (template: ReportTemplate) => {
     navigate(`/report?template=${template.id}`);
@@ -150,6 +181,7 @@ export default function SelectTemplate() {
           >
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Gotowe szablony branżowe
+              {hiddenCount > 0 && <span className="ml-1 opacity-60">({visibleStarters.length}/{STARTER_TEMPLATES.length})</span>}
             </p>
             {showStarters
               ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -157,41 +189,59 @@ export default function SelectTemplate() {
             }
           </button>
           {showStarters && (
-            <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border mt-1">
-              {STARTER_TEMPLATES.map((starter) => {
-                const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
-                const badgeColor = BADGE_COLORS[starter.icon] || "bg-muted text-muted-foreground";
-                const badgeLabel = BADGE_LABELS[starter.icon] || "";
-                return (
-                  <div key={starter.id}>
-                    <div className="p-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${badgeColor}`}>
-                          {emoji}
+            <>
+              {visibleStarters.length > 0 ? (
+                <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border mt-1">
+                  {visibleStarters.map((starter) => {
+                    const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
+                    const badgeColor = BADGE_COLORS[starter.icon] || "bg-muted text-muted-foreground";
+                    const badgeLabel = BADGE_LABELS[starter.icon] || "";
+                    return (
+                      <div key={starter.id}>
+                        <div className="p-3.5">
+                          <div className="flex items-center gap-3">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${badgeColor}`}>
+                              {emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-medium">{starter.name}</h3>
+                              <p className="text-[11px] text-muted-foreground">{starter.description}</p>
+                            </div>
+                            {badgeLabel && (
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${badgeColor}`}>
+                                {badgeLabel}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium">{starter.name}</h3>
-                          <p className="text-[11px] text-muted-foreground">{starter.description}</p>
+                        <div className="flex border-t border-border">
+                          <button onClick={() => handleUseTemplate(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border">
+                            Użyj bez zmian
+                          </button>
+                          <button onClick={() => handleDuplicateStarter(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-accent hover:text-accent/80 transition-colors border-r border-border">
+                            <Pencil className="h-3.5 w-3.5" /> Kopiuj i dostosuj
+                          </button>
+                          <button onClick={() => hideStarter(starter.id)} className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors">
+                            <EyeOff className="h-3.5 w-3.5" />
+                          </button>
                         </div>
-                        {badgeLabel && (
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${badgeColor}`}>
-                            {badgeLabel}
-                          </span>
-                        )}
                       </div>
-                    </div>
-                    <div className="flex border-t border-border">
-                      <button onClick={() => handleUseTemplate(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border">
-                        Użyj bez zmian
-                      </button>
-                      <button onClick={() => handleDuplicateStarter(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-accent hover:text-accent/80 transition-colors">
-                        <Pencil className="h-3.5 w-3.5" /> Kopiuj i dostosuj
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4 mt-1">Wszystkie szablony ukryte</p>
+              )}
+
+              {hiddenCount > 0 && (
+                <button
+                  onClick={restoreAllStarters}
+                  className="w-full flex items-center justify-center gap-1.5 mt-2.5 py-2.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors rounded-xl border border-border bg-card"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" /> Przywróć ukryte szablony ({hiddenCount})
+                </button>
+              )}
+            </>
           )}
         </div>
       </main>
