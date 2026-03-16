@@ -259,21 +259,26 @@ export function generateReport(
     // --- SIGNATURE ---
     if (field.type === "signature") {
       const sigData = (draft.signatures || {})[field.id];
-      if (!sigData) return;
       flushDataRows();
 
-      // Wrap signature label + image + line as unbreakable
-      content.push({
-        stack: [
-          { text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] },
-          { image: sigData, width: 150, height: 75 },
-          {
-            canvas: [{ type: "line", x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
-            margin: [0, 2, 0, 8] as [number, number, number, number],
-          },
-        ],
-        unbreakable: true,
+      const sigStack: any[] = [
+        { text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] },
+      ];
+
+      if (sigData) {
+        // Signed digitally — show image
+        sigStack.push({ image: sigData, width: 150, height: 75 });
+      } else {
+        // Empty — leave blank space for pen signature
+        sigStack.push({ text: "", margin: [0, 0, 0, 55] as [number, number, number, number] });
+      }
+
+      sigStack.push({
+        canvas: [{ type: "line", x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
+        margin: [0, 2, 0, 8] as [number, number, number, number],
       });
+
+      content.push({ stack: sigStack, unbreakable: true });
     }
   });
 
