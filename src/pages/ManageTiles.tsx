@@ -146,7 +146,7 @@ export default function ManageTiles() {
           <>
             <div className="flex gap-2">
               <input
-                className="flex-1 h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                className="flex-1 h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="Nowa czynność..."
@@ -174,7 +174,7 @@ export default function ManageTiles() {
                   onDragEnd={handleTileDragEnd}
                   onDragOver={(e) => e.preventDefault()}
                   onTouchStart={() => handleTouchStart(index)}
-                  className={`flex items-center gap-2 rounded-lg border-2 border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
+                  className={`flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
                     touchDragIndex === index ? "opacity-50 scale-95" : ""
                   }`}
                 >
@@ -207,7 +207,7 @@ export default function ManageTiles() {
 
             <div className="space-y-2">
               <input
-                className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
                 value={newFieldLabel}
                 onChange={(e) => setNewFieldLabel(e.target.value)}
                 placeholder="Nazwa pola (np. Nr seryjny)"
@@ -215,7 +215,7 @@ export default function ManageTiles() {
               />
               <div className="flex gap-2">
                 <select
-                  className="flex-1 h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+                  className="flex-1 h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
                   value={newFieldType}
                   onChange={(e) => setNewFieldType(e.target.value as CustomFieldType)}
                 >
@@ -246,7 +246,7 @@ export default function ManageTiles() {
                   onDragEnd={handleFieldDragEnd}
                   onDragOver={(e) => e.preventDefault()}
                   onTouchStart={() => handleTouchStart(index)}
-                  className={`flex items-center gap-2 rounded-lg border-2 border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
+                  className={`flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-3 cursor-grab active:cursor-grabbing transition-all ${
                     touchDragIndex === index ? "opacity-50 scale-95" : ""
                   }`}
                 >
