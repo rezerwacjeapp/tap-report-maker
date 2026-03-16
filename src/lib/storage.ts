@@ -37,6 +37,7 @@ export interface ReportDraft {
   photosByField: Record<string, string[]>; // fieldId -> base64[] — per-field photos
   signatures: Record<string, string | null>; // signatureFieldId -> base64
   customFields: Record<string, string>; // fieldId -> value
+  additionalNotes?: string;
   reportNumber?: string;
   templateId?: string;
   _lastSaved?: number;
