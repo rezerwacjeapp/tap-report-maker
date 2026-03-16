@@ -140,7 +140,7 @@ export default function ReportWizard() {
 
       <header className="flex items-center gap-2 px-5 pt-6 pb-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}><ArrowLeft className="h-5 w-5" /></Button>
-        <h1 className="text-xl flex-1 truncate">{templateName}</h1>
+        <h1 className="text-lg flex-1 truncate">{templateName}</h1>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
 
@@ -150,7 +150,7 @@ export default function ReportWizard() {
           <label className="text-sm font-medium mb-1.5 block">Numer raportu</label>
           <input
             type="text"
-            className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
+            className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
             value={draft.reportNumber || ""}
             onChange={(e) => update({ reportNumber: e.target.value })}
             placeholder="np. 001/2026"
@@ -212,7 +212,7 @@ export default function ReportWizard() {
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
                 <div className="space-y-2">
-                  <textarea className="w-full min-h-[80px] rounded-lg border-2 border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                  <textarea className="w-full min-h-[80px] rounded-xl border border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
                   <VoiceButton onResult={(text) => { const cur = draft.customFields[field.id] || ""; updateField(field.id, cur ? `${cur} ${text}` : text); }} />
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function ReportWizard() {
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
                 <div className="space-y-2">
-                  <input type="text" className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                  <input type="text" className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
                   <VoiceButton onResult={(text) => { updateField(field.id, text); }} />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default function ReportWizard() {
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
-                <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-lg border-2 border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
               </div>
             )}
           </div>
@@ -258,10 +258,10 @@ export default function ReportWizard() {
         )}
       </main>
 
-      <div className="sticky bottom-0 bg-background border-t border-border px-5 py-4">
-        <Button variant="accent" size="lg" onClick={handleGenerate} className="w-full">
-          <FileDown className="h-5 w-5 mr-1" /> Generuj PDF
-        </Button>
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4">
+        <button onClick={handleGenerate} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg">
+          <FileDown className="h-5 w-5" /> Generuj PDF
+        </button>
       </div>
     </div>
   );
