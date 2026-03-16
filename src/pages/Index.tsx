@@ -1,98 +1,189 @@
-import { useRef, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Eraser } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Plus, ChevronRight, Calendar } from "lucide-react";
+import { getProfile, getReportHistory } from "@/lib/storage";
+import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
 
-interface Props {
-  value: string | null;
-  onChange: (data: string | null) => void;
-  label?: string;
-}
+const INDUSTRY_COLORS: Record<string, string> = {
+  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+  Droplets: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+  Sun: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+  Fan: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
+};
 
-export function SignatureCanvas({ value, onChange, label }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [drawing, setDrawing] = useState(false);
+const INDUSTRY_DOTS: Record<string, string> = {
+  Wind: "bg-blue-500",
+  Zap: "bg-amber-500",
+  Home: "bg-purple-500",
+  Flame: "bg-orange-500",
+  ShieldAlert: "bg-red-500",
+  Droplets: "bg-cyan-500",
+  Sun: "bg-yellow-500",
+  Fan: "bg-teal-500",
+};
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
+const INDUSTRY_EMOJI: Record<string, string> = {
+  Wind: "❄️", Zap: "⚡", Home: "🏠", Flame: "🔥",
+  ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
+};
 
-    canvas.width = canvas.offsetWidth * 2;
-    canvas.height = canvas.offsetHeight * 2;
-    ctx.scale(2, 2);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#1e2a38";
+const Index = () => {
+  const navigate = useNavigate();
+  const profile = getProfile();
+  const hasProfile = profile.fields?.some((f) => f.value?.trim());
+  const reports = getReportHistory();
+  const userTemplateCount = getUserTemplates().length;
+  const recentReports = reports.slice(0, 3);
 
-    if (value) {
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      img.src = value;
-    }
-  }, []);
-
-  const getPos = (e: React.TouchEvent | React.MouseEvent) => {
-    const canvas = canvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    if ("touches" in e) {
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-    }
-    return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top };
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString("pl-PL", {
+        day: "numeric", month: "short",
+      });
+    } catch { return dateStr; }
   };
 
-  const start = (e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
-    setDrawing(true);
-    const ctx = canvasRef.current!.getContext("2d")!;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-  };
-
-  const move = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!drawing) return;
-    e.preventDefault();
-    const ctx = canvasRef.current!.getContext("2d")!;
-    const pos = getPos(e);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-  };
-
-  const end = () => {
-    setDrawing(false);
-    const canvas = canvasRef.current!;
-    onChange(canvas.toDataURL("image/png"));
-  };
-
-  const clear = () => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    onChange(null);
+  // Find icon for template name in starters
+  const getTemplateIcon = (templateName: string) => {
+    const starter = STARTER_TEMPLATES.find((s) => s.name === templateName);
+    return starter?.icon || "FileText";
   };
 
   return (
-    <div className="space-y-2">
-      <div className="relative rounded-lg border border-border bg-card overflow-hidden">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-40 touch-none cursor-crosshair"
-          onMouseDown={start}
-          onMouseMove={move}
-          onMouseUp={end}
-          onMouseLeave={end}
-          onTouchStart={start}
-          onTouchMove={move}
-          onTouchEnd={end}
-        />
-        <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground pointer-events-none select-none">
-          {label || "Podpis"}
-        </p>
-      </div>
-      <Button variant="outline" size="sm" onClick={clear} className="w-full">
-        <Eraser className="h-4 w-4 mr-1" /> Wyczyść podpis
-      </Button>
+    <div className="flex flex-1 flex-col bg-background">
+      {/* Header */}
+      <header className="px-5 pt-8 pb-2">
+        <h1 className="text-2xl tracking-tight">
+          Raport<span className="text-accent">ON</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Raport serwisowy w minutę</p>
+      </header>
+
+      {/* Main */}
+      <main className="flex-1 px-5 py-4 space-y-5">
+        {/* Hero — New Report */}
+        <button
+          onClick={() => navigate("/select-template")}
+          className="w-full rounded-2xl bg-gradient-to-br from-emerald-700 to-accent p-5 text-left text-white shadow-lg active:scale-[0.98] transition-transform"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+              <Plus className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold">Nowy raport</h2>
+              <p className="text-sm text-white/75 mt-0.5">Wybierz szablon i wypełnij dane</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-white/60" />
+          </div>
+        </button>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-xl bg-secondary p-3.5">
+            <p className="text-xl font-semibold">{reports.length}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Raportów</p>
+          </div>
+          <div className="rounded-xl bg-secondary p-3.5">
+            <p className="text-xl font-semibold">{userTemplateCount}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Szablonów</p>
+          </div>
+          <div className="rounded-xl bg-secondary p-3.5">
+            <p className="text-xl font-semibold">
+              {reports.length > 0 ? formatDate(reports[0].date) : "—"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Ostatni</p>
+          </div>
+        </div>
+
+        {/* Recent reports */}
+        {recentReports.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Ostatnie raporty
+              </p>
+              <button onClick={() => navigate("/reports")} className="text-xs text-accent font-medium">
+                Wszystkie
+              </button>
+            </div>
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              {recentReports.map((report, i) => {
+                const icon = getTemplateIcon(report.templateName);
+                const dotColor = INDUSTRY_DOTS[icon] || "bg-accent";
+                return (
+                  <button
+                    key={report.id}
+                    onClick={() => navigate("/reports")}
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-secondary/50 transition-colors active:bg-secondary ${i < recentReports.length - 1 ? "border-b border-border" : ""}`}
+                  >
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {report.clientName !== "—" ? report.clientName : report.filename}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-muted-foreground">{formatDate(report.date)}</span>
+                        <span className="text-[11px] text-muted-foreground">•</span>
+                        <span className="text-[11px] text-accent font-medium">{report.templateName}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Quick start */}
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+            Szybki start
+          </p>
+          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+            {STARTER_TEMPLATES.slice(0, 4).map((starter) => {
+              const colorCls = INDUSTRY_COLORS[starter.icon] || "bg-muted text-muted-foreground";
+              const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
+              return (
+                <button
+                  key={starter.id}
+                  onClick={() => navigate(`/report?template=${starter.id}`)}
+                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3.5 min-w-[100px] hover:shadow-sm transition-all active:scale-[0.97]"
+                >
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${colorCls}`}>
+                    {emoji}
+                  </div>
+                  <span className="text-[11px] font-medium text-center">{starter.name.split(" ")[0]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Profile hint */}
+        {!hasProfile && (
+          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4">
+            <p className="text-sm">
+              <strong>Wskazówka:</strong> Uzupełnij{" "}
+              <span className="text-accent font-semibold cursor-pointer" onClick={() => navigate("/profile")}>
+                profil firmy
+              </span>
+              , aby Twoje dane pojawiały się automatycznie w raportach.
+            </p>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="px-5 py-3 text-center">
+        <p className="text-[11px] text-muted-foreground">RaportON v1.0 • Działa offline</p>
+      </footer>
     </div>
   );
-}
+};
+
+export default Index;
