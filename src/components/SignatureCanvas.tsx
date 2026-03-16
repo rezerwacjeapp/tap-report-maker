@@ -20,6 +20,11 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
     canvas.width = canvas.offsetWidth * 2;
     canvas.height = canvas.offsetHeight * 2;
     ctx.scale(2, 2);
+
+    // White background — signature PNG must have white bg for PDF
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.lineWidth = 2;
@@ -69,6 +74,12 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Re-fill white background
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
     onChange(null);
   };
 
