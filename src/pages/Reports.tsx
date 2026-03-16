@@ -168,9 +168,14 @@ export default function Reports() {
                         {report.photosCount > 0 && (
                           <span className="flex items-center gap-1"><Camera className="h-3 w-3" />{report.photosCount}</span>
                         )}
-                        {(report.hasSignature || (report.signatures && Object.values(report.signatures).some((v) => !!v))) && (
+                        {report.signatureLabels && Object.keys(report.signatureLabels).length > 0 ? (
+                          <span className="flex items-center gap-1">
+                            <PenTool className="h-3 w-3" />
+                            {Object.values(report.signatures || {}).filter(Boolean).length}/{Object.keys(report.signatureLabels).length} podp.
+                          </span>
+                        ) : (report.hasSignature || (report.signatures && Object.values(report.signatures).some(Boolean))) ? (
                           <span className="flex items-center gap-1"><PenTool className="h-3 w-3" />Podpis</span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -216,19 +221,40 @@ export default function Reports() {
                       </div>
                     )}
 
-                    {report.signatures && Object.entries(report.signatures).some(([, v]) => !!v) && (
+                    {report.signatureLabels && Object.keys(report.signatureLabels).length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
+                        <div className="flex flex-wrap gap-4">
+                          {Object.entries(report.signatureLabels).map(([sigId, sigLabel]) => {
+                            const sigData = report.signatures?.[sigId];
+                            return (
+                              <div key={sigId} className="flex flex-col items-start gap-1">
+                                <span className="text-[11px] text-muted-foreground">{sigLabel || "Podpis"}</span>
+                                {sigData ? (
+                                  <img src={sigData} alt={sigLabel || "Podpis"} className="h-14 w-auto border border-border rounded bg-white" />
+                                ) : (
+                                  <div className="h-14 w-32 border border-dashed border-border rounded bg-muted/30 flex items-center justify-center">
+                                    <span className="text-[10px] text-muted-foreground">Nie podpisano</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : report.signatures && Object.entries(report.signatures).some(([, v]) => !!v) ? (
                       <div className="space-y-2">
                         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
                         <div className="flex flex-wrap gap-4">
                           {Object.entries(report.signatures).filter(([, v]) => !!v).map(([sigId, sigData]) => (
                             <div key={sigId} className="flex flex-col items-start gap-1">
-                              <span className="text-[11px] text-muted-foreground">{report.signatureLabels?.[sigId] || "Podpis"}</span>
-                              <img src={sigData!} alt={report.signatureLabels?.[sigId] || "Podpis"} className="h-14 w-auto border border-border rounded bg-white" />
+                              <span className="text-[11px] text-muted-foreground">Podpis</span>
+                              <img src={sigData!} alt="Podpis" className="h-14 w-auto border border-border rounded bg-white" />
                             </div>
                           ))}
                         </div>
                       </div>
-                    )}
+                    ) : null}
 
                     {report.photosCount > 0 && (
                       <div className="space-y-1">
