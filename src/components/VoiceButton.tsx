@@ -26,10 +26,16 @@ export function VoiceButton({ onResult }: Props) {
     recognition.interimResults = false;
 
     recognition.onresult = (e: any) => {
-      const transcript = Array.from(e.results)
-        .map((r: any) => r[0].transcript)
-        .join(" ");
-      onResult(transcript);
+      // Only process NEW final results — e.resultIndex marks where new ones start
+      let newText = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          newText += e.results[i][0].transcript;
+        }
+      }
+      if (newText.trim()) {
+        onResult(newText.trim());
+      }
     };
 
     recognition.onend = () => setListening(false);
