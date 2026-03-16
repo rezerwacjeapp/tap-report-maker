@@ -1,7 +1,17 @@
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, ChevronRight, Calendar } from "lucide-react";
+import { Plus, ChevronRight } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
+
+const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
+
+function getHiddenStarters(): Set<string> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_STARTERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
 
 const INDUSTRY_COLORS: Record<string, string> = {
   Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
@@ -15,14 +25,9 @@ const INDUSTRY_COLORS: Record<string, string> = {
 };
 
 const INDUSTRY_DOTS: Record<string, string> = {
-  Wind: "bg-blue-500",
-  Zap: "bg-amber-500",
-  Home: "bg-purple-500",
-  Flame: "bg-orange-500",
-  ShieldAlert: "bg-red-500",
-  Droplets: "bg-cyan-500",
-  Sun: "bg-yellow-500",
-  Fan: "bg-teal-500",
+  Wind: "bg-blue-500", Zap: "bg-amber-500", Home: "bg-purple-500",
+  Flame: "bg-orange-500", ShieldAlert: "bg-red-500", Droplets: "bg-cyan-500",
+  Sun: "bg-yellow-500", Fan: "bg-teal-500",
 };
 
 const INDUSTRY_EMOJI: Record<string, string> = {
@@ -32,11 +37,20 @@ const INDUSTRY_EMOJI: Record<string, string> = {
 
 const Index = () => {
   const navigate = useNavigate();
+
+  // Force re-read on every render (component remounts on navigate back)
+  const [, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
+
   const profile = getProfile();
   const hasProfile = profile.fields?.some((f) => f.value?.trim());
   const reports = getReportHistory();
   const userTemplateCount = getUserTemplates().length;
   const recentReports = reports.slice(0, 3);
+
+  // Filter quick start by hidden starters
+  const hiddenStarters = getHiddenStarters();
+  const visibleStarters = STARTER_TEMPLATES.filter((s) => !hiddenStarters.has(s.id));
 
   const formatDate = (dateStr: string) => {
     try {
@@ -46,7 +60,6 @@ const Index = () => {
     } catch { return dateStr; }
   };
 
-  // Find icon for template name in starters
   const getTemplateIcon = (templateName: string) => {
     const starter = STARTER_TEMPLATES.find((s) => s.name === templateName);
     return starter?.icon || "FileText";
@@ -139,30 +152,32 @@ const Index = () => {
           </div>
         )}
 
-        {/* Quick start */}
-        <div>
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-            Szybki start
-          </p>
-          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
-            {STARTER_TEMPLATES.slice(0, 4).map((starter) => {
-              const colorCls = INDUSTRY_COLORS[starter.icon] || "bg-muted text-muted-foreground";
-              const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
-              return (
-                <button
-                  key={starter.id}
-                  onClick={() => navigate(`/report?template=${starter.id}`)}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3.5 min-w-[100px] hover:shadow-sm transition-all active:scale-[0.97]"
-                >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${colorCls}`}>
-                    {emoji}
-                  </div>
-                  <span className="text-[11px] font-medium text-center">{starter.name.split(" ")[0]}</span>
-                </button>
-              );
-            })}
+        {/* Quick start — only visible starters */}
+        {visibleStarters.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+              Szybki start
+            </p>
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+              {visibleStarters.slice(0, 5).map((starter) => {
+                const colorCls = INDUSTRY_COLORS[starter.icon] || "bg-muted text-muted-foreground";
+                const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
+                return (
+                  <button
+                    key={starter.id}
+                    onClick={() => navigate(`/report?template=${starter.id}`)}
+                    className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3.5 min-w-[100px] hover:shadow-sm transition-all active:scale-[0.97]"
+                  >
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${colorCls}`}>
+                      {emoji}
+                    </div>
+                    <span className="text-[11px] font-medium text-center">{starter.name.split(" ")[0]}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Profile hint */}
         {!hasProfile && (
