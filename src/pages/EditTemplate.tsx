@@ -208,7 +208,7 @@ export default function EditTemplate() {
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Nazwa szablonu (widoczna tylko w aplikacji)</label>
           <input
-            className="text-xl font-bold w-full h-12 rounded-lg border-2 border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
+            className="text-xl font-bold w-full h-12 rounded-xl border border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
             value={template.name}
             onChange={(e) => setTemplate({ ...template, name: e.target.value })}
             placeholder="np. Przegląd klimatyzacji"
@@ -217,7 +217,7 @@ export default function EditTemplate() {
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Tytuł dokumentu (widoczny w nagłówku PDF)</label>
           <input
-            className="w-full h-10 rounded-lg border-2 border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
+            className="w-full h-10 rounded-xl border border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
             value={template.pdfTitle}
             onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
             placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
@@ -237,7 +237,7 @@ export default function EditTemplate() {
           const isExpanded = expandedCats.has(cat);
           const activeCount = blocks.filter((b) => activeFieldBlocks.has(b.id)).length;
           return (
-            <div key={cat} className="rounded-xl border-2 border-border bg-card overflow-hidden">
+            <div key={cat} className="rounded-xl border border-border bg-card overflow-hidden">
               <button onClick={() => toggleCategory(cat)} className="w-full flex items-center justify-between p-3 text-left">
                 <div className="flex items-center gap-2">
                   {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
@@ -260,7 +260,7 @@ export default function EditTemplate() {
         })}
 
         {/* === ADD FIELD — type-first approach === */}
-        <div className="rounded-xl border-2 border-dashed border-border p-4 space-y-3">
+        <div className="rounded-xl border border-dashed border-border p-4 space-y-3">
           <p className="text-sm font-semibold">Dodaj pole do raportu</p>
           <p className="text-[11px] text-muted-foreground">Wybierz typ pola, a następnie wpisz jego nazwę.</p>
 
@@ -286,7 +286,7 @@ export default function EditTemplate() {
                     setTimeout(() => addFieldInputRef.current?.focus(), 50);
                   }
                 }}
-                className={`rounded-lg border-2 p-2.5 text-center transition-all ${expandedAddType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+                className={`rounded-xl border p-2.5 text-center transition-all ${expandedAddType === type ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
               >
                 <Icon className={`h-5 w-5 mx-auto mb-1 ${expandedAddType === type ? "text-accent" : "text-muted-foreground"}`} />
                 <span className="text-xs font-medium block">{label}</span>
@@ -304,7 +304,7 @@ export default function EditTemplate() {
                 setExpandedAddType("tiles");
               }
             }}
-            className={`w-full rounded-lg border-2 p-2.5 text-left transition-all flex items-center gap-3 ${expandedAddType === "tiles" ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+            className={`w-full rounded-xl border p-2.5 text-left transition-all flex items-center gap-3 ${expandedAddType === "tiles" ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
           >
             <ListChecks className={`h-5 w-5 shrink-0 ${expandedAddType === "tiles" ? "text-accent" : "text-muted-foreground"}`} />
             <div>
@@ -315,12 +315,12 @@ export default function EditTemplate() {
 
           {/* === Expanded panel for simple types === */}
           {expandedAddType && !["signature", "tiles"].includes(expandedAddType) && (
-            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
               <p className="text-xs text-muted-foreground">Wpisz nazwę pola typu <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
               <div className="flex gap-1.5">
                 <input
                   ref={addFieldInputRef}
-                  className="flex-1 h-10 rounded-lg border-2 border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
+                  className="flex-1 h-10 rounded-xl border border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
                   value={newFieldLabel}
                   onChange={(e) => setNewFieldLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField(expandedAddType); }}
@@ -335,7 +335,7 @@ export default function EditTemplate() {
 
           {/* === Expanded panel for SIGNATURE === */}
           {expandedAddType === "signature" && (
-            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
               <p className="text-xs text-muted-foreground">Kliknij gotowy podpis lub wpisz własną nazwę:</p>
               <div className="flex flex-wrap gap-2">
                 {["Podpis klienta", "Podpis serwisanta", "Podpis inspektora", "Podpis kierownika"].map((label) => (
@@ -364,7 +364,7 @@ export default function EditTemplate() {
 
           {/* === Expanded panel for TILES/CZYNNOŚCI === */}
           {expandedAddType === "tiles" && (
-            <div className="rounded-lg border-2 border-accent/30 bg-accent/5 p-3 space-y-2">
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
               <p className="text-xs text-muted-foreground">Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
               <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
 
@@ -400,7 +400,7 @@ export default function EditTemplate() {
             {template.fields.map((field, index) => (
               <div key={field.id}>
                 <div draggable onDragStart={() => handleDragStart(index)} onDragEnter={() => handleDragEnter(index)} onDragEnd={handleFieldDragEnd} onDragOver={(e) => e.preventDefault()}
-                  className="flex items-center gap-1 rounded-lg border border-border bg-card px-2 py-2 cursor-grab active:cursor-grabbing">
+                  className="flex items-center gap-1 rounded-xl border border-border bg-card px-2 py-2 cursor-grab active:cursor-grabbing">
                   <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex flex-col gap-0.5 shrink-0">
                     <button onClick={() => moveField(index, -1)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20"><ArrowUp className="h-3.5 w-3.5" /></button>
