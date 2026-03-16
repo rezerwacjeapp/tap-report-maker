@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw,
+  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw, Star,
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -49,15 +49,42 @@ function saveHiddenStarters(ids: Set<string>) {
   localStorage.setItem(HIDDEN_STARTERS_KEY, JSON.stringify([...ids]));
 }
 
+const QUICK_START_KEY = "raporton_quick_start";
+
+function getQuickStartIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(QUICK_START_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveQuickStartIds(ids: Set<string>) {
+  localStorage.setItem(QUICK_START_KEY, JSON.stringify([...ids]));
+}
+
 export default function SelectTemplate() {
   const navigate = useNavigate();
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showStarters, setShowStarters] = useState(true);
   const [hiddenStarters, setHiddenStarters] = useState<Set<string>>(getHiddenStarters);
+  const [quickStartIds, setQuickStartIds] = useState<Set<string>>(getQuickStartIds);
 
   const visibleStarters = STARTER_TEMPLATES.filter((s) => !hiddenStarters.has(s.id));
   const hiddenCount = STARTER_TEMPLATES.length - visibleStarters.length;
+
+  const toggleQuickStart = (id: string) => {
+    const next = new Set(quickStartIds);
+    if (next.has(id)) {
+      next.delete(id);
+      toast.success("Usunięto z szybkiego startu");
+    } else {
+      next.add(id);
+      toast.success("Dodano do szybkiego startu");
+    }
+    setQuickStartIds(next);
+    saveQuickStartIds(next);
+  };
 
   const hideStarter = (id: string) => {
     const next = new Set(hiddenStarters);
@@ -156,6 +183,9 @@ export default function SelectTemplate() {
                       </div>
                     </button>
                     <div className="flex border-t border-border">
+                      <button onClick={() => toggleQuickStart(template.id)} className={`flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] transition-colors border-r border-border ${quickStartIds.has(template.id) ? "text-amber-500" : "text-muted-foreground hover:text-amber-500"}`}>
+                        <Star className="h-3.5 w-3.5" fill={quickStartIds.has(template.id) ? "currentColor" : "none"} />
+                      </button>
                       <button onClick={() => handleEditTemplate(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
                         <Pencil className="h-3.5 w-3.5" /> Edytuj
                       </button>
@@ -215,6 +245,9 @@ export default function SelectTemplate() {
                           </div>
                         </div>
                         <div className="flex border-t border-border">
+                          <button onClick={() => toggleQuickStart(starter.id)} className={`flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] transition-colors border-r border-border ${quickStartIds.has(starter.id) ? "text-amber-500" : "text-muted-foreground hover:text-amber-500"}`}>
+                            <Star className="h-3.5 w-3.5" fill={quickStartIds.has(starter.id) ? "currentColor" : "none"} />
+                          </button>
                           <button onClick={() => handleUseTemplate(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border">
                             Użyj bez zmian
                           </button>
