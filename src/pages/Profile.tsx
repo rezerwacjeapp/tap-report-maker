@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Upload, Check, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
+import { Upload, Check, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
 import { getProfile, saveProfile, type CompanyProfile, type ProfileField } from "@/lib/storage";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 
 const FIELD_SUGGESTIONS = [
@@ -57,36 +57,33 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  // Which suggestion labels are already used
   const usedLabels = new Set(profile.fields.map((f) => f.label));
   const availableSuggestions = FIELD_SUGGESTIONS.filter((s) => !usedLabels.has(s.label));
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+    <div className="flex flex-1 flex-col bg-background">
+      <header className="px-5 pt-8 pb-2">
         <h1 className="text-xl">Profil firmy</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Dane widoczne w nagłówku PDF</p>
       </header>
 
-      <main className="flex-1 px-5 space-y-5 pb-8">
+      <main className="flex-1 px-5 space-y-5 pb-8 pt-4">
         {/* Logo */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-2">
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogo} />
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card overflow-hidden"
+            className="flex h-20 w-20 items-center justify-center rounded-2xl border border-dashed border-border bg-card overflow-hidden hover:border-accent transition-colors"
           >
             {profile.logo ? (
               <img src={profile.logo} alt="Logo" className="h-full w-full object-contain" />
             ) : (
-              <Upload className="h-8 w-8 text-muted-foreground" />
+              <Upload className="h-7 w-7 text-muted-foreground" />
             )}
           </button>
-          <span className="text-xs text-muted-foreground">Logo firmy</span>
+          <span className="text-[11px] text-muted-foreground">Logo firmy</span>
           {profile.logo && (
-            <button onClick={() => update({ ...profile, logo: null })} className="text-xs text-destructive hover:underline">
+            <button onClick={() => update({ ...profile, logo: null })} className="text-[11px] text-destructive hover:underline">
               Usuń logo
             </button>
           )}
@@ -94,99 +91,92 @@ export default function Profile() {
 
         {/* Dynamic fields */}
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">Dane firmy widoczne w nagłówku PDF. Kliknij etykietę aby ją zmienić.</p>
+          <p className="text-[11px] text-muted-foreground">Kliknij etykietę aby ją zmienić.</p>
 
-          {profile.fields.map((field, index) => (
-            <div key={field.id} className="rounded-lg border-2 border-border bg-card p-3 space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                {/* Move arrows */}
-                <div className="flex flex-col gap-0.5 shrink-0">
-                  <button onClick={() => moveField(index, -1)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
-                    <ArrowUp className="h-3 w-3" />
-                  </button>
-                  <button onClick={() => moveField(index, 1)} disabled={index === profile.fields.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
-                    <ArrowDown className="h-3 w-3" />
-                  </button>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+            {profile.fields.map((field, index) => (
+              <div key={field.id} className="p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex flex-col gap-0.5 shrink-0">
+                    <button onClick={() => moveField(index, -1)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
+                      <ArrowUp className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => moveField(index, 1)} disabled={index === profile.fields.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
+                      <ArrowDown className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <input
+                    className="text-[11px] font-medium text-muted-foreground bg-transparent border-b border-dashed border-border outline-none flex-1 min-w-0 py-0.5 focus:border-accent focus:text-foreground transition-colors"
+                    value={field.label}
+                    onChange={(e) => updateField(field.id, { label: e.target.value })}
+                    placeholder="Wpisz nazwę pola..."
+                    id={`label-${field.id}`}
+                  />
+                  {profile.fields.length > 1 && (
+                    <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-
-                {/* Editable label */}
                 <input
-                  className="text-xs font-medium text-muted-foreground bg-transparent border-b border-dashed border-border outline-none flex-1 min-w-0 py-0.5 focus:border-accent focus:text-foreground transition-colors"
-                  value={field.label}
-                  onChange={(e) => updateField(field.id, { label: e.target.value })}
-                  placeholder="Wpisz nazwę pola..."
-                  id={`label-${field.id}`}
+                  className="w-full h-11 rounded-xl border border-border bg-background px-3.5 text-base focus:outline-none focus:border-accent transition-colors"
+                  value={field.value}
+                  onChange={(e) => updateField(field.id, { value: e.target.value })}
+                  placeholder={
+                    FIELD_SUGGESTIONS.find((s) => s.label === field.label)?.placeholder
+                    || (index === 0 ? "np. Serwis Klima Sp. z o.o." : "Wartość...")
+                  }
                 />
-
-                {/* Delete (only if more than 1 field) */}
-                {profile.fields.length > 1 && (
-                  <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0">
-                    <X className="h-4 w-4" />
-                  </button>
+                {index === 0 && (
+                  <p className="text-[10px] text-muted-foreground">Pierwsze pole = nazwa dużą czcionką w nagłówku PDF</p>
                 )}
               </div>
-
-              {/* Value */}
-              <input
-                className="w-full h-11 rounded-lg border-2 border-border bg-background px-3 text-base focus:outline-none focus:border-accent transition-colors"
-                value={field.value}
-                onChange={(e) => updateField(field.id, { value: e.target.value })}
-                placeholder={
-                  FIELD_SUGGESTIONS.find((s) => s.label === field.label)?.placeholder
-                  || (index === 0 ? "np. Serwis Klima Sp. z o.o." : `Wartość...`)
-                }
-              />
-
-              {/* First field hint */}
-              {index === 0 && (
-                <p className="text-[10px] text-muted-foreground">Pierwsze pole = nazwa wyświetlana dużą czcionką w nagłówku PDF</p>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Add field */}
-        <div className="rounded-xl border-2 border-dashed border-border p-3 space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Dodaj pole do nagłówka</p>
-
-          {availableSuggestions.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {availableSuggestions.map((s) => (
-                <button
-                  key={s.label}
-                  onClick={() => addField(s.label)}
-                  className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all"
-                >
-                  <Plus className="h-3 w-3 inline mr-1" />{s.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              const id = `pf_${Date.now()}`;
-              const f: ProfileField = { id, label: "", value: "" };
-              update({ ...profile, fields: [...profile.fields, f] });
-              setTimeout(() => {
-                const el = document.getElementById(`label-${id}`);
-                if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "center" }); }
-              }, 50);
-            }}
-            className="w-full rounded-md border border-dashed border-border bg-card px-3 py-2 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all"
-          >
-            <Plus className="h-3 w-3 inline mr-1" /> Inne pole...
-          </button>
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dodaj pole</p>
+          <div className="flex flex-wrap gap-1.5">
+            {availableSuggestions.map((s) => (
+              <button
+                key={s.label}
+                onClick={() => addField(s.label)}
+                className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all"
+              >
+                <Plus className="h-3 w-3 inline mr-1" />{s.label}
+              </button>
+            ))}
+            <button
+              onClick={() => {
+                const id = `pf_${Date.now()}`;
+                const f: ProfileField = { id, label: "", value: "" };
+                update({ ...profile, fields: [...profile.fields, f] });
+                setTimeout(() => {
+                  const el = document.getElementById(`label-${id}`);
+                  if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+                }, 50);
+              }}
+              className="rounded-lg border border-dashed border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all"
+            >
+              <Plus className="h-3 w-3 inline mr-1" /> Inne pole...
+            </button>
+          </div>
         </div>
 
-        <Button
-          variant="accent"
-          size="lg"
-          className="w-full"
+        {/* Theme toggle */}
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Motyw</p>
+          <ThemeToggle />
+        </div>
+
+        <button
           onClick={() => { toast.success("Profil zapisany"); navigate("/"); }}
+          className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
-          <Check className="h-5 w-5 mr-1" /> Zapisano automatycznie
-        </Button>
+          <Check className="h-5 w-5" /> Zapisano automatycznie
+        </button>
       </main>
     </div>
   );
