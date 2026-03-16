@@ -233,9 +233,7 @@ export default function Reports() {
                                 {sigData ? (
                                   <img src={sigData} alt={sigLabel || "Podpis"} className="h-14 w-auto border border-border rounded bg-white" />
                                 ) : (
-                                  <div className="h-14 w-32 border border-dashed border-border rounded bg-muted/30 flex items-center justify-center">
-                                    <span className="text-[10px] text-muted-foreground">Nie podpisano</span>
-                                  </div>
+                                  <div className="h-14 w-32 border border-border rounded bg-white" />
                                 )}
                               </div>
                             );
