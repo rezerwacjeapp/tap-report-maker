@@ -29,17 +29,19 @@ const INDUSTRY_COLORS: Record<string, string> = {
   Droplets: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
   Sun: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
   Fan: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
+  FileText: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
 };
 
 const INDUSTRY_DOTS: Record<string, string> = {
   Wind: "bg-blue-500", Zap: "bg-amber-500", Home: "bg-purple-500",
   Flame: "bg-orange-500", ShieldAlert: "bg-red-500", Droplets: "bg-cyan-500",
-  Sun: "bg-yellow-500", Fan: "bg-teal-500",
+  Sun: "bg-yellow-500", Fan: "bg-teal-500", FileText: "bg-emerald-500",
 };
 
 const INDUSTRY_EMOJI: Record<string, string> = {
   Wind: "❄️", Zap: "⚡", Home: "🏠", Flame: "🔥",
   ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
+  FileText: "📄",
 };
 
 const Index = () => {
@@ -48,13 +50,13 @@ const Index = () => {
   const profile = getProfile();
   const hasProfile = profile.fields?.some((f) => f.value?.trim());
   const reports = getReportHistory();
-  const userTemplateCount = userTemplates.length;
   const recentReports = reports.slice(0, 3);
 
   // Quick start: pinned templates (user + starter), fallback to visible starters
   const hiddenStarters = getHiddenStarters();
   const quickStartIds = getQuickStartIds();
   const userTemplates = getUserTemplates();
+  const userTemplateCount = userTemplates.length;
 
   const quickStartTemplates: { id: string; name: string; icon: string }[] = [];
   if (quickStartIds.size > 0) {
