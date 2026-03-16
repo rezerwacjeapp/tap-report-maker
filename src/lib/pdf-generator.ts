@@ -287,7 +287,7 @@ export function generateReport(
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `Wygenerowano: ${generationDate} • ${profileFields[0]?.value || "DocSwift"}`, style: "footer", alignment: "left" as const },
+        { text: `Wygenerowano: ${generationDate} • ${profileFields[0]?.value || "RaportON"}`, style: "footer", alignment: "left" as const },
         { text: `Strona ${currentPage} z ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
