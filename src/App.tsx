@@ -21,7 +21,7 @@ const HIDE_NAV = ["/report", "/edit-template"];
 function AppShell() {
   useTheme(); // applies theme class on mount
   const location = useLocation();
-  const hideNav = HIDE_NAV.some((p) => location.pathname.startsWith(p));
+  const hideNav = HIDE_NAV.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"));
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
