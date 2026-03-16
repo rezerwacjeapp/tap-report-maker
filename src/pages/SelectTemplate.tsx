@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, Wind, Zap, Home, FileText, Plus,
-  ChevronRight, ChevronDown, Pencil, Trash2, Copy,
-  Flame, ShieldAlert, Droplets, ArrowUpDown, Thermometer, Sun, Fan,
+  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText,
 } from "lucide-react";
 import {
   getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -18,13 +15,32 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const ICON_MAP: Record<string, React.ElementType> = { Wind, Zap, Home, FileText, Flame, ShieldAlert, Droplets, ArrowUpDown, Thermometer, Sun, Fan };
+const BADGE_COLORS: Record<string, string> = {
+  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+  Droplets: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+  Sun: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+  Fan: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
+};
+
+const BADGE_LABELS: Record<string, string> = {
+  Wind: "HVAC", Zap: "SEP", Home: "NIERUCH.", Flame: "GAZ",
+  ShieldAlert: "PPOŻ", Droplets: "HYDR.", Sun: "PV", Fan: "WENT.",
+};
+
+const INDUSTRY_EMOJI: Record<string, string> = {
+  Wind: "❄️", Zap: "⚡", Home: "🏠", Flame: "🔥",
+  ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
+};
 
 export default function SelectTemplate() {
   const navigate = useNavigate();
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [showStarters, setShowStarters] = useState(false);
+  const [showStarters, setShowStarters] = useState(true);
 
   const handleUseTemplate = (template: ReportTemplate) => {
     navigate(`/report?template=${template.id}`);
@@ -56,68 +72,66 @@ export default function SelectTemplate() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="flex items-center gap-3 px-5 pt-6 pb-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl">Nowy raport</h1>
-          <p className="text-sm text-muted-foreground">Wybierz lub stwórz szablon</p>
-        </div>
+    <div className="flex flex-1 flex-col bg-background">
+      <header className="px-5 pt-8 pb-2">
+        <h1 className="text-xl">Nowy raport</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Wybierz lub stwórz szablon</p>
       </header>
 
-      <main className="flex-1 px-5 py-4 space-y-6 pb-8">
-        {/* === USER TEMPLATES === */}
+      <main className="flex-1 px-5 py-4 space-y-5 pb-8">
+        {/* Create new */}
+        <button
+          onClick={handleCreateNew}
+          className="w-full rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-4 text-left hover:bg-accent/10 transition-all active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+              <Plus className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">Stwórz własny szablon</h3>
+              <p className="text-xs text-muted-foreground">Wybierz klocki i zbuduj od zera</p>
+            </div>
+          </div>
+        </button>
+
+        {/* User templates */}
         {userTemplates.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
               Twoje szablony
             </p>
-            <div className="space-y-2">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
               {userTemplates.map((template) => {
-                const Icon = ICON_MAP[template.icon] || FileText;
+                const emoji = INDUSTRY_EMOJI[template.icon] || "📄";
+                const badgeColor = BADGE_COLORS[template.icon] || "bg-muted text-muted-foreground";
                 return (
-                  <div
-                    key={template.id}
-                    className="rounded-xl border-2 border-border bg-card overflow-hidden"
-                  >
+                  <div key={template.id}>
                     <button
                       onClick={() => handleUseTemplate(template)}
-                      className="w-full p-4 text-left hover:bg-muted/30 transition-all active:scale-[0.99]"
+                      className="w-full p-3.5 text-left hover:bg-secondary/50 transition-all active:scale-[0.99]"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent shrink-0">
-                          <Icon className="h-5 w-5" />
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${badgeColor}`}>
+                          {emoji}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold truncate">{template.name}</h3>
-                          <p className="text-xs text-muted-foreground">
+                          <h3 className="text-sm font-medium truncate">{template.name}</h3>
+                          <p className="text-[11px] text-muted-foreground">
                             {template.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} pól • {countTileOptions(template)} czynności
                           </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                       </div>
                     </button>
-
-                    {/* Action bar */}
                     <div className="flex border-t border-border">
-                      <button
-                        onClick={() => handleEditTemplate(template.id)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-accent transition-colors border-r border-border"
-                      >
+                      <button onClick={() => handleEditTemplate(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
                         <Pencil className="h-3.5 w-3.5" /> Edytuj
                       </button>
-                      <button
-                        onClick={() => handleDuplicateUser(template)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-accent transition-colors border-r border-border"
-                      >
+                      <button onClick={() => handleDuplicateUser(template)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
                         <Copy className="h-3.5 w-3.5" /> Kopiuj
                       </button>
-                      <button
-                        onClick={() => setDeleteId(template.id)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
-                      >
+                      <button onClick={() => setDeleteId(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 className="h-3.5 w-3.5" /> Usuń
                       </button>
                     </div>
@@ -128,29 +142,13 @@ export default function SelectTemplate() {
           </div>
         )}
 
-        {/* === CREATE NEW === */}
-        <button
-          onClick={handleCreateNew}
-          className="w-full rounded-xl border-2 border-dashed border-accent/40 bg-accent/5 p-5 text-left hover:bg-accent/10 transition-all active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent">
-              <Plus className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold">Stwórz własny szablon</h3>
-              <p className="text-sm text-muted-foreground">Wybierz klocki i zbuduj od zera</p>
-            </div>
-          </div>
-        </button>
-
-        {/* === STARTER TEMPLATES — collapsible === */}
+        {/* Starter templates */}
         <div>
           <button
             onClick={() => setShowStarters(!showStarters)}
-            className="w-full flex items-center justify-between py-3 text-left"
+            className="w-full flex items-center justify-between py-2"
           >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Gotowe szablony branżowe
             </p>
             {showStarters
@@ -159,47 +157,41 @@ export default function SelectTemplate() {
             }
           </button>
           {showStarters && (
-          <div className="space-y-2">
-            {STARTER_TEMPLATES.map((starter) => {
-              const Icon = ICON_MAP[starter.icon] || FileText;
-              return (
-                <div
-                  key={starter.id}
-                  className="rounded-xl border-2 border-border bg-card overflow-hidden"
-                >
-                  <div className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold">{starter.name}</h3>
-                        <p className="text-xs text-muted-foreground">{starter.description}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {starter.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} pól • {countTileOptions(starter)} czynności
-                        </p>
+            <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border mt-1">
+              {STARTER_TEMPLATES.map((starter) => {
+                const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
+                const badgeColor = BADGE_COLORS[starter.icon] || "bg-muted text-muted-foreground";
+                const badgeLabel = BADGE_LABELS[starter.icon] || "";
+                return (
+                  <div key={starter.id}>
+                    <div className="p-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${badgeColor}`}>
+                          {emoji}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium">{starter.name}</h3>
+                          <p className="text-[11px] text-muted-foreground">{starter.description}</p>
+                        </div>
+                        {badgeLabel && (
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${badgeColor}`}>
+                            {badgeLabel}
+                          </span>
+                        )}
                       </div>
                     </div>
+                    <div className="flex border-t border-border">
+                      <button onClick={() => handleUseTemplate(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border">
+                        Użyj bez zmian
+                      </button>
+                      <button onClick={() => handleDuplicateStarter(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-accent hover:text-accent/80 transition-colors">
+                        <Pencil className="h-3.5 w-3.5" /> Kopiuj i dostosuj
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="flex border-t border-border">
-                    <button
-                      onClick={() => handleUseTemplate(starter)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border"
-                    >
-                      Użyj bez zmian
-                    </button>
-                    <button
-                      onClick={() => handleDuplicateStarter(starter)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
-                    >
-                      <Pencil className="h-3.5 w-3.5" /> Kopiuj i dostosuj
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </main>
