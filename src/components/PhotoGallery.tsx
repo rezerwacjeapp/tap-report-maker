@@ -51,7 +51,7 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
       <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={addPhoto} />
       <div className="grid grid-cols-3 gap-2">
         {photos.map((photo, i) => (
-          <div key={i} className="relative aspect-square rounded-lg border-2 border-border overflow-hidden bg-muted">
+          <div key={i} className="relative aspect-square rounded-lg border border-border overflow-hidden bg-muted">
             <img src={photo} alt={`Zdjęcie ${i + 1}`} className="h-full w-full object-cover" />
             <button
               onClick={() => remove(i)}
@@ -64,7 +64,7 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
         {photos.length < max && (
           <button
             onClick={() => inputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-card text-muted-foreground hover:border-accent hover:text-accent transition-colors"
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-card text-muted-foreground hover:border-accent hover:text-accent transition-colors"
           >
             <Camera className="h-6 w-6" />
             <span className="text-[10px] font-medium">Dodaj</span>
