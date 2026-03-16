@@ -285,6 +285,18 @@ export function generateReport(
   // Flush any remaining data rows
   flushDataRows();
 
+  // === ADDITIONAL NOTES (ad-hoc, not part of template) ===
+  if (draft.additionalNotes?.trim()) {
+    content.push({
+      stack: [
+        { text: "Uwagi dodatkowe", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
+        { text: draft.additionalNotes.trim(), style: "fieldValue" },
+      ],
+      unbreakable: true,
+      margin: [0, 0, 0, 12] as [number, number, number, number],
+    });
+  }
+
   // === DOCUMENT DEFINITION ===
   const docDefinition: any = {
     pageSize: "A4",
