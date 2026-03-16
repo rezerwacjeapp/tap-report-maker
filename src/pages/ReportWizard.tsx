@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
   getProfile, addReportToHistory, getNextReportNumber,
@@ -48,6 +48,7 @@ export default function ReportWizard() {
 
   // Field visibility
   const [hiddenFieldIds, setHiddenFieldIds] = useState<Set<string>>(new Set());
+  const [showNotes, setShowNotes] = useState(false);
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
@@ -79,7 +80,7 @@ export default function ReportWizard() {
     } else { setDraft(buildEmptyDraft()); setInitialized(true); }
   }, [templateId, buildEmptyDraft]);
 
-  const handleResume = () => { setDraft(getDraft()); setShowResume(false); setInitialized(true); };
+  const handleResume = () => { const d = getDraft(); setDraft(d); if (d.additionalNotes?.trim()) setShowNotes(true); setShowResume(false); setInitialized(true); };
   const handleNewDraft = () => { clearDraft(); setDraft(buildEmptyDraft()); setShowResume(false); setInitialized(true); };
 
   useEffect(() => {
@@ -253,6 +254,29 @@ export default function ReportWizard() {
                   <Eye className="h-3 w-3" /> {f.label}
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Additional notes — hidden by default, toggled on demand */}
+        {!showNotes ? (
+          <button
+            onClick={() => setShowNotes(true)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+          >
+            <Plus className="h-4 w-4" /> Uwagi dodatkowe
+          </button>
+        ) : (
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Uwagi dodatkowe</label>
+            <div className="space-y-2">
+              <textarea
+                className="w-full min-h-[80px] rounded-xl border border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none"
+                value={draft.additionalNotes || ""}
+                onChange={(e) => update({ additionalNotes: e.target.value })}
+                placeholder="Dodatkowe uwagi, spostrzeżenia..."
+              />
+              <VoiceButton onResult={(text) => { const cur = draft.additionalNotes || ""; update({ additionalNotes: cur ? `${cur} ${text}` : text }); }} />
             </div>
           </div>
         )}
