@@ -74,7 +74,7 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="relative rounded-lg border-2 border-border bg-card overflow-hidden">
+      <div className="relative rounded-lg border border-border bg-card overflow-hidden">
         <canvas
           ref={canvasRef}
           className="w-full h-40 touch-none cursor-crosshair"
