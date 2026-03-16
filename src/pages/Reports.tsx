@@ -2,18 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, FileText, Search, Trash2, Calendar, Camera,
+  FileText, Search, Trash2, Calendar, Camera,
   PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown,
 } from "lucide-react";
 import { getReportHistory, removeReportFromHistory, getProfile, type ReportHistoryItem } from "@/lib/storage";
 import { generateReport, regenerateFromHistory } from "@/lib/pdf-generator";
 import { getSnapshot, deleteSnapshot } from "@/lib/pdf-store";
+import { STARTER_TEMPLATES } from "@/lib/templates";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const INDUSTRY_DOTS: Record<string, string> = {
+  Wind: "bg-blue-500", Zap: "bg-amber-500", Home: "bg-purple-500",
+  Flame: "bg-orange-500", ShieldAlert: "bg-red-500", Droplets: "bg-cyan-500",
+  Sun: "bg-yellow-500", Fan: "bg-teal-500",
+};
+
+const BADGE_COLORS: Record<string, string> = {
+  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+};
+
+const BADGE_LABELS: Record<string, string> = {
+  Wind: "HVAC", Zap: "SEP", Home: "NIERUCH.", Flame: "GAZ", ShieldAlert: "PPOŻ",
+};
+
+function getTemplateIcon(templateName: string) {
+  const s = STARTER_TEMPLATES.find((st) => st.name === templateName);
+  return s?.icon || "FileText";
+}
 
 export default function Reports() {
   const navigate = useNavigate();
@@ -46,20 +70,15 @@ export default function Reports() {
   const formatDate = (dateStr: string) => {
     try {
       return new Date(dateStr).toLocaleDateString("pl-PL", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
+        day: "numeric", month: "short", year: "numeric",
       });
-    } catch {
-      return dateStr;
-    }
+    } catch { return dateStr; }
   };
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  /** Get filled fields sorted for display */
   const getFilledFields = (report: ReportHistoryItem) => {
     return Object.entries(report.customFields)
       .filter(([, value]) => value?.trim())
@@ -70,22 +89,23 @@ export default function Reports() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="flex items-center gap-3 px-5 pt-6 pb-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl flex-1">Historia raportów</h1>
-        <span className="text-sm text-muted-foreground">{reports.length}</span>
+    <div className="flex flex-1 flex-col bg-background">
+      <header className="px-5 pt-8 pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl">Historia raportów</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{reports.length} raportów</p>
+          </div>
+        </div>
       </header>
 
       {/* Search */}
       {reports.length > 0 && (
         <div className="px-5 py-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 bg-secondary rounded-xl px-3.5 h-11 border border-border">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <input
-              className="w-full h-11 rounded-lg border-2 border-border bg-card pl-10 pr-4 text-base focus:outline-none focus:border-accent transition-colors"
+              className="flex-1 bg-transparent text-sm focus:outline-none"
               placeholder="Szukaj po kliencie, dacie, szablonie..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -101,46 +121,57 @@ export default function Reports() {
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-base font-medium">Brak raportów</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Wygenerowane raporty pojawią się tutaj
-            </p>
-            <Button
-              variant="accent"
-              className="mt-6"
+            <p className="text-sm text-muted-foreground mt-1">Wygenerowane raporty pojawią się tutaj</p>
+            <button
               onClick={() => navigate("/select-template")}
+              className="mt-6 h-10 px-5 rounded-xl bg-accent text-white text-sm font-medium active:scale-[0.98] transition-transform"
             >
               Utwórz pierwszy raport
-            </Button>
+            </button>
           </div>
         )}
 
         {filtered.length === 0 && reports.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            Brak wyników dla „{search}"
-          </p>
+          <p className="text-center text-sm text-muted-foreground py-8">Brak wyników dla „{search}"</p>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {filtered.map((report) => {
             const isExpanded = expandedId === report.id;
             const filledFields = getFilledFields(report);
             const tileLabels = report.tileLabels || [];
+            const icon = getTemplateIcon(report.templateName);
+            const dotColor = INDUSTRY_DOTS[icon] || "bg-accent";
+            const badgeColor = BADGE_COLORS[icon] || "bg-muted text-muted-foreground";
+            const badgeLabel = BADGE_LABELS[icon] || "";
 
             return (
-              <div
-                key={report.id}
-                className="rounded-xl border-2 border-border bg-card overflow-hidden transition-all"
-              >
-                {/* Collapsed header — always visible */}
-                <button
-                  onClick={() => toggleExpand(report.id)}
-                  className="w-full p-4 text-left"
-                >
-                  <div className="flex items-start justify-between gap-3">
+              <div key={report.id} className="rounded-2xl border border-border bg-card overflow-hidden transition-all">
+                <button onClick={() => toggleExpand(report.id)} className="w-full p-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold truncate">
+                      <h3 className="text-sm font-medium truncate">
                         {report.clientName !== "—" ? report.clientName : report.filename}
                       </h3>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />{formatDate(report.date)}
+                        </span>
+                        {report.reportNumber && <span className="font-mono">{report.reportNumber}</span>}
+                        {badgeLabel && (
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${badgeColor}`}>
+                            {badgeLabel}
+                          </span>
+                        )}
+                        {!badgeLabel && <span className="text-accent font-medium">{report.templateName}</span>}
+                        {report.photosCount > 0 && (
+                          <span className="flex items-center gap-1"><Camera className="h-3 w-3" />{report.photosCount}</span>
+                        )}
+                        {(report.hasSignature || (report.signatures && Object.values(report.signatures).some((v) => !!v))) && (
+                          <span className="flex items-center gap-1"><PenTool className="h-3 w-3" />Podpis</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
@@ -149,66 +180,31 @@ export default function Reports() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      {isExpanded
-                        ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                        : <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      }
+                      {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </div>
-                  </div>
-
-                  {/* Meta row */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(report.date)}
-                    </span>
-                    {report.reportNumber && (
-                      <span className="font-mono">{report.reportNumber}</span>
-                    )}
-                    <span className="font-medium text-accent">
-                      {report.templateName}
-                    </span>
-                    {report.photosCount > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Camera className="h-3 w-3" />
-                        {report.photosCount} zdjęć
-                      </span>
-                    )}
-                    {(report.hasSignature || (report.signatures && Object.values(report.signatures).some((v) => !!v))) && (
-                      <span className="flex items-center gap-1">
-                        <PenTool className="h-3 w-3" />
-                        {report.signatures ? `${Object.values(report.signatures).filter((v) => !!v).length} podp.` : "Podpis"}
-                      </span>
-                    )}
                   </div>
                 </button>
 
-                {/* Expanded details */}
+                {/* Expanded */}
                 {isExpanded && (
                   <div className="px-4 pb-4 space-y-4 border-t border-border pt-3">
-                    {/* All filled fields */}
                     {filledFields.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Dane raportu
-                        </p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dane raportu</p>
                         <div className="space-y-1.5">
                           {filledFields.map(({ label, value }) => (
                             <div key={label} className="flex gap-2">
-                              <span className="text-xs text-muted-foreground shrink-0 w-28 pt-0.5">{label}:</span>
-                              <span className="text-sm text-foreground break-words">{value}</span>
+                              <span className="text-[11px] text-muted-foreground shrink-0 w-28 pt-0.5">{label}:</span>
+                              <span className="text-sm break-words">{value}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Selected tiles */}
                     {tileLabels.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Wykonane czynności ({tileLabels.length})
-                        </p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Wykonane czynności ({tileLabels.length})</p>
                         <div className="space-y-1">
                           {tileLabels.map((label, i) => (
                             <div key={i} className="flex items-center gap-2">
@@ -220,48 +216,29 @@ export default function Reports() {
                       </div>
                     )}
 
-                    {/* Signatures preview */}
                     {report.signatures && Object.entries(report.signatures).some(([, v]) => !!v) && (
                       <div className="space-y-2">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Podpisy
-                        </p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
                         <div className="flex flex-wrap gap-4">
-                          {Object.entries(report.signatures)
-                            .filter(([, v]) => !!v)
-                            .map(([sigId, sigData]) => (
-                              <div key={sigId} className="flex flex-col items-start gap-1">
-                                <span className="text-xs text-muted-foreground">
-                                  {report.signatureLabels?.[sigId] || "Podpis"}
-                                </span>
-                                <img
-                                  src={sigData!}
-                                  alt={report.signatureLabels?.[sigId] || "Podpis"}
-                                  className="h-14 w-auto border border-border rounded bg-white"
-                                />
-                              </div>
-                            ))}
+                          {Object.entries(report.signatures).filter(([, v]) => !!v).map(([sigId, sigData]) => (
+                            <div key={sigId} className="flex flex-col items-start gap-1">
+                              <span className="text-[11px] text-muted-foreground">{report.signatureLabels?.[sigId] || "Podpis"}</span>
+                              <img src={sigData!} alt={report.signatureLabels?.[sigId] || "Podpis"} className="h-14 w-auto border border-border rounded bg-white" />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Photos info */}
                     {report.photosCount > 0 && (
                       <div className="space-y-1">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Zdjęcia
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {report.photosCount} {report.photosCount === 1 ? "zdjęcie zapisane" : "zdjęć zapisanych"} w PDF
-                        </p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Zdjęcia</p>
+                        <p className="text-xs text-muted-foreground">{report.photosCount} {report.photosCount === 1 ? "zdjęcie zapisane" : "zdjęć zapisanych"} w PDF</p>
                       </div>
                     )}
 
-                    {/* File info + regenerate */}
                     <div className="pt-2 flex items-center justify-between gap-3">
-                      <p className="text-xs text-muted-foreground font-mono truncate flex-1">
-                        {report.filename}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground font-mono truncate flex-1">{report.filename}</p>
                       <Button
                         variant="outline"
                         size="sm"
@@ -270,11 +247,9 @@ export default function Reports() {
                           try {
                             const snapshot = await getSnapshot(report.id);
                             if (snapshot) {
-                              // Re-generate identical PDF from saved snapshot
                               generateReport(snapshot.profile, snapshot.draft, snapshot.options);
                               toast.success("PDF pobrany!");
                             } else {
-                              // Fallback for old reports without snapshot
                               const profile = getProfile();
                               regenerateFromHistory(profile, report);
                               toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
@@ -295,20 +270,15 @@ export default function Reports() {
         </div>
       </main>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Usunąć raport?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Raport zostanie usunięty z historii. Wcześniej pobrany plik PDF pozostanie na urządzeniu.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Raport zostanie usunięty z historii. Wcześniej pobrany plik PDF pozostanie na urządzeniu.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>
-              Usuń
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>Usuń</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
