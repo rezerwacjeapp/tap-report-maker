@@ -1,14 +1,21 @@
-import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
+const QUICK_START_KEY = "raporton_quick_start";
 
 function getHiddenStarters(): Set<string> {
   try {
     const raw = localStorage.getItem(HIDDEN_STARTERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function getQuickStartIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(QUICK_START_KEY);
     return raw ? new Set(JSON.parse(raw)) : new Set();
   } catch { return new Set(); }
 }
@@ -38,19 +45,33 @@ const INDUSTRY_EMOJI: Record<string, string> = {
 const Index = () => {
   const navigate = useNavigate();
 
-  // Force re-read on every render (component remounts on navigate back)
-  const [, setTick] = useState(0);
-  const refresh = useCallback(() => setTick((t) => t + 1), []);
-
   const profile = getProfile();
   const hasProfile = profile.fields?.some((f) => f.value?.trim());
   const reports = getReportHistory();
-  const userTemplateCount = getUserTemplates().length;
+  const userTemplateCount = userTemplates.length;
   const recentReports = reports.slice(0, 3);
 
-  // Filter quick start by hidden starters
+  // Quick start: pinned templates (user + starter), fallback to visible starters
   const hiddenStarters = getHiddenStarters();
-  const visibleStarters = STARTER_TEMPLATES.filter((s) => !hiddenStarters.has(s.id));
+  const quickStartIds = getQuickStartIds();
+  const userTemplates = getUserTemplates();
+
+  const quickStartTemplates: { id: string; name: string; icon: string }[] = [];
+  if (quickStartIds.size > 0) {
+    // Show pinned templates in order
+    const allTemplates = [...userTemplates, ...STARTER_TEMPLATES];
+    for (const t of allTemplates) {
+      if (quickStartIds.has(t.id)) {
+        quickStartTemplates.push({ id: t.id, name: t.name, icon: t.icon });
+      }
+    }
+  } else {
+    // Fallback: first 4 visible starters
+    STARTER_TEMPLATES
+      .filter((s) => !hiddenStarters.has(s.id))
+      .slice(0, 4)
+      .forEach((s) => quickStartTemplates.push({ id: s.id, name: s.name, icon: s.icon }));
+  }
 
   const formatDate = (dateStr: string) => {
     try {
@@ -152,26 +173,26 @@ const Index = () => {
           </div>
         )}
 
-        {/* Quick start — only visible starters */}
-        {visibleStarters.length > 0 && (
+        {/* Quick start — pinned or default starters */}
+        {quickStartTemplates.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
               Szybki start
             </p>
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
-              {visibleStarters.slice(0, 5).map((starter) => {
-                const colorCls = INDUSTRY_COLORS[starter.icon] || "bg-muted text-muted-foreground";
-                const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
+              {quickStartTemplates.map((tmpl) => {
+                const colorCls = INDUSTRY_COLORS[tmpl.icon] || "bg-muted text-muted-foreground";
+                const emoji = INDUSTRY_EMOJI[tmpl.icon] || "📄";
                 return (
                   <button
-                    key={starter.id}
-                    onClick={() => navigate(`/report?template=${starter.id}`)}
+                    key={tmpl.id}
+                    onClick={() => navigate(`/report?template=${tmpl.id}`)}
                     className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3.5 min-w-[100px] hover:shadow-sm transition-all active:scale-[0.97]"
                   >
                     <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${colorCls}`}>
                       {emoji}
                     </div>
-                    <span className="text-[11px] font-medium text-center">{starter.name.split(" ")[0]}</span>
+                    <span className="text-[11px] font-medium text-center">{tmpl.name.split(" ")[0]}</span>
                   </button>
                 );
               })}
