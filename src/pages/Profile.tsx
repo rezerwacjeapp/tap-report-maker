@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, Check, Plus, X, ArrowUp, ArrowDown, LogOut } from "lucide-react";
+import { Upload, Check, Plus, X, ArrowUp, ArrowDown, LogOut, Loader2 } from "lucide-react";
+import { type CompanyProfile, type ProfileField } from "@/lib/storage";
+import { getCloudProfile, saveCloudProfile } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
-import { getProfile, saveProfile, type CompanyProfile, type ProfileField } from "@/lib/storage";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 
@@ -18,32 +19,45 @@ const FIELD_SUGGESTIONS = [
 export default function Profile() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<CompanyProfile>(getProfile);
+  const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    getCloudProfile()
+      .then((p) => setProfile(p))
+      .catch(() => toast.error("Nie udało się załadować profilu"))
+      .finally(() => setLoading(false));
+  }, []);
 
   const update = (next: CompanyProfile) => {
     setProfile(next);
-    saveProfile(next);
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveCloudProfile(next).catch(() => toast.error("Błąd zapisu profilu"));
+    }, 500);
   };
 
   const updateField = (id: string, partial: Partial<ProfileField>) => {
-    update({
-      ...profile,
-      fields: profile.fields.map((f) => f.id === id ? { ...f, ...partial } : f),
-    });
+    if (!profile) return;
+    update({ ...profile, fields: profile.fields.map((f) => f.id === id ? { ...f, ...partial } : f) });
   };
 
   const addField = (label: string) => {
+    if (!profile) return;
     const f: ProfileField = { id: `pf_${Date.now()}`, label, value: "" };
     update({ ...profile, fields: [...profile.fields, f] });
     toast.success(`Dodano pole: ${label}`);
   };
 
   const removeField = (id: string) => {
+    if (!profile) return;
     update({ ...profile, fields: profile.fields.filter((f) => f.id !== id) });
   };
 
   const moveField = (index: number, direction: -1 | 1) => {
+    if (!profile) return;
     const target = index + direction;
     if (target < 0 || target >= profile.fields.length) return;
     const items = [...profile.fields];
@@ -52,12 +66,21 @@ export default function Profile() {
   };
 
   const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!profile) return;
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => update({ ...profile, logo: reader.result as string });
     reader.readAsDataURL(file);
   };
+
+  if (loading || !profile) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
 
   const usedLabels = new Set(profile.fields.map((f) => f.label));
   const availableSuggestions = FIELD_SUGGESTIONS.filter((s) => !usedLabels.has(s.label));
@@ -94,7 +117,6 @@ export default function Profile() {
         {/* Dynamic fields */}
         <div className="space-y-3">
           <p className="text-[11px] text-muted-foreground">Kliknij etykietę aby ją zmienić.</p>
-
           <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
             {profile.fields.map((field, index) => (
               <div key={field.id} className="p-3.5 space-y-2">
@@ -142,11 +164,8 @@ export default function Profile() {
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dodaj pole</p>
           <div className="flex flex-wrap gap-1.5">
             {availableSuggestions.map((s) => (
-              <button
-                key={s.label}
-                onClick={() => addField(s.label)}
-                className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all"
-              >
+              <button key={s.label} onClick={() => addField(s.label)}
+                className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all">
                 <Plus className="h-3 w-3 inline mr-1" />{s.label}
               </button>
             ))}
@@ -160,8 +179,7 @@ export default function Profile() {
                   if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "center" }); }
                 }, 50);
               }}
-              className="rounded-lg border border-dashed border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all"
-            >
+              className="rounded-lg border border-dashed border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all">
               <Plus className="h-3 w-3 inline mr-1" /> Inne pole...
             </button>
           </div>
@@ -173,23 +191,17 @@ export default function Profile() {
           <ThemeToggle />
         </div>
 
-        <button
-          onClick={() => { toast.success("Profil zapisany"); navigate("/"); }}
-          className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-        >
+        <button onClick={() => { toast.success("Profil zapisany"); navigate("/"); }}
+          className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
           <Check className="h-5 w-5" /> Zapisano automatycznie
         </button>
 
         {/* Account */}
         <div className="space-y-3 pt-2">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Konto</p>
-          {user?.email && (
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          )}
-          <button
-            onClick={async () => { await signOut(); navigate("/login"); }}
-            className="w-full h-12 rounded-xl border border-destructive/30 text-destructive font-medium flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-[0.98] transition-all"
-          >
+          {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+          <button onClick={async () => { await signOut(); navigate("/login"); }}
+            className="w-full h-12 rounded-xl border border-destructive/30 text-destructive font-medium flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-[0.98] transition-all">
             <LogOut className="h-5 w-5" /> Wyloguj się
           </button>
         </div>
