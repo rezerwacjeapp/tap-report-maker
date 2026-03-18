@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, Check, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
+import { Upload, Check, Plus, X, ArrowUp, ArrowDown, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import { getProfile, saveProfile, type CompanyProfile, type ProfileField } from "@/lib/storage";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ const FIELD_SUGGESTIONS = [
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<CompanyProfile>(getProfile);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -177,6 +179,20 @@ export default function Profile() {
         >
           <Check className="h-5 w-5" /> Zapisano automatycznie
         </button>
+
+        {/* Account */}
+        <div className="space-y-3 pt-2">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Konto</p>
+          {user?.email && (
+            <p className="text-sm text-muted-foreground">{user.email}</p>
+          )}
+          <button
+            onClick={async () => { await signOut(); navigate("/login"); }}
+            className="w-full h-12 rounded-xl border border-destructive/30 text-destructive font-medium flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-[0.98] transition-all"
+          >
+            <LogOut className="h-5 w-5" /> Wyloguj się
+          </button>
+        </div>
       </main>
     </div>
   );
