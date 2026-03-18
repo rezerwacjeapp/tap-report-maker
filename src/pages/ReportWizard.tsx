@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2 } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
-  getProfile, addReportToHistory, getNextReportNumber,
   type ReportDraft,
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
-import { generateReport } from "@/lib/pdf-generator";
-import { saveSnapshot } from "@/lib/pdf-store";
+import { generateReport, type TemplateOptions } from "@/lib/pdf-generator";
+import {
+  getCloudProfile, addCloudReport, saveCloudSnapshot,
+  checkReportLimit, incrementReportCount, getCloudNextReportNumber,
+} from "@/lib/supabase-storage";
+import type { CompanyProfile } from "@/lib/storage";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -52,11 +55,19 @@ export default function ReportWizard() {
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
+  // Profile from Supabase (needed for PDF generation)
+  const [cloudProfile, setCloudProfile] = useState<CompanyProfile | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    getCloudProfile().then(setCloudProfile).catch(() => {});
+  }, []);
+
   // Draft
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
     allFields.forEach((f) => { if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0]; else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = ""; });
-    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: getNextReportNumber(), templateId };
+    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
   }, [allFields, templateId]);
 
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
@@ -83,6 +94,16 @@ export default function ReportWizard() {
   const handleResume = () => { const d = getDraft(); setDraft(d); if (d.additionalNotes?.trim()) setShowNotes(true); setShowResume(false); setInitialized(true); };
   const handleNewDraft = () => { clearDraft(); setDraft(buildEmptyDraft()); setShowResume(false); setInitialized(true); };
 
+  // Load report number from Supabase for new drafts
+  useEffect(() => {
+    if (!initialized) return;
+    if (!draft.reportNumber) {
+      getCloudNextReportNumber().then((num) => {
+        setDraft((d) => ({ ...d, reportNumber: num }));
+      }).catch(() => {});
+    }
+  }, [initialized]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!initialized) return;
     autoSaveRef.current = setInterval(() => { saveDraft(draft); }, 10_000);
@@ -100,25 +121,47 @@ export default function ReportWizard() {
   const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
-  const handleGenerate = () => {
-    const profile = getProfile();
+  const handleGenerate = async () => {
+    if (generating) return;
+    setGenerating(true);
+
     try {
+      // Check plan limit
+      const limit = await checkReportLimit();
+      if (!limit.allowed) {
+        toast.error(`Limit ${limit.limit} raportów/miesiąc osiągnięty (${limit.count}/${limit.limit}). Przejdź na plan Solo.`);
+        setGenerating(false);
+        return;
+      }
+
+      // Load profile from Supabase (use cached if available)
+      const profile = cloudProfile || await getCloudProfile();
+
       const meta = generateReport(profile, draft, {
         pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
       });
-      addReportToHistory(meta);
-      // Save full snapshot to IndexedDB for re-download from history
-      saveSnapshot(meta.id, {
+
+      // Save to Supabase
+      const cloudId = await addCloudReport(meta);
+
+      // Save snapshot for re-download
+      saveCloudSnapshot(cloudId, {
         draft: { ...draft },
         profile: { ...profile },
         options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields },
       }).catch((e) => console.warn("Snapshot save failed:", e));
+
+      // Increment report count for free plan
+      incrementReportCount().catch(() => {});
+
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
     } catch (err) {
       console.error("PDF generation error:", err);
       toast.error("Błąd generowania PDF");
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -283,8 +326,8 @@ export default function ReportWizard() {
       </main>
 
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4">
-        <button onClick={handleGenerate} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg">
-          <FileDown className="h-5 w-5" /> Generuj PDF
+        <button onClick={handleGenerate} disabled={generating} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
+          {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
         </button>
       </div>
     </div>
