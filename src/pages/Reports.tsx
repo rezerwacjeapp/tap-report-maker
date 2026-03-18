@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   FileText, Search, Trash2, Calendar, Camera,
-  PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown,
+  PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown, Loader2,
 } from "lucide-react";
-import { getReportHistory, removeReportFromHistory, getProfile, type ReportHistoryItem } from "@/lib/storage";
+import { type ReportHistoryItem } from "@/lib/storage";
 import { generateReport, regenerateFromHistory } from "@/lib/pdf-generator";
-import { getSnapshot, deleteSnapshot } from "@/lib/pdf-store";
+import {
+  getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
+  getCloudSnapshot, getCloudProfile,
+} from "@/lib/supabase-storage";
 import { STARTER_TEMPLATES } from "@/lib/templates";
 import { toast } from "sonner";
 import {
@@ -41,10 +44,18 @@ function getTemplateIcon(templateName: string) {
 
 export default function Reports() {
   const navigate = useNavigate();
-  const [reports, setReports] = useState<ReportHistoryItem[]>(getReportHistory);
+  const [reports, setReports] = useState<ReportHistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCloudReportHistory()
+      .then(setReports)
+      .catch(() => toast.error("Nie udało się załadować historii"))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = reports.filter((r) => {
     const q = search.toLowerCase();
@@ -58,10 +69,10 @@ export default function Reports() {
     );
   });
 
-  const handleDelete = (id: string) => {
-    removeReportFromHistory(id);
-    deleteSnapshot(id).catch(() => {});
-    setReports(getReportHistory());
+  const handleDelete = async (id: string) => {
+    await removeCloudReport(id).catch(() => {});
+    deleteCloudSnapshot(id).catch(() => {});
+    setReports((prev) => prev.filter((r) => r.id !== id));
     setDeleteId(null);
     if (expandedId === id) setExpandedId(null);
     toast.success("Raport usunięty z historii");
@@ -115,7 +126,13 @@ export default function Reports() {
       )}
 
       <main className="flex-1 px-5 pb-8">
-        {filtered.length === 0 && reports.length === 0 && (
+        {loading && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
+          </div>
+        )}
+
+        {!loading && filtered.length === 0 && reports.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted mb-4">
               <FileText className="h-8 w-8 text-muted-foreground" />
@@ -269,12 +286,12 @@ export default function Reports() {
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {
-                            const snapshot = await getSnapshot(report.id);
+                            const snapshot = await getCloudSnapshot(report.id);
                             if (snapshot) {
                               generateReport(snapshot.profile, snapshot.draft, snapshot.options);
                               toast.success("PDF pobrany!");
                             } else {
-                              const profile = getProfile();
+                              const profile = await getCloudProfile();
                               regenerateFromHistory(profile, report);
                               toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
                             }
