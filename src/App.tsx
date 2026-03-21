@@ -16,6 +16,7 @@ import Reports from "./pages/Reports";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Landing from "./pages/Landing";
+import Upgrade from "./pages/Upgrade";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ function AppShell() {
           <Route path="/edit-template" element={<EditTemplate />} />
           <Route path="/report" element={<ReportWizard />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/upgrade" element={<Upgrade />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="/register" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
