@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, Zap } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
+import { checkReportLimit } from "@/lib/supabase-storage";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
 const QUICK_START_KEY = "raporton_quick_start";
@@ -52,6 +54,15 @@ const Index = () => {
   const reports = getReportHistory();
   const recentReports = reports.slice(0, 3);
 
+  // Plan limit info (async from Supabase)
+  const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string } | null>(null);
+
+  useEffect(() => {
+    checkReportLimit()
+      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan }))
+      .catch(() => {});
+  }, []);
+
   // Quick start: pinned templates (user + starter), fallback to visible starters
   const hiddenStarters = getHiddenStarters();
   const quickStartIds = getQuickStartIds();
@@ -60,7 +71,6 @@ const Index = () => {
 
   const quickStartTemplates: { id: string; name: string; icon: string }[] = [];
   if (quickStartIds.size > 0) {
-    // Show pinned templates in order
     const allTemplates = [...userTemplates, ...STARTER_TEMPLATES];
     for (const t of allTemplates) {
       if (quickStartIds.has(t.id)) {
@@ -68,7 +78,6 @@ const Index = () => {
       }
     }
   } else {
-    // Fallback: first 4 visible starters
     STARTER_TEMPLATES
       .filter((s) => !hiddenStarters.has(s.id))
       .slice(0, 4)
@@ -134,6 +143,56 @@ const Index = () => {
             <p className="text-[11px] text-muted-foreground mt-0.5">Ostatni</p>
           </div>
         </div>
+
+        {/* Plan limit bar */}
+        {planInfo && (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {planInfo.plan === "solo" ? "Plan Solo" : "Plan Free"}
+                </span>
+                {planInfo.plan === "free" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold">
+                    {planInfo.count}/{planInfo.limit}
+                  </span>
+                )}
+              </div>
+              {planInfo.plan === "free" && (
+                <button
+                  onClick={() => navigate("/upgrade")}
+                  className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+                >
+                  <Zap className="h-3 w-3" />
+                  Przejdź na Solo
+                </button>
+              )}
+            </div>
+
+            {planInfo.plan === "free" ? (
+              <>
+                <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      planInfo.count >= planInfo.limit ? "bg-destructive" : "bg-accent"
+                    }`}
+                    style={{ width: `${Math.min((planInfo.count / planInfo.limit) * 100, 100)}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  {planInfo.count >= planInfo.limit
+                    ? "Limit raportów osiągnięty. Przejdź na Solo, aby generować bez limitu."
+                    : `${planInfo.limit - planInfo.count} ${planInfo.limit - planInfo.count === 1 ? "raport" : "raporty"} pozostało w tym miesiącu`
+                  }
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Bez limitu raportów
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Recent reports */}
         {recentReports.length > 0 && (
