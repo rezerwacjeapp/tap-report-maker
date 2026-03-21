@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
   type ReportDraft,
@@ -58,6 +58,8 @@ export default function ReportWizard() {
   // Profile from Supabase (needed for PDF generation)
   const [cloudProfile, setCloudProfile] = useState<CompanyProfile | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitInfo, setLimitInfo] = useState<{ count: number; limit: number } | null>(null);
 
   useEffect(() => {
     getCloudProfile().then(setCloudProfile).catch(() => {});
@@ -129,7 +131,8 @@ export default function ReportWizard() {
       // Check plan limit
       const limit = await checkReportLimit();
       if (!limit.allowed) {
-        toast.error(`Limit ${limit.limit} raportów/miesiąc osiągnięty (${limit.count}/${limit.limit}). Przejdź na plan Solo.`);
+        setLimitInfo({ count: limit.count, limit: limit.limit });
+        setShowLimitModal(true);
         setGenerating(false);
         return;
       }
@@ -169,6 +172,7 @@ export default function ReportWizard() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
+      {/* Resume draft dialog */}
       <AlertDialog open={showResume} onOpenChange={setShowResume}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -178,6 +182,39 @@ export default function ReportWizard() {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleNewDraft}>Zacznij od nowa</AlertDialogCancel>
             <AlertDialogAction onClick={handleResume}>Kontynuuj</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Limit reached modal */}
+      <AlertDialog open={showLimitModal} onOpenChange={setShowLimitModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-accent" />
+              Limit raportów osiągnięty
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 pt-2">
+              <p>
+                Wykorzystałeś {limitInfo?.count}/{limitInfo?.limit} darmowych raportów w tym miesiącu.
+              </p>
+              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full bg-destructive w-full" />
+              </div>
+              <p>
+                Przejdź na plan <strong>Solo za 19 zł/miesiąc</strong> i generuj raporty bez limitu.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>Zamknij</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => navigate("/upgrade")}
+              className="bg-accent hover:bg-accent/90 text-white"
+            >
+              <Zap className="h-4 w-4 mr-1" />
+              Przejdź na Solo
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
