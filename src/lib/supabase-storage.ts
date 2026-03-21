@@ -166,7 +166,7 @@ export async function deleteCloudSnapshot(reportId: string): Promise<void> {
 
 // ─── PLAN & LIMITS ──────────────────────────────────────────
 
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 5;
 
 export async function checkReportLimit(): Promise<{ allowed: boolean; count: number; limit: number; plan: string }> {
   const { data: { user } } = await supabase.auth.getUser();
