@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB — pdfmake fonts are ~2MB
       },
       manifest: {
-        name: "DocSwift - Generator Raportów",
-        short_name: "DocSwift",
-        description: "Błyskawiczne raporty PDF w terenie",
+        name: "RaportON - Protokoły Serwisowe",
+        short_name: "RaportON",
+        description: "Profesjonalne protokoły PDF w 60 sekund",
         theme_color: "#1e2a38",
         background_color: "#edf0f4",
         display: "standalone",
