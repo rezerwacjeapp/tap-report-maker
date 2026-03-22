@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight, Zap } from "lucide-react";
+import { Plus, ChevronRight, Zap, Clock, X } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
-import { checkReportLimit } from "@/lib/supabase-storage";
+import { checkReportLimit, getCloudDrafts, deleteCloudDraft, type CloudDraft } from "@/lib/supabase-storage";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
 const QUICK_START_KEY = "raporton_quick_start";
@@ -56,12 +56,19 @@ const Index = () => {
 
   // Plan limit info (async from Supabase)
   const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string } | null>(null);
+  const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
 
   useEffect(() => {
     checkReportLimit()
       .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan }))
       .catch(() => {});
+    getCloudDrafts().then(setCloudDrafts).catch(() => {});
   }, []);
+
+  const handleDeleteDraft = (id: string) => {
+    deleteCloudDraft(id).catch(() => {});
+    setCloudDrafts((prev) => prev.filter((d) => d.id !== id));
+  };
 
   // Quick start: pinned templates (user + starter), fallback to visible starters
   const hiddenStarters = getHiddenStarters();
@@ -97,6 +104,20 @@ const Index = () => {
     return starter?.icon || "FileText";
   };
 
+  const formatRelativeTime = (dateStr: string) => {
+    try {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return "przed chwilą";
+      if (mins < 60) return `${mins} min temu`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} godz. temu`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return "wczoraj";
+      return `${days} dni temu`;
+    } catch { return ""; }
+  };
+
   return (
     <div className="flex flex-1 flex-col bg-background">
       {/* Header */}
@@ -125,6 +146,55 @@ const Index = () => {
             <ChevronRight className="h-5 w-5 text-white/60" />
           </div>
         </button>
+
+        {/* Saved drafts */}
+        {cloudDrafts.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+              Niedokończone raporty
+            </p>
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+              {cloudDrafts.map((d, i) => {
+                const icon = getTemplateIcon(d.templateName);
+                const emoji = INDUSTRY_EMOJI[icon] || "📄";
+                const timeAgo = formatRelativeTime(d.updatedAt);
+                return (
+                  <div
+                    key={d.id}
+                    className={`flex items-center gap-3 px-4 py-3.5 ${i < cloudDrafts.length - 1 ? "border-b border-border" : ""}`}
+                  >
+                    <button
+                      onClick={() => navigate(`/report?template=${d.templateId}&draft=${d.id}`)}
+                      className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-sm shrink-0">
+                        {emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {d.label || d.templateName}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[11px] text-muted-foreground">{timeAgo}</span>
+                          {d.label && <span className="text-[11px] text-muted-foreground">• {d.templateName}</span>}
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDraft(d.id)}
+                      className="p-1.5 text-muted-foreground hover:text-destructive shrink-0 transition-colors"
+                      title="Usuń szkic"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3">
