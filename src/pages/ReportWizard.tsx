@@ -232,7 +232,7 @@ export default function ReportWizard() {
           title={showCompanyHeader ? "Dane firmy widoczne w PDF" : "Dane firmy ukryte w PDF"}
         >
           {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          Firma
+          {showCompanyHeader ? "Dane firmy widoczne" : "Dane firmy ukryte"}
         </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
