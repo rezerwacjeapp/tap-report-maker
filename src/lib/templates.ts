@@ -20,6 +20,7 @@ export interface ReportTemplate {
   fields: CustomFieldDef[];
   tiles: TileItem[];
   hasPhotos: boolean;
+  showCompanyHeader?: boolean;
   signatureFields: SignatureFieldDef[];
 }
 
