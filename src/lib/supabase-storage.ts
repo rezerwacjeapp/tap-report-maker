@@ -164,6 +164,118 @@ export async function deleteCloudSnapshot(reportId: string): Promise<void> {
   await supabase.from("report_snapshots").delete().eq("report_id", reportId).eq("user_id", user.id);
 }
 
+// ─── DRAFTS (cloud) ──────────────────────────────────────
+
+export interface CloudDraft {
+  id: string;
+  templateId: string;
+  templateName: string;
+  draftData: any; // ReportDraft JSON
+  showCompanyHeader: boolean;
+  label: string; // first text field value or fallback
+  updatedAt: string;
+}
+
+export async function getCloudDrafts(): Promise<CloudDraft[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("drafts")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(20);
+
+  if (error || !data) return [];
+
+  return data.map((d: any) => ({
+    id: d.id,
+    templateId: d.template_id,
+    templateName: d.template_name,
+    draftData: d.draft_data,
+    showCompanyHeader: d.show_company_header ?? true,
+    label: d.label || "",
+    updatedAt: d.updated_at,
+  }));
+}
+
+export async function saveCloudDraft(draft: {
+  id?: string;
+  templateId: string;
+  templateName: string;
+  draftData: any;
+  showCompanyHeader: boolean;
+  label: string;
+}): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  if (draft.id) {
+    // Update existing draft
+    await supabase
+      .from("drafts")
+      .update({
+        draft_data: draft.draftData,
+        show_company_header: draft.showCompanyHeader,
+        label: draft.label,
+        template_name: draft.templateName,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", draft.id)
+      .eq("user_id", user.id);
+    return draft.id;
+  }
+
+  // Insert new draft
+  const { data, error } = await supabase
+    .from("drafts")
+    .insert({
+      user_id: user.id,
+      template_id: draft.templateId,
+      template_name: draft.templateName,
+      draft_data: draft.draftData,
+      show_company_header: draft.showCompanyHeader,
+      label: draft.label,
+    })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return data.id;
+}
+
+export async function deleteCloudDraft(id: string): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("drafts").delete().eq("id", id).eq("user_id", user.id);
+}
+
+export async function getCloudDraft(id: string): Promise<CloudDraft | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("drafts")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    templateId: data.template_id,
+    templateName: data.template_name,
+    draftData: data.draft_data,
+    showCompanyHeader: data.show_company_header ?? true,
+    label: data.label || "",
+    updatedAt: data.updated_at,
+  };
+}
+
 // ─── PLAN & LIMITS ──────────────────────────────────────────
 
 const FREE_LIMIT = 5;
