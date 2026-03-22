@@ -226,6 +226,14 @@ export default function ReportWizard() {
       <header className="flex items-center gap-2 px-5 pt-6 pb-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}><ArrowLeft className="h-5 w-5" /></Button>
         <h1 className="text-lg flex-1 truncate">{templateName}</h1>
+        <button
+          onClick={() => setShowCompanyHeader((v) => !v)}
+          className={`flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${showCompanyHeader ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"}`}
+          title={showCompanyHeader ? "Dane firmy widoczne w PDF" : "Dane firmy ukryte w PDF"}
+        >
+          {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+          Firma
+        </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
 
@@ -364,15 +372,6 @@ export default function ReportWizard() {
             </div>
           </div>
         )}
-
-        {/* Company header toggle */}
-        <button
-          onClick={() => setShowCompanyHeader((v) => !v)}
-          className="flex items-center justify-between w-full rounded-xl border border-border bg-card px-4 py-3"
-        >
-          <span className="text-sm text-muted-foreground">Dane firmy w nagłówku PDF</span>
-          {showCompanyHeader ? <Eye className="h-4 w-4 text-accent" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-        </button>
       </main>
 
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4">
