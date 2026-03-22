@@ -29,7 +29,7 @@ export default function ReportWizard() {
   const templateId = searchParams.get("template") || "";
   const template = getTemplateById(templateId);
 
-  const { allFields, allTiles, pdfTitle, templateName } = useMemo(() => {
+  const { allFields, allTiles, pdfTitle, templateName, defaultShowCompanyHeader } = useMemo(() => {
     if (template && template.fields.length > 0) {
       const tilesFromFields = getAllTileOptions(template);
       const legacyTiles = template.tiles || [];
@@ -38,9 +38,10 @@ export default function ReportWizard() {
         allTiles: [...tilesFromFields, ...legacyTiles],
         pdfTitle: template.pdfTitle,
         templateName: template.name,
+        defaultShowCompanyHeader: template.showCompanyHeader !== false,
       };
     }
-    return { allFields: [], allTiles: [], pdfTitle: "RAPORT SERWISOWY", templateName: template?.name || "Raport serwisowy" };
+    return { allFields: [], allTiles: [], pdfTitle: "RAPORT SERWISOWY", templateName: template?.name || "Raport serwisowy", defaultShowCompanyHeader: true };
   }, [template]);
 
   // Derive signature fields from fields for PDF generator compatibility
@@ -52,6 +53,9 @@ export default function ReportWizard() {
   // Field visibility
   const [hiddenFieldIds, setHiddenFieldIds] = useState<Set<string>>(new Set());
   const [showNotes, setShowNotes] = useState(false);
+  const [showCompanyHeader, setShowCompanyHeader] = useState(true);
+
+  useEffect(() => { setShowCompanyHeader(defaultShowCompanyHeader); }, [defaultShowCompanyHeader]);
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
@@ -141,7 +145,7 @@ export default function ReportWizard() {
       const profile = cloudProfile || await getCloudProfile();
 
       const meta = generateReport(profile, draft, {
-        pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields,
+        pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader,
       });
 
       // Save to Supabase
@@ -151,7 +155,7 @@ export default function ReportWizard() {
       saveCloudSnapshot(cloudId, {
         draft: { ...draft },
         profile: { ...profile },
-        options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields },
+        options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader },
       }).catch((e) => console.warn("Snapshot save failed:", e));
 
       // Increment report count for free plan
@@ -360,6 +364,15 @@ export default function ReportWizard() {
             </div>
           </div>
         )}
+
+        {/* Company header toggle */}
+        <button
+          onClick={() => setShowCompanyHeader((v) => !v)}
+          className="flex items-center justify-between w-full rounded-xl border border-border bg-card px-4 py-3"
+        >
+          <span className="text-sm text-muted-foreground">Dane firmy w nagłówku PDF</span>
+          {showCompanyHeader ? <Eye className="h-4 w-4 text-accent" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+        </button>
       </main>
 
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4">
