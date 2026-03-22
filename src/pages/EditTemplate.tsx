@@ -223,6 +223,12 @@ export default function EditTemplate() {
             placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
           />
         </div>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-muted-foreground">Dane firmy w nagłówku PDF</label>
+          <button onClick={() => setTemplate({ ...template, showCompanyHeader: !(template.showCompanyHeader !== false) })}>
+            {renderToggle(template.showCompanyHeader !== false)}
+          </button>
+        </div>
       </header>
 
       <div className="px-5 py-1 text-xs text-muted-foreground">
