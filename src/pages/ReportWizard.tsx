@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
   type ReportDraft,
@@ -14,6 +14,7 @@ import { generateReport, type TemplateOptions } from "@/lib/pdf-generator";
 import {
   getCloudProfile, addCloudReport, saveCloudSnapshot,
   checkReportLimit, incrementReportCount, getCloudNextReportNumber,
+  saveCloudDraft, deleteCloudDraft, getCloudDraft,
 } from "@/lib/supabase-storage";
 import type { CompanyProfile } from "@/lib/storage";
 import { toast } from "sonner";
@@ -27,7 +28,11 @@ export default function ReportWizard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template") || "";
+  const draftParam = searchParams.get("draft") || "";
   const template = getTemplateById(templateId);
+
+  // Cloud draft tracking (editing existing saved draft)
+  const [cloudDraftId, setCloudDraftId] = useState<string | null>(draftParam || null);
 
   const { allFields, allTiles, pdfTitle, templateName, defaultShowCompanyHeader } = useMemo(() => {
     if (template && template.fields.length > 0) {
@@ -62,6 +67,7 @@ export default function ReportWizard() {
   // Profile from Supabase (needed for PDF generation)
   const [cloudProfile, setCloudProfile] = useState<CompanyProfile | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitInfo, setLimitInfo] = useState<{ count: number; limit: number } | null>(null);
 
@@ -85,6 +91,23 @@ export default function ReportWizard() {
   useEffect(() => {
     if (didCheckDraft.current) return;
     didCheckDraft.current = true;
+
+    // Loading from a saved cloud draft?
+    if (draftParam) {
+      getCloudDraft(draftParam).then((cd) => {
+        if (cd) {
+          setDraft(cd.draftData as ReportDraft);
+          setShowCompanyHeader(cd.showCompanyHeader);
+          if ((cd.draftData as ReportDraft).additionalNotes?.trim()) setShowNotes(true);
+        } else {
+          setDraft(buildEmptyDraft());
+        }
+        setInitialized(true);
+      }).catch(() => { setDraft(buildEmptyDraft()); setInitialized(true); });
+      return;
+    }
+
+    // Existing localStorage draft?
     if (hasDraft()) {
       const saved = getDraft();
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
@@ -95,7 +118,7 @@ export default function ReportWizard() {
         setShowResume(true);
       } else { clearDraft(); setDraft(buildEmptyDraft()); setInitialized(true); }
     } else { setDraft(buildEmptyDraft()); setInitialized(true); }
-  }, [templateId, buildEmptyDraft]);
+  }, [templateId, buildEmptyDraft, draftParam]);
 
   const handleResume = () => { const d = getDraft(); setDraft(d); if (d.additionalNotes?.trim()) setShowNotes(true); setShowResume(false); setInitialized(true); };
   const handleNewDraft = () => { clearDraft(); setDraft(buildEmptyDraft()); setShowResume(false); setInitialized(true); };
@@ -161,6 +184,9 @@ export default function ReportWizard() {
       // Increment report count for free plan
       incrementReportCount().catch(() => {});
 
+      // Delete cloud draft if we were editing one
+      if (cloudDraftId) deleteCloudDraft(cloudDraftId).catch(() => {});
+
       toast.success("Raport PDF wygenerowany!");
       clearDraft();
       navigate("/");
@@ -172,7 +198,42 @@ export default function ReportWizard() {
     }
   };
 
-  const handleClearDraft = () => { clearDraft(); setDraft(buildEmptyDraft()); toast.success("Szkic wyczyszczony"); };
+  const handleSaveLater = async () => {
+    if (savingDraft) return;
+    setSavingDraft(true);
+    try {
+      // Build a label from the first non-empty text field
+      const firstTextField = allFields.find((f) => f.type === "text" && draft.customFields[f.id]?.trim());
+      const label = firstTextField ? draft.customFields[firstTextField.id].trim() : "";
+
+      const savedId = await saveCloudDraft({
+        id: cloudDraftId || undefined,
+        templateId,
+        templateName,
+        draftData: draft,
+        showCompanyHeader,
+        label,
+      });
+
+      setCloudDraftId(savedId);
+      clearDraft();
+      toast.success("Raport zapisany — dokończysz później");
+      navigate("/");
+    } catch (err) {
+      console.error("Draft save error:", err);
+      toast.error("Nie udało się zapisać szkicu");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const handleClearDraft = () => {
+    if (cloudDraftId) deleteCloudDraft(cloudDraftId).catch(() => {});
+    clearDraft();
+    setCloudDraftId(null);
+    setDraft(buildEmptyDraft());
+    toast.success("Szkic wyczyszczony");
+  };
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -374,9 +435,12 @@ export default function ReportWizard() {
         )}
       </main>
 
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4">
-        <button onClick={handleGenerate} disabled={generating} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4 space-y-2">
+        <button onClick={handleGenerate} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
           {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
+        </button>
+        <button onClick={handleSaveLater} disabled={savingDraft || generating} className="w-full h-10 rounded-xl border border-border text-muted-foreground font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-muted disabled:opacity-50">
+          {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} {savingDraft ? "Zapisuję..." : "Dokończ później"}
         </button>
       </div>
     </div>
