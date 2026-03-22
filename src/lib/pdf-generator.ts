@@ -44,6 +44,7 @@ export interface TemplateOptions {
   fields: import("./storage").CustomFieldDef[];
   tiles: import("./storage").TileItem[];
   signatureFields: { id: string; label: string }[];
+  showCompanyHeader?: boolean;
 }
 
 export function generateReport(
@@ -56,6 +57,7 @@ export function generateReport(
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
   const templateName = options?.templateName ?? "Raport serwisowy";
   const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Podpis klienta" }];
+  const showCompanyHeader = options?.showCompanyHeader !== false;
   const selectedLabels = draft.selectedTiles
     .map((id) => allTiles.find((t) => t.id === id)?.label)
     .filter(Boolean) as string[];
@@ -85,34 +87,37 @@ export function generateReport(
   const content: any[] = [];
 
   // === HEADER ===
-  const headerCols: any[] = [];
-
-  if (profile.logo) {
-    headerCols.push({
-      image: profile.logo,
-      width: 50,
-      height: 50,
-    });
-  }
-
-  // Build header text from profile fields
   const profileFields = profile.fields || [];
-  const firstField = profileFields[0];
-  const restFields = profileFields.slice(1).filter((f) => f.value?.trim());
 
-  headerCols.push({
-    stack: [
-      { text: firstField?.value || "Firma", style: "companyName" },
-      ...restFields.map((f) => ({
-        text: f.label ? `${f.label}: ${f.value}` : f.value,
-        style: "companyDetail",
-      })),
-    ],
-    width: "*",
-    margin: [profile.logo ? 10 : 0, 2, 0, 0] as [number, number, number, number],
-  });
+  if (showCompanyHeader) {
+    const headerCols: any[] = [];
 
-  content.push({ columns: headerCols, margin: [0, 0, 0, 8] as [number, number, number, number] });
+    if (profile.logo) {
+      headerCols.push({
+        image: profile.logo,
+        width: 50,
+        height: 50,
+      });
+    }
+
+    // Build header text from profile fields
+    const firstField = profileFields[0];
+    const restFields = profileFields.slice(1).filter((f) => f.value?.trim());
+
+    headerCols.push({
+      stack: [
+        { text: firstField?.value || "Firma", style: "companyName" },
+        ...restFields.map((f) => ({
+          text: f.label ? `${f.label}: ${f.value}` : f.value,
+          style: "companyDetail",
+        })),
+      ],
+      width: "*",
+      margin: [profile.logo ? 10 : 0, 2, 0, 0] as [number, number, number, number],
+    });
+
+    content.push({ columns: headerCols, margin: [0, 0, 0, 8] as [number, number, number, number] });
+  }
 
   // Accent line
   content.push({
