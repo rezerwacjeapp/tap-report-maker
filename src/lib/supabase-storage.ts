@@ -278,7 +278,7 @@ export async function getCloudDraft(id: string): Promise<CloudDraft | null> {
 
 // ─── PLAN & LIMITS ──────────────────────────────────────────
 
-const FREE_LIMIT = 5;
+const FREE_LIMIT = 15;
 
 export async function checkReportLimit(): Promise<{ allowed: boolean; count: number; limit: number; plan: string }> {
   const { data: { user } } = await supabase.auth.getUser();
