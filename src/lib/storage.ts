@@ -32,7 +32,9 @@ export interface CustomFieldDef {
 }
 
 export interface ReportDraft {
-  selectedTiles: string[];
+  selectedTiles: string[]; // kept for backward compat — derived from tileStates "done"
+  tileStates?: Record<string, "done" | "fail" | "na">; // per-tile status
+  tileNotes?: Record<string, string>; // per-tile notes
   photos: string[]; // base64 — legacy flat array
   photosByField: Record<string, string[]>; // fieldId -> base64[] — per-field photos
   signatures: Record<string, string | null>; // signatureFieldId -> base64
