@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
   type ReportDraft,
@@ -78,8 +78,14 @@ export default function ReportWizard() {
   // Draft
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
-    allFields.forEach((f) => { if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0]; else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = ""; });
-    return { selectedTiles: [], photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
+    const ts: Record<string, "done" | "fail" | "na"> = {};
+    allFields.forEach((f) => {
+      if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0];
+      else if (f.type === "tiles") {
+        (f.tileOptions || []).forEach((t) => { ts[t.id] = "na"; });
+      } else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = "";
+    });
+    return { selectedTiles: [], tileStates: ts, tileNotes: {}, photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
   }, [allFields, templateId]);
 
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
@@ -96,9 +102,12 @@ export default function ReportWizard() {
     if (draftParam) {
       getCloudDraft(draftParam).then((cd) => {
         if (cd) {
-          setDraft(cd.draftData as ReportDraft);
+          const d = cd.draftData as ReportDraft;
+          setDraft(d);
           setShowCompanyHeader(cd.showCompanyHeader);
-          if ((cd.draftData as ReportDraft).additionalNotes?.trim()) setShowNotes(true);
+          if (d.additionalNotes?.trim()) setShowNotes(true);
+          const notesWithContent = Object.entries(d.tileNotes || {}).filter(([, v]) => v?.trim()).map(([k]) => k);
+          if (notesWithContent.length) setExpandedNoteIds(new Set(notesWithContent));
         } else {
           setDraft(buildEmptyDraft());
         }
@@ -113,6 +122,8 @@ export default function ReportWizard() {
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
         Object.values(saved.photosByField || {}).some((arr) => arr.length > 0) ||
         Object.values(saved.signatures || {}).some((v) => !!v) ||
+        Object.values(saved.tileStates || {}).some((v) => v !== "na") ||
+        Object.values(saved.tileNotes || {}).some((v) => v?.trim()) ||
         Object.values(saved.customFields).some((v) => v?.trim() && v !== new Date().toISOString().split("T")[0]);
       if (saved.templateId === templateId && hasContent) {
         setShowResume(true);
@@ -120,7 +131,16 @@ export default function ReportWizard() {
     } else { setDraft(buildEmptyDraft()); setInitialized(true); }
   }, [templateId, buildEmptyDraft, draftParam]);
 
-  const handleResume = () => { const d = getDraft(); setDraft(d); if (d.additionalNotes?.trim()) setShowNotes(true); setShowResume(false); setInitialized(true); };
+  const handleResume = () => {
+    const d = getDraft();
+    setDraft(d);
+    if (d.additionalNotes?.trim()) setShowNotes(true);
+    // Expand tile notes that have content
+    const notesWithContent = Object.entries(d.tileNotes || {}).filter(([, v]) => v?.trim()).map(([k]) => k);
+    if (notesWithContent.length) setExpandedNoteIds(new Set(notesWithContent));
+    setShowResume(false);
+    setInitialized(true);
+  };
   const handleNewDraft = () => { clearDraft(); setDraft(buildEmptyDraft()); setShowResume(false); setInitialized(true); };
 
   // Load report number from Supabase for new drafts
@@ -143,9 +163,19 @@ export default function ReportWizard() {
     setDraft((d) => { const next = { ...d, ...partial }; saveDraft(next); return next; });
   }, []);
 
-  const toggleTile = (id: string) => {
-    update({ selectedTiles: draft.selectedTiles.includes(id) ? draft.selectedTiles.filter((t) => t !== id) : [...draft.selectedTiles, id] });
+  const setTileState = (tileId: string, state: "done" | "fail" | "na") => {
+    const newStates = { ...(draft.tileStates || {}), [tileId]: state };
+    // Keep selectedTiles in sync for backward compat
+    const newSelected = Object.entries(newStates).filter(([, s]) => s === "done").map(([id]) => id);
+    update({ tileStates: newStates, selectedTiles: newSelected });
   };
+
+  const setTileNote = (tileId: string, note: string) => {
+    update({ tileNotes: { ...(draft.tileNotes || {}), [tileId]: note } });
+  };
+
+  const [expandedNoteIds, setExpandedNoteIds] = useState<Set<string>>(new Set());
+  const toggleNoteExpand = (id: string) => setExpandedNoteIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
@@ -327,13 +357,49 @@ export default function ReportWizard() {
               <div>
                 <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
                 {(field.tileOptions || []).length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {(field.tileOptions || []).map((tile) => (
-                      <Button key={tile.id} variant={draft.selectedTiles.includes(tile.id) ? "tileActive" : "tile"} size="lg" className="h-auto py-4 text-sm leading-tight text-center whitespace-normal" onClick={() => toggleTile(tile.id)}>
-                        {draft.selectedTiles.includes(tile.id) && <Check className="h-4 w-4 mr-1 shrink-0" />}
-                        {tile.label}
-                      </Button>
-                    ))}
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+                    {(field.tileOptions || []).map((tile) => {
+                      const state = (draft.tileStates || {})[tile.id] || "na";
+                      const noteExpanded = expandedNoteIds.has(tile.id);
+                      const noteText = (draft.tileNotes || {})[tile.id] || "";
+                      return (
+                        <div key={tile.id} className="px-3.5 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm flex-1 min-w-0">{tile.label}</span>
+                            <div className="flex gap-1 shrink-0">
+                              <button
+                                onClick={() => setTileState(tile.id, "done")}
+                                className={`w-9 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-colors ${state === "done" ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                              >✓</button>
+                              <button
+                                onClick={() => setTileState(tile.id, "fail")}
+                                className={`w-9 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-colors ${state === "fail" ? "bg-red-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                              >✗</button>
+                              <button
+                                onClick={() => setTileState(tile.id, "na")}
+                                className={`w-9 h-8 rounded-lg text-[10px] font-semibold flex items-center justify-center transition-colors ${state === "na" ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                              >nd.</button>
+                            </div>
+                            <button
+                              onClick={() => toggleNoteExpand(tile.id)}
+                              className={`p-1.5 rounded-lg transition-colors ${noteExpanded || noteText ? "text-accent" : "text-muted-foreground hover:text-foreground"}`}
+                              title="Uwagi"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {noteExpanded && (
+                            <input
+                              type="text"
+                              className="mt-2 w-full h-9 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                              value={noteText}
+                              onChange={(e) => setTileNote(tile.id, e.target.value)}
+                              placeholder="Uwagi..."
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">Brak zdefiniowanych czynności w tej sekcji.</p>
