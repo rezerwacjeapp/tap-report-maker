@@ -1258,7 +1258,46 @@
     }
   });
 })();
+
+// ── Cookie banner ──
+(function() {
+  if (localStorage.getItem('raporton_cookies')) return;
+
+  var banner = document.getElementById('cookieBanner');
+  if (!banner) return;
+  
+  // Show after small delay for smooth experience
+  setTimeout(function() { banner.style.transform = 'translateY(0)'; banner.style.opacity = '1'; }, 800);
+
+  document.getElementById('cookieAccept').addEventListener('click', function() {
+    localStorage.setItem('raporton_cookies', 'all');
+    banner.style.transform = 'translateY(100%)';
+    banner.style.opacity = '0';
+    setTimeout(function() { banner.remove(); }, 400);
+  });
+
+  document.getElementById('cookieReject').addEventListener('click', function() {
+    localStorage.setItem('raporton_cookies', 'essential');
+    banner.style.transform = 'translateY(100%)';
+    banner.style.opacity = '0';
+    setTimeout(function() { banner.remove(); }, 400);
+  });
+})();
 </script>
+
+<!-- Cookie Banner -->
+<div id="cookieBanner" style="position:fixed; bottom:0; left:0; right:0; z-index:200; padding:1rem; transform:translateY(100%); opacity:0; transition:all 0.5s cubic-bezier(0.16,1,0.3,1); pointer-events:auto;">
+  <div style="max-width:680px; margin:0 auto; background:rgba(255,255,255,0.85); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.7); border-radius:1.25rem; padding:1.25rem 1.5rem; box-shadow:0 -8px 40px rgba(0,0,0,0.08); display:flex; flex-wrap:wrap; align-items:center; gap:1rem;">
+    <div style="flex:1; min-width:200px;">
+      <p style="font-size:0.9rem; font-weight:500; color:#0f172a; margin:0 0 0.25rem;">Szanujemy Twoją prywatność</p>
+      <p style="font-size:0.8rem; color:#64748b; margin:0; line-height:1.5;">Używamy plików cookies wyłącznie w celach technicznych (sesja logowania). Nie stosujemy cookies marketingowych. <a href="/prywatnosc" style="color:#10b981; text-decoration:none;">Polityka prywatności</a></p>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-shrink:0;">
+      <button id="cookieReject" style="padding:0.6rem 1.25rem; font-size:0.8rem; font-weight:500; font-family:inherit; color:#64748b; background:rgba(241,245,249,0.8); border:1px solid rgba(226,232,240,0.6); border-radius:50px; cursor:pointer; transition:all 0.3s;">Tylko niezbędne</button>
+      <button id="cookieAccept" style="padding:0.6rem 1.25rem; font-size:0.8rem; font-weight:600; font-family:inherit; color:#fff; background:#0f172a; border:none; border-radius:50px; cursor:pointer; box-shadow:0 4px 12px rgba(15,23,42,0.15); transition:all 0.3s;">Akceptuję</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
