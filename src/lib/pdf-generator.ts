@@ -58,7 +58,14 @@ export function generateReport(
   const templateName = options?.templateName ?? "Raport serwisowy";
   const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Podpis klienta" }];
   const showCompanyHeader = options?.showCompanyHeader !== false;
-  const selectedLabels = draft.selectedTiles
+
+  // Derive selected tiles from tileStates (done) or legacy selectedTiles
+  const tileStates = draft.tileStates || {};
+  const effectiveSelectedTiles = Object.keys(tileStates).length > 0
+    ? Object.entries(tileStates).filter(([, s]) => s === "done").map(([id]) => id)
+    : draft.selectedTiles;
+
+  const selectedLabels = effectiveSelectedTiles
     .map((id) => allTiles.find((t) => t.id === id)?.label)
     .filter(Boolean) as string[];
 
@@ -193,19 +200,41 @@ export function generateReport(
         ],
       ];
 
+      const tileStates = draft.tileStates || {};
+      const tileNotes = draft.tileNotes || {};
+
       (field.tileOptions || []).forEach((tile, i) => {
-        const isSelected = draft.selectedTiles.includes(tile.id);
+        // Determine state: new tileStates > legacy selectedTiles > default "na"
+        let state: "done" | "fail" | "na" = "na";
+        if (tileStates[tile.id]) {
+          state = tileStates[tile.id];
+        } else if (draft.selectedTiles.includes(tile.id)) {
+          state = "done";
+        }
+
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
+        const statusText = state === "done" ? "✔" : state === "fail" ? "✗" : "nd.";
+
         body.push([
           { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
           { text: tile.label, style: "tableCell", fillColor: bg },
           {
-            text: isSelected ? "✔" : "✗",
+            text: statusText,
             style: "tableCell", fillColor: bg, alignment: "center" as const,
-            color: isSelected ? COLORS.accent : "#ef4444",
+            color: "#18181b",
             bold: true,
           },
         ]);
+
+        // Add notes row if present
+        const note = tileNotes[tile.id];
+        if (note?.trim()) {
+          body.push([
+            { text: "", fillColor: bg },
+            { text: note, style: "tableCell", fillColor: bg, italics: true, color: COLORS.gray, colSpan: 2 },
+            {},
+          ]);
+        }
       });
 
       // Wrap header + table in unbreakable stack so they don't split across pages
@@ -352,7 +381,7 @@ export function generateReport(
     templateId: draft.templateId,
     pdfTitle,
     reportNumber: reportNum,
-    selectedTiles: [...draft.selectedTiles],
+    selectedTiles: [...effectiveSelectedTiles],
     tileLabels: selectedLabels,
     customFields: { ...draft.customFields },
     fieldLabels,
