@@ -213,7 +213,7 @@ export function generateReport(
         }
 
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-        const statusText = state === "done" ? "✔" : state === "fail" ? "✗" : "nd.";
+        const statusText = state === "done" ? "TAK" : state === "fail" ? "NIE" : "nd.";
 
         body.push([
           { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
