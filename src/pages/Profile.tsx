@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, Check, Plus, X, ArrowUp, ArrowDown, LogOut, Loader2 } from "lucide-react";
+import { Upload, Check, Plus, X, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import { type CompanyProfile, type ProfileField } from "@/lib/storage";
 import { getCloudProfile, saveCloudProfile } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,7 +18,7 @@ const FIELD_SUGGESTIONS = [
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -86,7 +86,7 @@ export default function Profile() {
   const availableSuggestions = FIELD_SUGGESTIONS.filter((s) => !usedLabels.has(s.label));
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
         <h1 className="text-xl">Profil firmy</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Dane widoczne w nagłówku PDF</p>
@@ -98,7 +98,7 @@ export default function Profile() {
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogo} />
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex h-20 w-20 items-center justify-center rounded-2xl border border-dashed border-border bg-card overflow-hidden hover:border-accent transition-colors"
+            className="flex h-20 w-20 items-center justify-center rounded-2xl border border-dashed border-border/60 glass-card overflow-hidden hover:border-accent transition-colors"
           >
             {profile.logo ? (
               <img src={profile.logo} alt="Logo" className="h-full w-full object-contain" />
@@ -117,7 +117,7 @@ export default function Profile() {
         {/* Dynamic fields */}
         <div className="space-y-3">
           <p className="text-[11px] text-muted-foreground">Kliknij etykietę aby ją zmienić.</p>
-          <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+          <div className="rounded-2xl glass-card overflow-hidden divide-y divide-border/50">
             {profile.fields.map((field, index) => (
               <div key={field.id} className="p-3.5 space-y-2">
                 <div className="flex items-center gap-1.5">
@@ -200,10 +200,6 @@ export default function Profile() {
         <div className="space-y-3 pt-2">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Konto</p>
           {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
-          <button onClick={async () => { await signOut(); navigate("/login"); }}
-            className="w-full h-12 rounded-xl border border-destructive/30 text-destructive font-medium flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-[0.98] transition-all">
-            <LogOut className="h-5 w-5" /> Wyloguj się
-          </button>
         </div>
       </main>
     </div>
