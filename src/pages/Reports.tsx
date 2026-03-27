@@ -100,7 +100,7 @@ export default function Reports() {
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
         <div className="flex items-center justify-between">
           <div>
@@ -113,7 +113,7 @@ export default function Reports() {
       {/* Search */}
       {reports.length > 0 && (
         <div className="px-5 py-3">
-          <div className="flex items-center gap-2 bg-secondary rounded-xl px-3.5 h-11 border border-border">
+          <div className="flex items-center gap-2 glass-card rounded-xl px-3.5 h-11">
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <input
               className="flex-1 bg-transparent text-sm focus:outline-none"
@@ -163,7 +163,7 @@ export default function Reports() {
             const badgeLabel = BADGE_LABELS[icon] || "";
 
             return (
-              <div key={report.id} className="rounded-2xl border border-border bg-card overflow-hidden transition-all">
+              <div key={report.id} className="rounded-2xl glass-card overflow-hidden transition-all">
                 <button onClick={() => toggleExpand(report.id)} className="w-full p-4 text-left">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
