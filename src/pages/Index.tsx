@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight, Zap, Clock, X } from "lucide-react";
+import { Plus, ChevronRight, Zap, Clock, X, LogOut } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
 import { checkReportLimit, getCloudDrafts, deleteCloudDraft, type CloudDraft } from "@/lib/supabase-storage";
+import { useAuth } from "@/hooks/use-auth";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
 const QUICK_START_KEY = "raporton_quick_start";
@@ -48,13 +49,13 @@ const INDUSTRY_EMOJI: Record<string, string> = {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const profile = getProfile();
   const hasProfile = profile.fields?.some((f) => f.value?.trim());
   const reports = getReportHistory();
   const recentReports = reports.slice(0, 3);
 
-  // Plan limit info (async from Supabase)
   const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string } | null>(null);
   const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
 
@@ -70,7 +71,6 @@ const Index = () => {
     setCloudDrafts((prev) => prev.filter((d) => d.id !== id));
   };
 
-  // Quick start: pinned templates (user + starter), fallback to visible starters
   const hiddenStarters = getHiddenStarters();
   const quickStartIds = getQuickStartIds();
   const userTemplates = getUserTemplates();
@@ -119,13 +119,23 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col">
       {/* Header */}
-      <header className="px-5 pt-8 pb-2">
-        <h1 className="text-2xl tracking-tight">
-          Raport<span className="text-accent">ON</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Raport serwisowy w minutę</p>
+      <header className="px-5 pt-8 pb-2 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl tracking-tight">
+            Raport<span className="text-accent">ON</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Raport serwisowy w minutę</p>
+        </div>
+        <button
+          onClick={async () => { await signOut(); navigate("/login"); }}
+          className="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:text-destructive glass-card hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all"
+          title="Wyloguj się"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Wyloguj</span>
+        </button>
       </header>
 
       {/* Main */}
@@ -133,10 +143,10 @@ const Index = () => {
         {/* Hero — New Report */}
         <button
           onClick={() => navigate("/select-template")}
-          className="w-full rounded-2xl bg-gradient-to-br from-emerald-700 to-accent p-5 text-left text-white shadow-lg active:scale-[0.98] transition-transform"
+          className="w-full rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-5 text-left text-white shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
               <Plus className="h-6 w-6" />
             </div>
             <div className="flex-1">
@@ -153,7 +163,7 @@ const Index = () => {
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
               Niedokończone raporty
             </p>
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+            <div className="rounded-2xl glass-card overflow-hidden" style={{ borderColor: 'rgba(245, 158, 11, 0.2)' }}>
               {cloudDrafts.map((d, i) => {
                 const icon = getTemplateIcon(d.templateName);
                 const emoji = INDUSTRY_EMOJI[icon] || "📄";
@@ -161,7 +171,7 @@ const Index = () => {
                 return (
                   <div
                     key={d.id}
-                    className={`flex items-center gap-3 px-4 py-3.5 ${i < cloudDrafts.length - 1 ? "border-b border-border" : ""}`}
+                    className={`flex items-center gap-3 px-4 py-3.5 ${i < cloudDrafts.length - 1 ? "border-b border-border/50" : ""}`}
                   >
                     <button
                       onClick={() => navigate(`/report?template=${d.templateId}&draft=${d.id}`)}
@@ -198,15 +208,15 @@ const Index = () => {
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-secondary p-3.5">
+          <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">{reports.length}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Raportów</p>
           </div>
-          <div className="rounded-xl bg-secondary p-3.5">
+          <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">{userTemplateCount}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Szablonów</p>
           </div>
-          <div className="rounded-xl bg-secondary p-3.5">
+          <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">
               {reports.length > 0 ? formatDate(reports[0].date) : "—"}
             </p>
@@ -216,7 +226,7 @@ const Index = () => {
 
         {/* Plan limit bar */}
         {planInfo && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="rounded-2xl glass-card p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -241,7 +251,7 @@ const Index = () => {
 
             {planInfo.plan === "free" ? (
               <>
-                <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       planInfo.count >= planInfo.limit ? "bg-destructive" : "bg-accent"
@@ -275,7 +285,7 @@ const Index = () => {
                 Wszystkie
               </button>
             </div>
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="rounded-2xl glass-card overflow-hidden">
               {recentReports.map((report, i) => {
                 const icon = getTemplateIcon(report.templateName);
                 const dotColor = INDUSTRY_DOTS[icon] || "bg-accent";
@@ -283,7 +293,7 @@ const Index = () => {
                   <button
                     key={report.id}
                     onClick={() => navigate("/reports")}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-secondary/50 transition-colors active:bg-secondary ${i < recentReports.length - 1 ? "border-b border-border" : ""}`}
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-white/40 dark:hover:bg-white/5 transition-colors active:bg-white/50 ${i < recentReports.length - 1 ? "border-b border-border/50" : ""}`}
                   >
                     <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
                     <div className="flex-1 min-w-0">
@@ -304,7 +314,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Quick start — pinned or default starters */}
+        {/* Quick start */}
         {quickStartTemplates.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
@@ -318,7 +328,7 @@ const Index = () => {
                   <button
                     key={tmpl.id}
                     onClick={() => navigate(`/report?template=${tmpl.id}`)}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3.5 min-w-[100px] hover:shadow-sm transition-all active:scale-[0.97]"
+                    className="flex flex-col items-center gap-2 rounded-2xl glass-card p-3.5 min-w-[100px] hover:shadow-md transition-all active:scale-[0.97]"
                   >
                     <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-base ${colorCls}`}>
                       {emoji}
@@ -333,7 +343,7 @@ const Index = () => {
 
         {/* Profile hint */}
         {!hasProfile && (
-          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4">
+          <div className="rounded-2xl glass-card p-4" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
             <p className="text-sm">
               <strong>Wskazówka:</strong> Uzupełnij{" "}
               <span className="text-accent font-semibold cursor-pointer" onClick={() => navigate("/profile")}>
