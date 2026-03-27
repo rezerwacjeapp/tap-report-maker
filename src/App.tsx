@@ -58,6 +58,12 @@ function AppShell() {
   // Logged in — show the app, redirect /login to home
   return (
     <div className="flex min-h-[100dvh] flex-col">
+      {/* Animated mesh background */}
+      <div className="mesh-bg">
+        <div className="blob" />
+        <div className="blob" />
+        <div className="blob" />
+      </div>
       <div className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<Index />} />
