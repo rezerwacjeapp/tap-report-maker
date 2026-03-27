@@ -14,7 +14,7 @@ export function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="sticky bottom-0 z-50 flex border-t border-border bg-card/95 backdrop-blur-sm safe-area-bottom">
+    <nav className="sticky bottom-0 z-50 flex glass-nav safe-area-bottom">
       {TABS.map((tab) => {
         const isActive =
           tab.path === "/"
