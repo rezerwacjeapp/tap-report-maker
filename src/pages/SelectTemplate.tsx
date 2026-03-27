@@ -130,7 +130,7 @@ export default function SelectTemplate() {
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
         <h1 className="text-xl">Nowy raport</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Wybierz lub stwórz szablon</p>
@@ -140,7 +140,7 @@ export default function SelectTemplate() {
         {/* Create new */}
         <button
           onClick={handleCreateNew}
-          className="w-full rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-4 text-left hover:bg-accent/10 transition-all active:scale-[0.99]"
+          className="w-full rounded-2xl border border-dashed border-accent/40 glass-card p-4 text-left hover:bg-white/60 dark:hover:bg-white/5 transition-all active:scale-[0.99]"
         >
           <div className="flex items-center gap-3.5">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
@@ -159,7 +159,7 @@ export default function SelectTemplate() {
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
               Twoje szablony
             </p>
-            <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+            <div className="rounded-2xl glass-card overflow-hidden divide-y divide-border/50">
               {userTemplates.map((template) => {
                 const emoji = INDUSTRY_EMOJI[template.icon] || "📄";
                 const badgeColor = BADGE_COLORS[template.icon] || "bg-muted text-muted-foreground";
@@ -221,7 +221,7 @@ export default function SelectTemplate() {
           {showStarters && (
             <>
               {visibleStarters.length > 0 ? (
-                <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border mt-1">
+                <div className="rounded-2xl glass-card overflow-hidden divide-y divide-border/50 mt-1">
                   {visibleStarters.map((starter) => {
                     const emoji = INDUSTRY_EMOJI[starter.icon] || "📄";
                     const badgeColor = BADGE_COLORS[starter.icon] || "bg-muted text-muted-foreground";
