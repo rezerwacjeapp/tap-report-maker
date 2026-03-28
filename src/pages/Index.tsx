@@ -56,12 +56,12 @@ const Index = () => {
   const reports = getReportHistory();
   const recentReports = reports.slice(0, 3);
 
-  const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string } | null>(null);
+  const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string; trial?: boolean; trialDaysLeft?: number } | null>(null);
   const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
 
   useEffect(() => {
     checkReportLimit()
-      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan }))
+      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan, trial: info.trial, trialDaysLeft: info.trialDaysLeft }))
       .catch(() => {});
     getCloudDrafts().then(setCloudDrafts).catch(() => {});
   }, []);
@@ -230,15 +230,20 @@ const Index = () => {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {planInfo.plan === "solo" ? "Plan Solo" : "Plan Free"}
+                  {planInfo.plan === "solo" ? "Plan Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Plan Free"}
                 </span>
+                {planInfo.plan === "trial" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-semibold">
+                    {planInfo.trialDaysLeft} {planInfo.trialDaysLeft === 1 ? "dzień" : "dni"} pozostało
+                  </span>
+                )}
                 {planInfo.plan === "free" && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold">
                     {planInfo.count}/{planInfo.limit}
                   </span>
                 )}
               </div>
-              {planInfo.plan === "free" && (
+              {(planInfo.plan === "free" || planInfo.plan === "trial") && (
                 <button
                   onClick={() => navigate("/upgrade")}
                   className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
@@ -249,7 +254,11 @@ const Index = () => {
               )}
             </div>
 
-            {planInfo.plan === "free" ? (
+            {planInfo.plan === "trial" ? (
+              <p className="text-[11px] text-muted-foreground">
+                Bez limitu raportów przez 7 dni. Potem: 5 raportów/mc lub plan Solo bez limitu.
+              </p>
+            ) : planInfo.plan === "free" ? (
               <>
                 <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
                   <div
