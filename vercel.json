@@ -4,6 +4,7 @@
     { "source": "/prywatnosc", "destination": "/prywatnosc.html" },
     { "source": "/kontakt", "destination": "/kontakt.html" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
