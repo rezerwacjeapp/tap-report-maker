@@ -278,9 +278,17 @@ export async function getCloudDraft(id: string): Promise<CloudDraft | null> {
 
 // ─── PLAN & LIMITS ──────────────────────────────────────────
 
-const FREE_LIMIT = 20;
+const FREE_LIMIT = 5;
+const TRIAL_DAYS = 7;
 
-export async function checkReportLimit(): Promise<{ allowed: boolean; count: number; limit: number; plan: string }> {
+export async function checkReportLimit(): Promise<{
+  allowed: boolean;
+  count: number;
+  limit: number;
+  plan: string;
+  trial?: boolean;
+  trialDaysLeft?: number;
+}> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { allowed: false, count: 0, limit: FREE_LIMIT, plan: "free" };
 
@@ -289,10 +297,21 @@ export async function checkReportLimit(): Promise<{ allowed: boolean; count: num
     .from("subscriptions")
     .select("plan, status")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (sub && sub.plan === "solo" && sub.status === "active") {
     return { allowed: true, count: 0, limit: Infinity, plan: "solo" };
+  }
+
+  // Check trial period (first 7 days after registration)
+  const createdAt = new Date(user.created_at);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  const isTrial = diffDays < TRIAL_DAYS;
+  const trialDaysLeft = Math.max(0, TRIAL_DAYS - diffDays);
+
+  if (isTrial) {
+    return { allowed: true, count: 0, limit: Infinity, plan: "trial", trial: true, trialDaysLeft };
   }
 
   // Free plan — check monthly count
@@ -302,7 +321,7 @@ export async function checkReportLimit(): Promise<{ allowed: boolean; count: num
     .select("count")
     .eq("user_id", user.id)
     .eq("month", month)
-    .single();
+    .maybeSingle();
 
   const count = countRow?.count || 0;
   return { allowed: count < FREE_LIMIT, count, limit: FREE_LIMIT, plan: "free" };
