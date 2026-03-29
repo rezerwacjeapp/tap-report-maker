@@ -35,11 +35,14 @@
 
     h1 { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.03em; margin-bottom: 0.5rem; }
     .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2.5rem; }
-    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2.5rem; margin-bottom: 0.75rem; }
     p, li { font-size: 0.95rem; color: var(--text); font-weight: 300; }
-    ul { padding-left: 1.5rem; margin-bottom: 1rem; }
-    li { margin-bottom: 0.4rem; }
+    ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    ol li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; list-style: disc; }
+    ul li { margin-bottom: 0.4rem; }
     p { margin-bottom: 1rem; }
+    a { color: var(--accent); }
 
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
     footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
@@ -58,52 +61,157 @@
 
 <main>
   <div class="content-card">
-    <h1>Regulamin serwisu</h1>
-    <p class="subtitle">Ostatnia aktualizacja: 20 marca 2026</p>
+    <h1>Regulamin serwisu RaportON</h1>
+    <p class="subtitle">Ostatnia aktualizacja: 29 marca 2026</p>
 
-    <h2>§1. Postanowienia ogólne</h2>
-    <p>Niniejszy regulamin określa zasady korzystania z serwisu RaportON dostępnego pod adresem raporton.pl (dalej: „Serwis"). Serwis umożliwia generowanie protokołów serwisowych w formacie PDF za pomocą aplikacji webowej (PWA).</p>
-    <p>Właścicielem Serwisu jest Radosław [nazwisko] prowadzący działalność nierejestrowaną zgodnie z art. 5 ust. 1 ustawy Prawo przedsiębiorców (dalej: „Usługodawca").</p>
+    <h2>§ 1. Postanowienia ogólne</h2>
+    <ol>
+      <li>Niniejszy Regulamin określa zasady korzystania z serwisu internetowego RaportON dostępnego pod adresem <strong>raporton.pl</strong> (dalej: „Serwis") oraz aplikacji webowej (PWA) udostępnianej za jego pośrednictwem (dalej: „Aplikacja").</li>
+      <li>Właścicielem i operatorem Serwisu jest <strong>Andrzej Król</strong>, zamieszkały/a pod adresem: ul. Słoneczna 10a 33-383 Tylicz, adres e-mail: <a href="mailto:kontakt.raporton@gmail.com">kontakt@raporton.pl</a> (dalej: „Usługodawca"). Usługodawca prowadzi działalność nierejestrowaną w rozumieniu art. 5 ust. 1 ustawy z dnia 6 marca 2018 r. — Prawo przedsiębiorców.</li>
+      <li>Korzystanie z Serwisu i Aplikacji oznacza akceptację niniejszego Regulaminu. Jeżeli nie zgadzasz się z jego postanowieniami, prosimy o niekorzystanie z Serwisu.</li>
+      <li>Regulamin jest udostępniany nieodpłatnie na stronie raporton.pl/regulamin w sposób umożliwiający jego pozyskanie, odtwarzanie i utrwalanie.</li>
+    </ol>
 
-    <h2>§2. Definicje</h2>
-    <ul>
-      <li><strong>Użytkownik</strong> — osoba fizyczna lub prawna korzystająca z Serwisu.</li>
-      <li><strong>Konto</strong> — indywidualne konto Użytkownika w Serwisie, chronione adresem email i hasłem.</li>
-      <li><strong>Plan Free</strong> — darmowy plan umożliwiający generowanie do 3 raportów miesięcznie.</li>
-      <li><strong>Plan Solo</strong> — płatny plan (19 PLN/miesiąc) bez limitu raportów.</li>
-      <li><strong>Raport</strong> — protokół serwisowy w formacie PDF wygenerowany przez Serwis.</li>
-    </ul>
+    <h2>§ 2. Definicje</h2>
+    <ol>
+      <li><strong>Użytkownik</strong> — osoba fizyczna, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, która korzysta z Serwisu po utworzeniu Konta.</li>
+      <li><strong>Konto</strong> — indywidualne konto Użytkownika w Serwisie, utworzone w procesie rejestracji, umożliwiające korzystanie z Aplikacji.</li>
+      <li><strong>Raport</strong> — dokument serwisowy (protokół, sprawozdanie, przegląd) wygenerowany przez Użytkownika za pomocą Aplikacji w formacie PDF.</li>
+      <li><strong>Szablon</strong> — predefiniowany wzór Raportu dostępny w Aplikacji, dostosowany do określonego rodzaju usług serwisowych.</li>
+      <li><strong>Plan</strong> — wybrany przez Użytkownika wariant dostępu do Aplikacji (Okres próbny, Plan Darmowy, Plan Solo), określający zakres dostępnych funkcji.</li>
+      <li><strong>Okres próbny</strong> — 7-dniowy okres od daty rejestracji Konta, w którym Użytkownik ma nieograniczony dostęp do wszystkich funkcji Aplikacji bez opłat.</li>
+      <li><strong>Subskrypcja</strong> — odpłatny dostęp do Planu Solo, rozliczany w cyklu miesięcznym.</li>
+    </ol>
 
-    <h2>§3. Rejestracja i konto</h2>
-    <p>Korzystanie z Serwisu wymaga utworzenia Konta. Rejestracja jest bezpłatna i możliwa za pomocą adresu email lub konta Google. Użytkownik zobowiązuje się podać prawdziwe dane i chronić swoje dane logowania.</p>
+    <h2>§ 3. Warunki techniczne</h2>
+    <ol>
+      <li>Do korzystania z Serwisu wymagane jest:
+        <ul>
+          <li>urządzenie z dostępem do internetu (komputer, tablet, smartfon),</li>
+          <li>aktualna przeglądarka internetowa obsługująca technologię PWA (np. Google Chrome, Mozilla Firefox, Microsoft Edge, Safari),</li>
+          <li>aktywny adres e-mail.</li>
+        </ul>
+      </li>
+      <li>Aplikacja działa jako Progressive Web App (PWA) i może być zainstalowana na urządzeniu mobilnym bezpośrednio z przeglądarki, bez konieczności pobierania z zewnętrznych sklepów z aplikacjami.</li>
+      <li>Usługodawca nie ponosi odpowiedzialności za problemy techniczne wynikające z niespełnienia wymagań opisanych w ust. 1.</li>
+    </ol>
 
-    <h2>§4. Zakres usług</h2>
-    <p>Serwis umożliwia:</p>
-    <ul>
-      <li>Tworzenie i edycję szablonów protokołów serwisowych</li>
-      <li>Wypełnianie formularzy z danymi zlecenia, zdjęciami i podpisami</li>
-      <li>Generowanie protokołów w formacie PDF z logo i danymi firmy Użytkownika</li>
-      <li>Przechowywanie historii wygenerowanych raportów</li>
-      <li>Dyktowanie głosowe treści pól formularza</li>
-    </ul>
+    <h2>§ 4. Rejestracja i Konto</h2>
+    <ol>
+      <li>Rejestracja Konta wymaga podania adresu e-mail oraz ustalenia hasła.</li>
+      <li>Użytkownik zobowiązany jest do podania prawdziwych danych oraz do zachowania poufności danych logowania do Konta.</li>
+      <li>Użytkownik ponosi odpowiedzialność za wszelkie działania wykonane za pośrednictwem swojego Konta.</li>
+      <li>Jedno Konto jest przypisane do jednego Użytkownika. Udostępnianie Konta osobom trzecim jest zabronione.</li>
+      <li>Usługodawca zastrzega sobie prawo do zawieszenia lub usunięcia Konta w przypadku naruszenia postanowień Regulaminu.</li>
+    </ol>
 
-    <h2>§5. Płatności i subskrypcja</h2>
-    <p>Plan Free jest bezpłatny i nie wymaga danych płatniczych. Plan Solo jest płatny w cyklach miesięcznych. Płatności realizowane są za pośrednictwem Stripe, Inc. Użytkownik może zrezygnować z subskrypcji w dowolnym momencie — dostęp do planu Solo utrzymuje się do końca opłaconego okresu.</p>
+    <h2>§ 5. Plany i cennik</h2>
+    <ol>
+      <li>Po rejestracji Konta Użytkownik otrzymuje <strong>Okres próbny</strong> trwający 7 dni kalendarzowych, w trakcie którego ma nieograniczony dostęp do wszystkich funkcji Aplikacji.</li>
+      <li>Po zakończeniu Okresu próbnego Użytkownik może korzystać z Aplikacji w ramach jednego z następujących Planów:
+        <ul>
+          <li><strong>Plan Darmowy</strong> — umożliwia generowanie do 5 Raportów miesięcznie, bez opłat;</li>
+          <li><strong>Plan Solo</strong> — umożliwia generowanie nieograniczonej liczby Raportów, w cenie 19 PLN brutto miesięcznie.</li>
+        </ul>
+      </li>
+      <li>Usługodawca zastrzega sobie prawo do zmiany cennika. O zmianach Użytkownik zostanie poinformowany z co najmniej 14-dniowym wyprzedzeniem drogą e-mailową. Zmiana cennika nie wpływa na już opłacone okresy Subskrypcji.</li>
+      <li>Limit Raportów w Planie Darmowym odnawia się pierwszego dnia każdego miesiąca kalendarzowego.</li>
+    </ol>
 
-    <h2>§6. Odpowiedzialność</h2>
-    <p>Usługodawca dokłada starań, aby Serwis działał poprawnie, ale nie gwarantuje nieprzerwanej dostępności. Serwis nie stanowi porad prawnych — Użytkownik odpowiada za treść generowanych raportów i ich zgodność z obowiązującymi przepisami.</p>
+    <h2>§ 6. Płatności i Subskrypcja</h2>
+    <ol>
+      <li>Płatności za Plan Solo obsługiwane są przez zewnętrznego operatora płatności <strong>Stripe</strong> (Stripe, Inc.). Usługodawca nie przechowuje danych kart płatniczych Użytkowników.</li>
+      <li>Subskrypcja Planu Solo jest odnawiana automatycznie co miesiąc, aż do momentu jej anulowania przez Użytkownika.</li>
+      <li>Użytkownik może anulować Subskrypcję w dowolnym momencie. Anulowanie oznacza, że Subskrypcja nie zostanie odnowiona na kolejny okres rozliczeniowy. Dostęp do Planu Solo pozostaje aktywny do końca bieżącego opłaconego okresu.</li>
+      <li>Usługodawca nie dokonuje zwrotów za niewykorzystane dni w ramach opłaconego okresu Subskrypcji, chyba że obowiązujące przepisy prawa stanowią inaczej.</li>
+      <li>W przypadku problemów z płatnością Użytkownik powinien skontaktować się z Usługodawcą pod adresem <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</li>
+    </ol>
 
-    <h2>§7. Własność intelektualna</h2>
-    <p>Treści wygenerowane przez Użytkownika (raporty, zdjęcia, dane) pozostają własnością Użytkownika. Serwis, jego kod źródłowy, design i szablony są własnością Usługodawcy.</p>
+    <h2>§ 7. Zasady korzystania z Aplikacji</h2>
+    <ol>
+      <li>Aplikacja służy do generowania profesjonalnych Raportów serwisowych w formacie PDF na potrzeby działalności Użytkownika w branżach takich jak: HVAC, elektryka, gazownictwo, ochrona przeciwpożarowa, zarządzanie nieruchomościami i pokrewnych.</li>
+      <li>Użytkownik może w ramach Aplikacji:
+        <ul>
+          <li>wybierać Szablony Raportów dostosowane do rodzaju usługi,</li>
+          <li>wypełniać formularze danymi dotyczącymi wykonanej usługi,</li>
+          <li>dołączać zdjęcia wykonane podczas prac serwisowych,</li>
+          <li>pobierać podpis klienta końcowego na urządzeniu mobilnym,</li>
+          <li>korzystać z dyktowania głosowego do wypełniania pól tekstowych,</li>
+          <li>generować i pobierać Raport w formacie PDF,</li>
+          <li>zapisywać wersje robocze Raportów do późniejszego dokończenia,</li>
+          <li>przeglądać historię wygenerowanych Raportów i pobierać je ponownie.</li>
+        </ul>
+      </li>
+      <li>Użytkownik zobowiązuje się do korzystania z Aplikacji zgodnie z obowiązującym prawem, w szczególności z przepisami dotyczącymi ochrony danych osobowych.</li>
+      <li>Zabronione jest korzystanie z Aplikacji w sposób naruszający prawa osób trzecich, przepisy prawa lub dobre obyczaje.</li>
+    </ol>
 
-    <h2>§8. Usunięcie konta</h2>
-    <p>Użytkownik może usunąć swoje Konto w dowolnym momencie kontaktując się z Usługodawcą. Usunięcie konta skutkuje trwałym usunięciem wszystkich danych Użytkownika z Serwisu.</p>
+    <h2>§ 8. Dane wprowadzane przez Użytkownika</h2>
+    <ol>
+      <li>Użytkownik jest wyłącznym administratorem danych osobowych, które wprowadza do Aplikacji w treści Raportów (w tym danych klientów końcowych, adresów obiektów, opisów usterek, zdjęć, podpisów).</li>
+      <li>Usługodawca przetwarza dane, o których mowa w ust. 1, wyłącznie w celu świadczenia usług na rzecz Użytkownika, działając jako podmiot przetwarzający w rozumieniu art. 28 Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).</li>
+      <li>Szczegółowe zasady przetwarzania danych osobowych określa <a href="/prywatnosc">Polityka Prywatności</a>.</li>
+      <li>Użytkownik odpowiada za legalność wprowadzania danych do Aplikacji, w tym za posiadanie odpowiedniej podstawy prawnej do przetwarzania danych klientów końcowych.</li>
+      <li>Użytkownik zobowiązuje się nie wprowadzać do Aplikacji treści bezprawnych.</li>
+    </ol>
 
-    <h2>§9. Zmiany regulaminu</h2>
-    <p>Usługodawca zastrzega sobie prawo do zmian regulaminu. O istotnych zmianach Użytkownicy zostaną poinformowani drogą mailową z 14-dniowym wyprzedzeniem.</p>
+    <h2>§ 9. Własność intelektualna</h2>
+    <ol>
+      <li>Serwis, Aplikacja, ich kod źródłowy, projekt graficzny, Szablony oraz wszelkie materiały udostępniane w ramach Serwisu stanowią własność Usługodawcy i podlegają ochronie prawnej.</li>
+      <li>Użytkownik nie nabywa żadnych praw własności intelektualnej do Serwisu ani Aplikacji poza prawem do korzystania z nich na zasadach określonych w niniejszym Regulaminie.</li>
+      <li>Treść wygenerowanych Raportów stanowi własność Użytkownika.</li>
+    </ol>
 
-    <h2>§10. Kontakt</h2>
-    <p>Wszelkie pytania dotyczące Regulaminu prosimy kierować na adres: <a href="mailto:kontakt@raporton.pl" style="color: var(--accent);">kontakt@raporton.pl</a></p>
+    <h2>§ 10. Odpowiedzialność</h2>
+    <ol>
+      <li>Usługodawca dokłada starań, aby Aplikacja działała prawidłowo i bez przerw, jednakże nie gwarantuje nieprzerwanej dostępności Serwisu.</li>
+      <li>Usługodawca nie ponosi odpowiedzialności za:
+        <ul>
+          <li>szkody wynikające z nieprawidłowego korzystania z Aplikacji przez Użytkownika,</li>
+          <li>treść danych wprowadzanych przez Użytkownika do Raportów,</li>
+          <li>skutki prawne wynikające z treści wygenerowanych Raportów (w tym ich zgodności z obowiązującymi przepisami branżowymi),</li>
+          <li>przerwy w dostępie do Serwisu spowodowane czynnikami niezależnymi od Usługodawcy (awarie serwerów, przerwy u dostawców usług hostingowych, siła wyższa),</li>
+          <li>utratę danych wynikającą z działania siły wyższej lub awarii systemów podmiotów trzecich.</li>
+        </ul>
+      </li>
+      <li>Szablony Raportów dostępne w Aplikacji mają charakter pomocniczy i nie stanowią porady prawnej ani technicznej. Użytkownik jest odpowiedzialny za weryfikację zgodności generowanych Raportów z obowiązującymi przepisami (w tym m.in. Prawo budowlane, Rozporządzenie (UE) 2024/573 ws. F-gazów, normy branżowe).</li>
+      <li>Całkowita odpowiedzialność Usługodawcy wobec Użytkownika z tytułu korzystania z Serwisu jest ograniczona do kwoty opłat uiszczonych przez Użytkownika w okresie 12 miesięcy poprzedzających zdarzenie będące podstawą roszczenia.</li>
+    </ol>
+
+    <h2>§ 11. Reklamacje</h2>
+    <ol>
+      <li>Użytkownik może złożyć reklamację dotyczącą funkcjonowania Serwisu drogą e-mailową na adres <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</li>
+      <li>Reklamacja powinna zawierać: dane identyfikujące Użytkownika (adres e-mail przypisany do Konta), opis problemu oraz oczekiwany sposób rozwiązania.</li>
+      <li>Usługodawca rozpatrzy reklamację w terminie 14 dni roboczych od dnia jej otrzymania i poinformuje Użytkownika o wyniku drogą e-mailową.</li>
+    </ol>
+
+    <h2>§ 12. Odstąpienie od umowy (konsumenci)</h2>
+    <ol>
+      <li>Użytkownik będący konsumentem w rozumieniu art. 22¹ Kodeksu cywilnego ma prawo odstąpienia od umowy o świadczenie usług drogą elektroniczną w terminie 14 dni od dnia zawarcia umowy (rejestracji Konta), bez podania przyczyny.</li>
+      <li>Prawo do odstąpienia nie przysługuje, jeżeli Usługodawca w pełni wykonał usługę za wyraźną zgodą konsumenta, który został poinformowany przed rozpoczęciem świadczenia, że po jego spełnieniu utraci prawo do odstąpienia.</li>
+      <li>Aby skorzystać z prawa odstąpienia, Użytkownik powinien wysłać oświadczenie na adres <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</li>
+    </ol>
+
+    <h2>§ 13. Usunięcie Konta</h2>
+    <ol>
+      <li>Użytkownik może w każdej chwili zażądać usunięcia swojego Konta, kontaktując się z Usługodawcą pod adresem <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</li>
+      <li>Usunięcie Konta skutkuje trwałym usunięciem danych Użytkownika z systemów Usługodawcy, z zastrzeżeniem danych, które Usługodawca jest zobowiązany przechowywać na podstawie obowiązujących przepisów prawa.</li>
+      <li>Aktywna Subskrypcja zostanie anulowana z dniem usunięcia Konta. Usługodawca nie dokonuje zwrotu za niewykorzystaną część okresu rozliczeniowego, chyba że obowiązujące przepisy stanowią inaczej.</li>
+    </ol>
+
+    <h2>§ 14. Zmiany Regulaminu</h2>
+    <ol>
+      <li>Usługodawca zastrzega sobie prawo do zmiany Regulaminu z ważnych przyczyn, takich jak: zmiana przepisów prawa, zmiana zakresu świadczonych usług, zmiana warunków technicznych.</li>
+      <li>O zmianach Regulaminu Użytkownik zostanie poinformowany drogą e-mailową z co najmniej 14-dniowym wyprzedzeniem.</li>
+      <li>Dalsze korzystanie z Serwisu po wejściu w życie zmian oznacza akceptację nowej treści Regulaminu. Użytkownik, który nie akceptuje zmian, ma prawo usunąć Konto.</li>
+    </ol>
+
+    <h2>§ 15. Postanowienia końcowe</h2>
+    <ol>
+      <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego, w szczególności Kodeksu cywilnego, ustawy o świadczeniu usług drogą elektroniczną oraz RODO.</li>
+      <li>Wszelkie spory wynikające z korzystania z Serwisu będą rozstrzygane przez sąd właściwy dla miejsca zamieszkania Usługodawcy, z zastrzeżeniem praw konsumenta do wytoczenia powództwa przed sądem właściwym dla swojego miejsca zamieszkania.</li>
+      <li>Regulamin wchodzi w życie z dniem 29 marca 2026 r.</li>
+    </ol>
   </div>
 </main>
 
