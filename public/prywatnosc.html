@@ -35,12 +35,23 @@
 
     h1 { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.03em; margin-bottom: 0.5rem; }
     .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2.5rem; }
-    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2.5rem; margin-bottom: 0.75rem; }
+    h3 { font-size: 1.05rem; font-weight: 500; color: var(--primary); margin-top: 1.25rem; margin-bottom: 0.5rem; }
     p, li { font-size: 0.95rem; color: var(--text); font-weight: 300; }
-    ul { padding-left: 1.5rem; margin-bottom: 1rem; }
-    li { margin-bottom: 0.4rem; }
+    ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    ol li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; list-style: disc; }
+    ul li { margin-bottom: 0.4rem; }
     p { margin-bottom: 1rem; }
     a { color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(226,232,240,0.5); font-weight: 300; color: var(--text); }
+    th { font-weight: 500; color: var(--primary); background: rgba(241,245,249,0.5); }
+    @media (max-width: 640px) {
+      table { font-size: 0.82rem; }
+      th, td { padding: 0.5rem 0.6rem; }
+    }
 
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
     footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
@@ -60,56 +71,181 @@
 <main>
   <div class="content-card">
     <h1>Polityka prywatności</h1>
-    <p class="subtitle">Ostatnia aktualizacja: 20 marca 2026</p>
+    <p class="subtitle">Ostatnia aktualizacja: 29 marca 2026</p>
 
-    <h2>1. Administrator danych</h2>
-    <p>Administratorem danych osobowych jest Radosław [nazwisko], prowadzący działalność nierejestrowaną, właściciel serwisu RaportON (raporton.pl). Kontakt: <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</p>
+    <h2>§ 1. Informacje ogólne</h2>
+    <ol>
+      <li>Niniejsza Polityka Prywatności określa zasady przetwarzania danych osobowych w serwisie <strong>RaportON</strong> dostępnym pod adresem <strong>raporton.pl</strong> (dalej: „Serwis") oraz w aplikacji webowej (PWA) udostępnianej za jego pośrednictwem (dalej: „Aplikacja").</li>
+      <li>Administratorem danych osobowych Użytkowników Serwisu jest <strong>Andrzej Król</strong>, zamieszkały/a pod adresem: ul. Słoneczna 10a 33-383 Tylicz, adres e-mail: <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a> (dalej: „Administrator"). Administrator prowadzi działalność nierejestrowaną w rozumieniu art. 5 ust. 1 ustawy z dnia 6 marca 2018 r. — Prawo przedsiębiorców.</li>
+      <li>Administrator przetwarza dane osobowe zgodnie z Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych (RODO) oraz ustawą z dnia 10 maja 2018 r. o ochronie danych osobowych.</li>
+      <li>Administrator dokłada szczególnej staranności w celu ochrony praw osób, których dane dotyczą.</li>
+    </ol>
 
-    <h2>2. Jakie dane zbieramy</h2>
-    <p>W ramach korzystania z Serwisu przetwarzamy następujące dane:</p>
+    <h2>§ 2. Jakie dane zbieramy</h2>
+
+    <h3>Dane podawane przy rejestracji</h3>
     <ul>
-      <li><strong>Dane konta:</strong> adres email, hasło (zaszyfrowane), identyfikator Google (przy logowaniu przez Google)</li>
-      <li><strong>Dane profilu firmy:</strong> nazwa firmy, NIP, adres, telefon, email, logo — podawane dobrowolnie przez Użytkownika</li>
-      <li><strong>Dane z raportów:</strong> treść formularzy, zdjęcia, podpisy — wprowadzane przez Użytkownika w celu generowania protokołów PDF</li>
-      <li><strong>Dane techniczne:</strong> adres IP, typ przeglądarki, czas dostępu — zbierane automatycznie w celach technicznych</li>
+      <li><strong>Adres e-mail</strong> — niezbędny do utworzenia Konta i komunikacji z Użytkownikiem.</li>
+      <li><strong>Hasło</strong> — przechowywane w formie zaszyfrowanej (haszowanej); Administrator nie ma dostępu do hasła w postaci jawnej.</li>
     </ul>
 
-    <h2>3. Cele przetwarzania</h2>
+    <h3>Dane profilowe</h3>
     <ul>
-      <li>Świadczenie usługi — generowanie raportów PDF (art. 6 ust. 1 lit. b RODO)</li>
-      <li>Obsługa konta użytkownika (art. 6 ust. 1 lit. b RODO)</li>
-      <li>Realizacja płatności za plan Solo (art. 6 ust. 1 lit. b RODO)</li>
-      <li>Zapewnienie bezpieczeństwa Serwisu (art. 6 ust. 1 lit. f RODO)</li>
+      <li>Imię i nazwisko, nazwa firmy, NIP, adres, numer telefonu — podawane opcjonalnie przez Użytkownika w ustawieniach profilu w celu automatycznego uzupełniania danych w Raportach.</li>
     </ul>
 
-    <h2>4. Przechowywanie danych</h2>
-    <p>Dane przechowywane są na serwerach Supabase (infrastruktura AWS, region EU). Dane konta przechowujemy przez czas posiadania konta. Po usunięciu konta dane są trwale usuwane w ciągu 30 dni.</p>
-
-    <h2>5. Udostępnianie danych</h2>
-    <p>Nie sprzedajemy danych osobowych. Dane mogą być udostępniane wyłącznie:</p>
+    <h3>Dane techniczne zbierane automatycznie</h3>
     <ul>
-      <li><strong>Supabase Inc.</strong> — hosting bazy danych i plików (podprzetwarzający)</li>
-      <li><strong>Vercel Inc.</strong> — hosting aplikacji</li>
-      <li><strong>Stripe, Inc.</strong> — realizacja płatności (dotyczy tylko użytkowników planu Solo)</li>
-      <li><strong>Google LLC</strong> — wyłącznie w przypadku logowania przez Google OAuth</li>
+      <li>Adres IP, typ przeglądarki, system operacyjny, rozdzielczość ekranu.</li>
+      <li>Dane dotyczące korzystania z Aplikacji (np. liczba wygenerowanych Raportów, czas korzystania).</li>
+      <li>Informacje o błędach technicznych zbierane za pośrednictwem systemu monitorowania błędów (Sentry) — dane te nie zawierają treści Raportów Użytkownika, lecz mogą obejmować informacje techniczne o kontekście wystąpienia błędu.</li>
     </ul>
 
-    <h2>6. Prawa użytkownika</h2>
-    <p>Na podstawie RODO przysługują Ci następujące prawa:</p>
+    <h3>Dane związane z płatnościami</h3>
     <ul>
-      <li>Prawo dostępu do swoich danych</li>
-      <li>Prawo do sprostowania danych</li>
-      <li>Prawo do usunięcia danych („prawo do bycia zapomnianym")</li>
-      <li>Prawo do przenoszenia danych</li>
-      <li>Prawo do wniesienia skargi do Prezesa UODO</li>
+      <li>Historia transakcji i status Subskrypcji — przechowywane w systemie Administratora.</li>
+      <li>Dane kart płatniczych — przetwarzane wyłącznie przez operatora płatności Stripe, Inc. Administrator nie przechowuje numerów kart ani kodów CVV.</li>
     </ul>
-    <p>Aby skorzystać z tych praw, napisz na <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>.</p>
 
-    <h2>7. Pliki cookies</h2>
-    <p>Serwis wykorzystuje pliki cookies wyłącznie w celach technicznych (utrzymanie sesji logowania). Nie stosujemy cookies marketingowych ani śledzących. Korzystając z Serwisu, akceptujesz stosowanie cookies technicznych.</p>
+    <h3>Dane wprowadzane w Raportach przez Użytkownika</h3>
+    <ul>
+      <li>Użytkownik może wprowadzać do Raportów dane osobowe swoich klientów końcowych (imiona, nazwiska, adresy, opisy usterek), dołączać zdjęcia oraz pobierać podpisy. Kwestię przetwarzania tych danych reguluje § 6 niniejszej Polityki.</li>
+    </ul>
 
-    <h2>8. Zmiany polityki</h2>
-    <p>Zastrzegamy sobie prawo do aktualizacji niniejszej polityki. O istotnych zmianach poinformujemy drogą mailową.</p>
+    <h2>§ 3. Cele i podstawy prawne przetwarzania danych</h2>
+    <p>Administrator przetwarza dane osobowe Użytkowników w następujących celach:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Cel przetwarzania</th>
+          <th>Podstawa prawna (RODO)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Świadczenie usług (prowadzenie Konta, generowanie Raportów)</td>
+          <td>Art. 6 ust. 1 lit. b — wykonanie umowy</td>
+        </tr>
+        <tr>
+          <td>Obsługa płatności i Subskrypcji</td>
+          <td>Art. 6 ust. 1 lit. b — wykonanie umowy</td>
+        </tr>
+        <tr>
+          <td>Komunikacja z Użytkownikiem (wsparcie, reklamacje)</td>
+          <td>Art. 6 ust. 1 lit. b — wykonanie umowy</td>
+        </tr>
+        <tr>
+          <td>Zapewnienie bezpieczeństwa Serwisu i monitorowanie błędów</td>
+          <td>Art. 6 ust. 1 lit. f — prawnie uzasadniony interes</td>
+        </tr>
+        <tr>
+          <td>Dochodzenie lub obrona przed roszczeniami</td>
+          <td>Art. 6 ust. 1 lit. f — prawnie uzasadniony interes</td>
+        </tr>
+        <tr>
+          <td>Realizacja obowiązków podatkowych i rachunkowych</td>
+          <td>Art. 6 ust. 1 lit. c — obowiązek prawny</td>
+        </tr>
+        <tr>
+          <td>Wysyłka informacji o zmianach w Serwisie lub Regulaminie</td>
+          <td>Art. 6 ust. 1 lit. f — prawnie uzasadniony interes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>§ 4. Okres przechowywania danych</h2>
+    <ol>
+      <li><strong>Dane Konta</strong> — przechowywane przez cały czas posiadania aktywnego Konta przez Użytkownika, a po jego usunięciu — przez okres niezbędny do rozliczenia usługi i dochodzenia ewentualnych roszczeń (maksymalnie 6 lat od zakończenia umowy, zgodnie z Kodeksem cywilnym).</li>
+      <li><strong>Dane dotyczące płatności</strong> — przechowywane przez okres wymagany przepisami prawa podatkowego i rachunkowego (5 lat od końca roku podatkowego, w którym dokonano transakcji).</li>
+      <li><strong>Raporty i ich treść</strong> — przechowywane na koncie Użytkownika do momentu ich usunięcia przez Użytkownika lub usunięcia Konta.</li>
+      <li><strong>Dane techniczne i logi błędów</strong> — przechowywane przez okres do 90 dni.</li>
+    </ol>
+
+    <h2>§ 5. Odbiorcy danych</h2>
+    <p>Administrator może udostępniać dane osobowe Użytkowników następującym kategoriom odbiorców, wyłącznie w zakresie niezbędnym do świadczenia usług:</p>
+    <ol>
+      <li><strong>Supabase, Inc.</strong> — dostawca infrastruktury bazodanowej i uwierzytelniania. Dane przechowywane są na serwerach zlokalizowanych w <strong>Unii Europejskiej (region Frankfurt)</strong>. Supabase przetwarza dane na podstawie umowy powierzenia przetwarzania danych (DPA).</li>
+      <li><strong>Stripe, Inc.</strong> — operator płatności elektronicznych z siedzibą w USA. Stripe przetwarza dane dotyczące płatności w celu realizacji transakcji i jest certyfikowany w ramach odpowiednich mechanizmów transferu danych (standardowe klauzule umowne UE). Stripe przetwarza jedynie dane niezbędne do obsługi płatności.</li>
+      <li><strong>Vercel, Inc.</strong> — dostawca usług hostingowych dla Serwisu, z siedzibą w USA. Vercel przetwarza dane techniczne (adresy IP, nagłówki żądań) w ramach standardowych klauzul umownych UE.</li>
+      <li><strong>Functional Software, Inc. (Sentry)</strong> — dostawca systemu monitorowania błędów. Dane przetwarzane w regionie UE, obejmują wyłącznie informacje techniczne o błędach.</li>
+    </ol>
+    <p>Administrator nie sprzedaje danych osobowych Użytkowników podmiotom trzecim. Administrator nie udostępnia danych w celach marketingowych podmiotów zewnętrznych.</p>
+
+    <h2>§ 6. Dane klientów końcowych — rola Administratora jako podmiotu przetwarzającego</h2>
+    <ol>
+      <li>Użytkownik, wprowadzając do Aplikacji dane osobowe swoich klientów końcowych (w treści Raportów, zdjęciach, podpisach), działa jako <strong>administrator</strong> tych danych w rozumieniu RODO.</li>
+      <li>Administrator Serwisu (Usługodawca) przetwarza dane klientów końcowych Użytkownika wyłącznie na jego udokumentowane polecenie i w celu świadczenia usług Aplikacji, występując w roli <strong>podmiotu przetwarzającego</strong> (procesora) w rozumieniu art. 28 RODO.</li>
+      <li>Administrator Serwisu zobowiązuje się do:
+        <ul>
+          <li>przetwarzania danych klientów końcowych wyłącznie w zakresie niezbędnym do świadczenia usług Aplikacji,</li>
+          <li>stosowania odpowiednich środków technicznych i organizacyjnych zapewniających bezpieczeństwo danych,</li>
+          <li>nieprzekazywania danych klientów końcowych podmiotom trzecim bez zgody Użytkownika, z wyjątkiem podprocesorów wymienionych w § 5,</li>
+          <li>usunięcia danych klientów końcowych po zakończeniu świadczenia usług (usunięciu Konta), chyba że obowiązek ich przechowywania wynika z przepisów prawa.</li>
+        </ul>
+      </li>
+      <li>Użytkownik jest odpowiedzialny za zapewnienie odpowiedniej podstawy prawnej przetwarzania danych swoich klientów końcowych oraz za spełnienie wobec nich obowiązków informacyjnych wynikających z RODO.</li>
+      <li>Korzystanie z Aplikacji przez Użytkownika stanowi udokumentowane polecenie przetwarzania w rozumieniu art. 28 ust. 3 lit. a RODO.</li>
+    </ol>
+
+    <h2>§ 7. Prawa Użytkownika</h2>
+    <p>Na podstawie RODO, Użytkownikowi przysługują następujące prawa w odniesieniu do jego danych osobowych:</p>
+    <ol>
+      <li><strong>Prawo dostępu</strong> (art. 15 RODO) — prawo do uzyskania informacji, czy i jakie dane osobowe są przetwarzane.</li>
+      <li><strong>Prawo do sprostowania</strong> (art. 16 RODO) — prawo do żądania poprawienia nieprawidłowych danych.</li>
+      <li><strong>Prawo do usunięcia</strong> (art. 17 RODO) — prawo do żądania usunięcia danych (tzw. „prawo do bycia zapomnianym"), z zastrzeżeniem wyjątków przewidzianych w RODO.</li>
+      <li><strong>Prawo do ograniczenia przetwarzania</strong> (art. 18 RODO) — prawo do żądania ograniczenia przetwarzania danych w określonych sytuacjach.</li>
+      <li><strong>Prawo do przenoszenia danych</strong> (art. 20 RODO) — prawo do otrzymania swoich danych w ustrukturyzowanym, powszechnie używanym formacie nadającym się do odczytu maszynowego.</li>
+      <li><strong>Prawo do sprzeciwu</strong> (art. 21 RODO) — prawo do wniesienia sprzeciwu wobec przetwarzania danych opartego na prawnie uzasadnionym interesie Administratora.</li>
+      <li><strong>Prawo do skargi</strong> — prawo do wniesienia skargi do organu nadzorczego: Prezesa Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa, <a href="https://www.uodo.gov.pl" target="_blank" rel="noopener">www.uodo.gov.pl</a>.</li>
+    </ol>
+    <p>W celu skorzystania z powyższych praw prosimy o kontakt pod adresem: <a href="mailto:kontakt@raporton.pl">kontakt@raporton.pl</a>. Administrator udzieli odpowiedzi bez zbędnej zwłoki, nie później niż w terminie 30 dni od otrzymania żądania.</p>
+
+    <h2>§ 8. Bezpieczeństwo danych</h2>
+    <ol>
+      <li>Administrator stosuje odpowiednie środki techniczne i organizacyjne w celu ochrony danych osobowych przed nieuprawnionym dostępem, utratą, zniszczeniem lub ujawnieniem, w szczególności:
+        <ul>
+          <li>szyfrowanie transmisji danych za pomocą protokołu TLS (HTTPS),</li>
+          <li>haszowanie haseł Użytkowników,</li>
+          <li>kontrola dostępu do bazy danych za pomocą polityk bezpieczeństwa na poziomie wierszy (Row Level Security),</li>
+          <li>regularne monitorowanie bezpieczeństwa infrastruktury,</li>
+          <li>przechowywanie danych w certyfikowanych centrach danych na terenie Unii Europejskiej.</li>
+        </ul>
+      </li>
+      <li>Pomimo stosowania powyższych zabezpieczeń, Administrator informuje, że żaden system informatyczny nie zapewnia całkowitej ochrony przed zagrożeniami.</li>
+    </ol>
+
+    <h2>§ 9. Pliki cookies i technologie śledzące</h2>
+    <ol>
+      <li>Serwis wykorzystuje pliki cookies (ciasteczka) w następujących celach:
+        <ul>
+          <li><strong>Niezbędne cookies</strong> — konieczne do prawidłowego działania Serwisu, w tym utrzymania sesji logowania. Podstawa: art. 6 ust. 1 lit. f RODO (prawnie uzasadniony interes).</li>
+          <li><strong>Funkcjonalne cookies</strong> — zapamiętywanie preferencji Użytkownika. Podstawa: art. 6 ust. 1 lit. f RODO.</li>
+        </ul>
+      </li>
+      <li>Serwis <strong>nie wykorzystuje</strong> cookies analitycznych ani reklamowych podmiotów trzecich.</li>
+      <li>Użytkownik może zarządzać plikami cookies za pomocą ustawień przeglądarki. Wyłączenie cookies niezbędnych może uniemożliwić prawidłowe działanie Serwisu.</li>
+    </ol>
+
+    <h2>§ 10. Transfer danych poza EOG</h2>
+    <ol>
+      <li>Dane osobowe Użytkowników są przechowywane na serwerach w Unii Europejskiej (Supabase — region Frankfurt, Sentry — region EU).</li>
+      <li>W związku z korzystaniem z usług Stripe, Inc. oraz Vercel, Inc. (siedziba w USA), niektóre dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym.</li>
+      <li>Transfer danych do USA odbywa się na podstawie standardowych klauzul umownych (SCC) zatwierdzonych przez Komisję Europejską, zapewniających odpowiedni poziom ochrony danych.</li>
+    </ol>
+
+    <h2>§ 11. Zmiany Polityki Prywatności</h2>
+    <ol>
+      <li>Administrator zastrzega sobie prawo do aktualizacji niniejszej Polityki Prywatności w celu odzwierciedlenia zmian w praktykach przetwarzania danych lub zmian przepisów prawa.</li>
+      <li>O istotnych zmianach Użytkownik zostanie poinformowany drogą e-mailową lub za pośrednictwem komunikatu w Aplikacji.</li>
+      <li>Aktualna wersja Polityki Prywatności jest zawsze dostępna pod adresem <a href="/prywatnosc">raporton.pl/prywatnosc</a>.</li>
+    </ol>
+
+    <h2>§ 12. Kontakt</h2>
+    <p>W sprawach dotyczących ochrony danych osobowych prosimy o kontakt:</p>
+    <ul>
+      <li><strong>E-mail:</strong> <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a></li>
+      <li><strong>Adres korespondencyjny:</strong> [ADRES]</li>
+    </ul>
   </div>
 </main>
 
