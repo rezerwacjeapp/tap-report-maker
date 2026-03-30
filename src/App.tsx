@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Landing from "./pages/Landing";
 import Upgrade from "./pages/Upgrade";
+import SetNewPassword from "./pages/SetNewPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,10 +39,15 @@ function LoadingScreen() {
 function AppShell() {
   useTheme();
   const location = useLocation();
-  const { user, loading } = useAuth();
+  const { user, loading, isRecovery } = useAuth();
   const hideNav = HIDE_NAV.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"));
 
   if (loading) return <LoadingScreen />;
+
+  // Password recovery flow — show set-new-password form
+  if (user && isRecovery) {
+    return <SetNewPassword />;
+  }
 
   // Not logged in — show landing, login, register
   if (!user) {
