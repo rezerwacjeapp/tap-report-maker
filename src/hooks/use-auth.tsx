@@ -9,6 +9,7 @@ interface AuthState {
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -58,12 +59,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    if (error) return { error: mapAuthError(error.message) };
+    return { error: null };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, resetPassword, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -82,6 +91,7 @@ function mapAuthError(msg: string): string {
   if (msg.includes("Email not confirmed")) return "Potwierdź email — sprawdź skrzynkę";
   if (msg.includes("Password should be at least")) return "Hasło musi mieć co najmniej 6 znaków";
   if (msg.includes("Email rate limit exceeded")) return "Za dużo prób — spróbuj za chwilę";
+  if (msg.includes("For security purposes")) return "Za dużo prób — odczekaj chwilę i spróbuj ponownie";
   if (msg.includes("Signup requires a valid password")) return "Podaj prawidłowe hasło";
   return msg;
 }
