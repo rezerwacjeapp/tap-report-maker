@@ -76,14 +76,27 @@
     }
     .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.35); }
     .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .submit-btn svg { width: 18px; height: 18px; }
 
-    .form-note { margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); font-weight: 300; }
+    /* Status messages */
+    .status-msg { margin-top: 1.25rem; padding: 1rem 1.25rem; border-radius: 1rem; display: none; align-items: flex-start; gap: 0.75rem; }
+    .status-msg.visible { display: flex; }
+    .status-msg svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+    .status-msg p { margin: 0; font-size: 0.9rem; }
+    .status-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+    .status-success svg { color: var(--accent); }
+    .status-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+    .status-error svg { color: #ef4444; }
 
     /* Response time note */
     .response-note { margin-top: 2rem; padding: 1rem 1.25rem; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
     .response-note svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
     .response-note p { margin: 0; font-size: 0.88rem; }
+
+    /* Spinner */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
     footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
@@ -132,43 +145,55 @@
     <!-- Contact form -->
     <h2>Napisz do nas</h2>
 
-    <div class="form-row form-group">
-      <div>
-        <label for="name">Imię <span class="optional">(opcjonalnie)</span></label>
-        <input type="text" id="name" placeholder="Jan Kowalski">
+    <div id="contactForm">
+      <div class="form-row form-group">
+        <div>
+          <label for="name">Imię <span class="optional">(opcjonalnie)</span></label>
+          <input type="text" id="name" name="name" placeholder="Jan Kowalski">
+        </div>
+        <div>
+          <label for="email">Twój e-mail</label>
+          <input type="email" id="email" name="email" placeholder="jan@firma.pl" required>
+        </div>
       </div>
-      <div>
-        <label for="email">Twój e-mail <span class="optional">(opcjonalnie)</span></label>
-        <input type="email" id="email" placeholder="jan@firma.pl">
+
+      <div class="form-group">
+        <label for="topic">Temat</label>
+        <select id="topic" name="topic" required>
+          <option value="" disabled selected>Wybierz temat...</option>
+          <option value="Pytanie ogólne">Pytanie ogólne</option>
+          <option value="Pomoc techniczna">Pomoc techniczna</option>
+          <option value="Płatności i subskrypcja">Płatności i subskrypcja</option>
+          <option value="Sugestia / propozycja funkcji">Sugestia / propozycja funkcji</option>
+          <option value="Zgłoszenie błędu">Zgłoszenie błędu</option>
+          <option value="Współpraca">Współpraca</option>
+          <option value="Usunięcie konta / danych">Usunięcie konta / danych</option>
+          <option value="Inne">Inne</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Wiadomość</label>
+        <textarea id="message" name="message" placeholder="Opisz swoje pytanie lub problem..." required></textarea>
+      </div>
+
+      <button class="submit-btn" id="sendBtn" onclick="sendForm()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="sendIcon"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+        <span id="btnText">Wyślij wiadomość</span>
+      </button>
+
+      <!-- Success message -->
+      <div class="status-msg status-success" id="successMsg">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <p><strong>Wiadomość wysłana!</strong> Odpowiemy najszybciej jak to możliwe. Dziękujemy za kontakt.</p>
+      </div>
+
+      <!-- Error message -->
+      <div class="status-msg status-error" id="errorMsg">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <p><strong>Coś poszło nie tak.</strong> Spróbuj ponownie lub napisz bezpośrednio na <a href="mailto:kontakt.raporton@gmail.com" style="color: #ef4444; font-weight: 500;">kontakt.raporton@gmail.com</a>.</p>
       </div>
     </div>
-
-    <div class="form-group">
-      <label for="topic">Temat</label>
-      <select id="topic">
-        <option value="" disabled selected>Wybierz temat...</option>
-        <option value="Pytanie ogólne">Pytanie ogólne</option>
-        <option value="Pomoc techniczna">Pomoc techniczna</option>
-        <option value="Płatności i subskrypcja">Płatności i subskrypcja</option>
-        <option value="Sugestia / propozycja funkcji">Sugestia / propozycja funkcji</option>
-        <option value="Zgłoszenie błędu">Zgłoszenie błędu</option>
-        <option value="Współpraca">Współpraca</option>
-        <option value="Usunięcie konta / danych">Usunięcie konta / danych</option>
-        <option value="Inne">Inne</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="message">Wiadomość</label>
-      <textarea id="message" placeholder="Opisz swoje pytanie lub problem..."></textarea>
-    </div>
-
-    <button class="submit-btn" id="sendBtn" onclick="sendMessage()">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
-      Wyślij wiadomość
-    </button>
-
-    <p class="form-note">Kliknięcie otworzy Twoją aplikację e-mail z wypełnioną wiadomością. Jeśli wolisz, możesz też napisać bezpośrednio na <a href="mailto:kontakt.raporton@gmail.com" style="color: var(--accent); font-weight: 500;">kontakt.raporton@gmail.com</a>.</p>
 
     <div class="response-note">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -187,35 +212,97 @@
 </footer>
 
 <script>
-function sendMessage() {
+// ============================================================
+// WAŻNE: Wstaw tutaj swój klucz z web3forms.com
+// Instrukcja: wejdź na https://web3forms.com → wpisz kontakt.raporton@gmail.com
+// → dostaniesz klucz na maila → wklej poniżej zamiast TWOJ_KLUCZ_TUTAJ
+// ============================================================
+const WEB3FORMS_KEY = '7d8aba20-e633-443f-b73a-0571cc40e49f';
+
+async function sendForm() {
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
-  const topic = document.getElementById('topic').value || 'Kontakt z raporton.pl';
+  const topic = document.getElementById('topic').value;
   const message = document.getElementById('message').value.trim();
 
+  // Validation
+  if (!email) {
+    document.getElementById('email').focus();
+    document.getElementById('email').style.borderColor = '#ef4444';
+    setTimeout(function() { document.getElementById('email').style.borderColor = ''; }, 2500);
+    return;
+  }
+  if (!topic) {
+    document.getElementById('topic').focus();
+    document.getElementById('topic').style.borderColor = '#ef4444';
+    setTimeout(function() { document.getElementById('topic').style.borderColor = ''; }, 2500);
+    return;
+  }
   if (!message) {
     document.getElementById('message').focus();
     document.getElementById('message').style.borderColor = '#ef4444';
-    setTimeout(() => { document.getElementById('message').style.borderColor = ''; }, 2000);
+    setTimeout(function() { document.getElementById('message').style.borderColor = ''; }, 2500);
     return;
   }
 
-  let body = message;
-  if (name || email) {
-    body += '\n\n---';
-    if (name) body += '\nImię: ' + name;
-    if (email) body += '\nE-mail zwrotny: ' + email;
+  // Hide previous status
+  document.getElementById('successMsg').classList.remove('visible');
+  document.getElementById('errorMsg').classList.remove('visible');
+
+  // Show loading state
+  var btn = document.getElementById('sendBtn');
+  var btnText = document.getElementById('btnText');
+  var sendIcon = document.getElementById('sendIcon');
+  btn.disabled = true;
+  btnText.textContent = 'Wysyłanie...';
+  sendIcon.style.display = 'none';
+  var spinner = document.createElement('div');
+  spinner.className = 'spinner';
+  spinner.id = 'loadingSpinner';
+  btn.insertBefore(spinner, btnText);
+
+  try {
+    var response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        subject: 'RaportON — ' + topic,
+        from_name: name || 'Formularz kontaktowy',
+        email: email,
+        message: message,
+        topic: topic
+      })
+    });
+
+    var data = await response.json();
+
+    if (data.success) {
+      document.getElementById('successMsg').classList.add('visible');
+      // Clear form
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('topic').selectedIndex = 0;
+      document.getElementById('message').value = '';
+    } else {
+      document.getElementById('errorMsg').classList.add('visible');
+    }
+  } catch (err) {
+    document.getElementById('errorMsg').classList.add('visible');
   }
 
-  const subject = encodeURIComponent(topic);
-  const encodedBody = encodeURIComponent(body);
-  window.location.href = 'mailto:kontakt.raporton@gmail.com?subject=' + subject + '&body=' + encodedBody;
+  // Reset button
+  btn.disabled = false;
+  btnText.textContent = 'Wyślij wiadomość';
+  sendIcon.style.display = '';
+  var sp = document.getElementById('loadingSpinner');
+  if (sp) sp.remove();
 }
 
-// Allow Ctrl+Enter to send
+// Ctrl+Enter to send
 document.getElementById('message').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    sendMessage();
+    sendForm();
   }
 });
 </script>
