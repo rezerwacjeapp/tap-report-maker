@@ -6,10 +6,13 @@ interface AuthState {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isRecovery: boolean;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+  clearRecovery: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -19,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -29,10 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Detect password recovery flow
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -67,12 +76,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) return { error: mapAuthError(error.message) };
+    setIsRecovery(false);
+    return { error: null };
+  };
+
+  const clearRecovery = () => setIsRecovery(false);
+
   const signOut = async () => {
+    setIsRecovery(false);
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, resetPassword, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isRecovery, signUp, signIn, signInWithGoogle, resetPassword, updatePassword, clearRecovery, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -93,5 +112,6 @@ function mapAuthError(msg: string): string {
   if (msg.includes("Email rate limit exceeded")) return "Za dużo prób — spróbuj za chwilę";
   if (msg.includes("For security purposes")) return "Za dużo prób — odczekaj chwilę i spróbuj ponownie";
   if (msg.includes("Signup requires a valid password")) return "Podaj prawidłowe hasło";
+  if (msg.includes("New password should be different")) return "Nowe hasło musi się różnić od poprzedniego";
   return msg;
 }
