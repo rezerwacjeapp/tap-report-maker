@@ -10,11 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://code.iconify.design/iconify-icon/2.0.0/iconify-icon.min.js"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f172a'/%3E%3Cpath d='M9 16.5l4 4 10-10' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M12 16.5l4 4 10-10' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none' opacity='0.4'/%3E%3C/svg%3E">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root { --primary: #0f172a; --text: #334155; --text-muted: #64748b; --accent: #10b981; --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.7); }
+    :root { --primary: #0f172a; --text: #334155; --text-muted: #64748b; --accent: #10b981; --accent-hover: #059669; --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.7); }
     html { scroll-behavior: smooth; }
     body { font-family: 'Outfit', system-ui, sans-serif; color: var(--text); background: #f0f2f5; -webkit-font-smoothing: antialiased; overflow-x: hidden; line-height: 1.7; }
     .mesh-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 50%, #f5f7fa 100%); }
@@ -37,15 +36,54 @@
     h1 { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.03em; margin-bottom: 0.5rem; }
     .subtitle { font-size: 0.95rem; color: var(--text-muted); font-weight: 300; margin-bottom: 2.5rem; }
     p { font-size: 0.95rem; color: var(--text); font-weight: 300; margin-bottom: 1rem; }
+    h2 { font-size: 1.15rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem; margin-top: 2.5rem; }
 
-    .contact-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 1.25rem; margin-bottom: 0.75rem; transition: all 0.3s ease; text-decoration: none; color: var(--text); }
+    /* Contact cards */
+    .contact-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.5rem; }
+    @media (max-width: 500px) { .contact-methods { grid-template-columns: 1fr; } }
+    .contact-card { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.25rem; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 1.25rem; transition: all 0.3s ease; text-decoration: none; color: var(--text); }
     .contact-card:hover { background: rgba(255,255,255,0.85); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    .contact-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent); }
-    .contact-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
-    .contact-value { font-size: 1rem; font-weight: 500; color: var(--primary); margin-top: 2px; }
+    .contact-icon { width: 42px; height: 42px; border-radius: 50%; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .contact-icon svg { width: 20px; height: 20px; color: var(--accent); }
+    .contact-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+    .contact-value { font-size: 0.9rem; font-weight: 500; color: var(--primary); margin-top: 1px; }
 
-    .response-note { margin-top: 2rem; padding: 1.25rem 1.5rem; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .response-note p { margin: 0; font-size: 0.9rem; }
+    /* Divider */
+    .divider { height: 1px; background: rgba(226,232,240,0.4); margin: 2rem 0; }
+
+    /* Form */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--primary); margin-bottom: 0.4rem; }
+    label .optional { font-weight: 300; color: var(--text-muted); font-size: 0.8rem; }
+    input, select, textarea {
+      width: 100%; padding: 0.75rem 1rem; font-family: 'Outfit', system-ui, sans-serif; font-size: 0.95rem; font-weight: 300;
+      background: rgba(255,255,255,0.7); border: 1px solid rgba(226,232,240,0.6); border-radius: 0.85rem;
+      color: var(--text); outline: none; transition: all 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); background: rgba(255,255,255,0.9); }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); font-weight: 300; }
+    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 3.5L11.5 6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+    textarea { resize: vertical; min-height: 120px; }
+
+    .submit-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; background: var(--accent); color: #fff;
+      font-family: 'Outfit', system-ui, sans-serif; font-size: 0.95rem; font-weight: 600;
+      border: none; border-radius: 50px; cursor: pointer;
+      transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16,185,129,0.25);
+    }
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.35); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn svg { width: 18px; height: 18px; }
+
+    .form-note { margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); font-weight: 300; }
+
+    /* Response time note */
+    .response-note { margin-top: 2rem; padding: 1rem 1.25rem; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+    .response-note svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+    .response-note p { margin: 0; font-size: 0.88rem; }
 
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
     footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
@@ -65,21 +103,76 @@
 <main>
   <div class="content-card">
     <h1>Kontakt</h1>
-    <p class="subtitle">Masz pytanie, sugestię lub potrzebujesz pomocy? Odezwij się — odpowiadamy szybko.</p>
+    <p class="subtitle">Masz pytanie, sugestię lub potrzebujesz pomocy? Napisz do nas — odpowiadamy szybko.</p>
 
-    <a href="mailto:kontakt@raporton.pl" class="contact-card">
-      <div class="contact-icon">
-        <iconify-icon icon="solar:letter-linear" width="22" height="22"></iconify-icon>
+    <!-- Direct contact methods -->
+    <div class="contact-methods">
+      <a href="mailto:kontakt.raporton@gmail.com" class="contact-card">
+        <div class="contact-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">kontakt.raporton@gmail.com</div>
+        </div>
+      </a>
+      <a href="https://raporton.pl" class="contact-card">
+        <div class="contact-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">Strona</div>
+          <div class="contact-value">raporton.pl</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Contact form -->
+    <h2>Napisz do nas</h2>
+
+    <div class="form-row form-group">
+      <div>
+        <label for="name">Imię <span class="optional">(opcjonalnie)</span></label>
+        <input type="text" id="name" placeholder="Jan Kowalski">
       </div>
       <div>
-        <div class="contact-label">Email</div>
-        <div class="contact-value">kontakt.raportON@gmail.com</div>
+        <label for="email">Twój e-mail <span class="optional">(opcjonalnie)</span></label>
+        <input type="email" id="email" placeholder="jan@firma.pl">
       </div>
-    </a>
+    </div>
+
+    <div class="form-group">
+      <label for="topic">Temat</label>
+      <select id="topic">
+        <option value="" disabled selected>Wybierz temat...</option>
+        <option value="Pytanie ogólne">Pytanie ogólne</option>
+        <option value="Pomoc techniczna">Pomoc techniczna</option>
+        <option value="Płatności i subskrypcja">Płatności i subskrypcja</option>
+        <option value="Sugestia / propozycja funkcji">Sugestia / propozycja funkcji</option>
+        <option value="Zgłoszenie błędu">Zgłoszenie błędu</option>
+        <option value="Współpraca">Współpraca</option>
+        <option value="Usunięcie konta / danych">Usunięcie konta / danych</option>
+        <option value="Inne">Inne</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="message">Wiadomość</label>
+      <textarea id="message" placeholder="Opisz swoje pytanie lub problem..."></textarea>
+    </div>
+
+    <button class="submit-btn" id="sendBtn" onclick="sendMessage()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+      Wyślij wiadomość
+    </button>
+
+    <p class="form-note">Kliknięcie otworzy Twoją aplikację e-mail z wypełnioną wiadomością. Jeśli wolisz, możesz też napisać bezpośrednio na <a href="mailto:kontakt.raporton@gmail.com" style="color: var(--accent); font-weight: 500;">kontakt.raporton@gmail.com</a>.</p>
 
     <div class="response-note">
-      <iconify-icon icon="solar:clock-circle-linear" width="20" height="20" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"></iconify-icon>
-      <p>Staramy się odpowiadać w ciągu 24 godzin w dni robocze. W przypadku pilnych spraw prosimy o zaznaczenie tego w temacie wiadomości.</p>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <p>Staramy się odpowiadać w ciągu <strong>24 godzin</strong> w dni robocze. W przypadku pilnych spraw prosimy o zaznaczenie tego w temacie wiadomości.</p>
     </div>
   </div>
 </main>
@@ -89,8 +182,42 @@
   <div style="display: flex; gap: 2rem;">
     <a href="/regulamin">Regulamin</a>
     <a href="/prywatnosc">Prywatność</a>
-    <a href="mailto:kontakt@raporton.pl">Kontakt</a>
+    <a href="/kontakt">Kontakt</a>
   </div>
 </footer>
+
+<script>
+function sendMessage() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const topic = document.getElementById('topic').value || 'Kontakt z raporton.pl';
+  const message = document.getElementById('message').value.trim();
+
+  if (!message) {
+    document.getElementById('message').focus();
+    document.getElementById('message').style.borderColor = '#ef4444';
+    setTimeout(() => { document.getElementById('message').style.borderColor = ''; }, 2000);
+    return;
+  }
+
+  let body = message;
+  if (name || email) {
+    body += '\n\n---';
+    if (name) body += '\nImię: ' + name;
+    if (email) body += '\nE-mail zwrotny: ' + email;
+  }
+
+  const subject = encodeURIComponent(topic);
+  const encodedBody = encodeURIComponent(body);
+  window.location.href = 'mailto:kontakt.raporton@gmail.com?subject=' + subject + '&body=' + encodedBody;
+}
+
+// Allow Ctrl+Enter to send
+document.getElementById('message').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    sendMessage();
+  }
+});
+</script>
 </body>
 </html>
