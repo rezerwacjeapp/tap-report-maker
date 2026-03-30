@@ -69,9 +69,37 @@ export default function Profile() {
     if (!profile) return;
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Max 2MB raw file — we'll resize it anyway
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo jest za duże (max 2 MB). Wybierz mniejszy plik.");
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = () => update({ ...profile, logo: reader.result as string });
+    reader.onload = () => {
+      // Resize logo to max 400px and compress
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDim = 400;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+          else { w = (w / h) * maxDim; h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        const resized = canvas.toDataURL("image/png", 0.9);
+        update({ ...profile, logo: resized });
+      };
+      img.onerror = () => toast.error("Nie udało się wczytać pliku.");
+      img.src = reader.result as string;
+    };
     reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   if (loading || !profile) {
