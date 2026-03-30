@@ -80,8 +80,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           user_id: userId,
           plan: "solo",
           status: "active",
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+          current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
           autopay_subscription_id: subscriptionId, // stores Stripe subscription ID
           updated_at: new Date().toISOString(),
         };
@@ -112,8 +112,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           .from("subscriptions")
           .update({
             status,
-            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+            current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq("autopay_subscription_id", stripeSubId);
