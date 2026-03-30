@@ -332,12 +332,22 @@ export async function incrementReportCount(): Promise<void> {
   if (!user) return;
 
   const month = new Date().toISOString().slice(0, 7);
+
+  // Try atomic RPC first (requires running the SQL migration in Supabase)
+  const { error: rpcError } = await supabase.rpc("increment_report_count", {
+    p_user_id: user.id,
+    p_month: month,
+  });
+
+  if (!rpcError) return; // Success — atomic increment done
+
+  // Fallback: non-atomic (for backward compatibility before migration)
   const { data: existing } = await supabase
     .from("report_counts")
     .select("count")
     .eq("user_id", user.id)
     .eq("month", month)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     await supabase
