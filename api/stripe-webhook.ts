@@ -66,6 +66,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           break;
         }
 
+        // Verify the user actually exists in Supabase Auth
+        const { data: userCheck, error: userError } = await supabase.auth.admin.getUserById(userId);
+        if (userError || !userCheck?.user) {
+          console.error(`checkout.session.completed: user ${userId} not found in auth`);
+          break;
+        }
+
         // Get subscription details from Stripe
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
