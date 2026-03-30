@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
-import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -15,7 +15,7 @@ function GoogleIcon() {
 }
 
 export default function Login() {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, resetPassword } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +23,17 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Cooldown after failed login
+  const [cooldown, setCooldown] = useState(false);
+  const failCountRef = useRef(0);
+
+  // Reset password flow
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   const handleGoogle = async () => {
     setError("");
@@ -39,16 +50,125 @@ export default function Login() {
       setError("Podaj email i hasło");
       return;
     }
+    if (cooldown) return;
+
     setLoading(true);
     const { error } = await signIn(email.trim(), password);
     setLoading(false);
+
     if (error) {
       setError(error);
+      failCountRef.current += 1;
+      // After 3 failed attempts, add a 5 second cooldown
+      if (failCountRef.current >= 3) {
+        setCooldown(true);
+        setTimeout(() => setCooldown(false), 5000);
+      }
     } else {
+      failCountRef.current = 0;
       navigate("/");
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError("");
+    if (!resetEmail.trim()) {
+      setResetError("Podaj adres email");
+      return;
+    }
+    setResetLoading(true);
+    const { error } = await resetPassword(resetEmail.trim());
+    setResetLoading(false);
+    if (error) {
+      setResetError(error);
+    } else {
+      setResetSent(true);
+    }
+  };
+
+  // ── Reset password view ──
+  if (showReset) {
+    if (resetSent) {
+      return (
+        <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
+          <div className="w-full max-w-sm text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="h-16 w-16 rounded-2xl bg-accent/10 flex items-center justify-center">
+                <CheckCircle2 className="h-8 w-8 text-accent" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold">Sprawdź email</h1>
+            <p className="text-sm text-muted-foreground">
+              Wysłaliśmy link do resetowania hasła na <strong className="text-foreground">{resetEmail}</strong>.
+              Kliknij go, żeby ustawić nowe hasło.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Nie widzisz wiadomości? Sprawdź folder spam.
+            </p>
+            <button
+              onClick={() => { setShowReset(false); setResetSent(false); setResetEmail(""); setResetError(""); }}
+              className="inline-block h-12 px-8 rounded-xl bg-accent text-white font-medium leading-[3rem] active:scale-[0.98] transition-transform"
+            >
+              Wróć do logowania
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
+        <div className="w-full max-w-sm space-y-8">
+          <div className="text-center space-y-2">
+            <a href="https://raporton.pl" className="text-3xl font-bold text-foreground inline-block">Raport<span className="text-accent">ON</span></a>
+            <p className="text-sm text-muted-foreground">Resetowanie hasła</p>
+          </div>
+
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <p className="text-sm text-muted-foreground text-center">
+              Podaj email, na który wyślemy link do ustawienia nowego hasła.
+            </p>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="email"
+                className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-4 text-base focus:outline-none focus:border-accent transition-colors"
+                placeholder="Email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
+
+            {resetError && (
+              <p className="text-sm text-destructive text-center">{resetError}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+            >
+              {resetLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Wyślij link resetujący"}
+            </button>
+          </form>
+
+          <div className="text-center">
+            <button
+              onClick={() => { setShowReset(false); setResetError(""); }}
+              className="text-sm text-accent font-medium hover:underline inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Wróć do logowania
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main login view ──
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
       <div className="w-full max-w-sm space-y-8">
@@ -120,12 +240,22 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || cooldown}
               className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Zaloguj się"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : cooldown ? "Odczekaj..." : "Zaloguj się"}
             </button>
           </form>
+
+          {/* Forgot password */}
+          <div className="text-center">
+            <button
+              onClick={() => { setShowReset(true); setResetEmail(email); }}
+              className="text-xs text-muted-foreground hover:text-accent transition-colors"
+            >
+              Nie pamiętam hasła
+            </button>
+          </div>
         </div>
 
         {/* Links */}
