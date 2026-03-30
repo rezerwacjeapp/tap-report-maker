@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight, Zap, Clock, X, LogOut } from "lucide-react";
+import { Plus, ChevronRight, Zap, Clock, X, LogOut, MessageCircle } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
 import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
 import { checkReportLimit, getCloudDrafts, deleteCloudDraft, type CloudDraft } from "@/lib/supabase-storage";
@@ -128,14 +128,25 @@ const Index = () => {
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Raport serwisowy w minutę</p>
         </div>
-        <button
-          onClick={async () => { await signOut(); navigate("/login"); }}
-          className="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:text-destructive glass-card hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all"
-          title="Wyloguj się"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Wyloguj</span>
-        </button>
+        <div className="flex items-center gap-2 mt-1">
+          <a
+            href="/kontakt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center rounded-xl px-2.5 py-2 text-muted-foreground hover:text-accent glass-card hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all"
+            title="Kontakt"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </a>
+          <button
+            onClick={async () => { await signOut(); navigate("/login"); }}
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:text-destructive glass-card hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all"
+            title="Wyloguj się"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Wyloguj</span>
+          </button>
+        </div>
       </header>
 
       {/* Main */}
