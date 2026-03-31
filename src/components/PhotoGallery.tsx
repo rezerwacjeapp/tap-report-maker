@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, X, Plus } from "lucide-react";
+import { Camera, X, ImagePlus } from "lucide-react";
 
 interface Props {
   photos: string[];
@@ -9,7 +9,8 @@ interface Props {
 }
 
 export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const addPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -19,7 +20,6 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
       if (photos.length >= max) return;
       const reader = new FileReader();
       reader.onload = () => {
-        // Resize for storage
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -48,7 +48,11 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
 
   return (
     <div className="space-y-3">
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={addPhoto} />
+      {/* Camera input — opens camera on mobile */}
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={addPhoto} />
+      {/* File input — opens gallery/files picker */}
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={addPhoto} multiple />
+
       <div className="grid grid-cols-3 gap-2">
         {photos.map((photo, i) => (
           <div key={i} className="relative aspect-square rounded-lg border border-border overflow-hidden bg-muted">
@@ -63,18 +67,26 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
         ))}
         {photos.length < max && (
           <button
-            onClick={() => inputRef.current?.click()}
+            onClick={() => cameraRef.current?.click()}
             className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-card text-muted-foreground hover:border-accent hover:text-accent transition-colors"
           >
             <Camera className="h-6 w-6" />
-            <span className="text-[10px] font-medium">Dodaj</span>
+            <span className="text-[10px] font-medium">Zdjęcie</span>
           </button>
         )}
       </div>
       {photos.length < max && (
-        <Button variant="outline" className="w-full" onClick={() => inputRef.current?.click()}>
-          <Plus className="h-4 w-4 mr-1" /> Zrób zdjęcie ({photos.length}/{max})
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={() => cameraRef.current?.click()}>
+            <Camera className="h-4 w-4 mr-1.5" /> Zrób zdjęcie
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            <ImagePlus className="h-4 w-4 mr-1.5" /> Z galerii
+          </Button>
+        </div>
+      )}
+      {photos.length > 0 && (
+        <p className="text-[10px] text-muted-foreground text-center">{photos.length}/{max} zdjęć</p>
       )}
     </div>
   );
