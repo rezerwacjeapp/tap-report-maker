@@ -18,6 +18,7 @@ import Register from "./pages/Register";
 import Landing from "./pages/Landing";
 import Upgrade from "./pages/Upgrade";
 import SetNewPassword from "./pages/SetNewPassword";
+import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PwaUpdatePrompt />
       <BrowserRouter>
         <AuthProvider>
           <AppShell />
