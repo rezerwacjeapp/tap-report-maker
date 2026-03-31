@@ -48,7 +48,7 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
 
   return (
     <div className="space-y-3">
-      <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={addPhoto} />
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={addPhoto} />
       <div className="grid grid-cols-3 gap-2">
         {photos.map((photo, i) => (
           <div key={i} className="relative aspect-square rounded-lg border border-border overflow-hidden bg-muted">
