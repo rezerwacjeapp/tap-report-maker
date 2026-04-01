@@ -16,6 +16,8 @@ import {
   checkReportLimit, incrementReportCount, getCloudNextReportNumber,
   saveCloudDraft, deleteCloudDraft, getCloudDraft,
 } from "@/lib/supabase-storage";
+import { uploadSnapshotImages } from "@/lib/image-storage";
+import { useAuth } from "@/hooks/use-auth";
 import type { CompanyProfile } from "@/lib/storage";
 import { toast } from "sonner";
 import {
@@ -26,6 +28,7 @@ import {
 
 export default function ReportWizard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template") || "";
   const draftParam = searchParams.get("draft") || "";
@@ -204,12 +207,11 @@ export default function ReportWizard() {
       // Save to Supabase
       const cloudId = await addCloudReport(meta);
 
-      // Save snapshot for re-download
-      saveCloudSnapshot(cloudId, {
-        draft: { ...draft },
-        profile: { ...profile },
-        options: { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader },
-      }).catch((e) => console.warn("Snapshot save failed:", e));
+      // Save snapshot — upload images to Storage, save lightweight data to DB
+      const snapshotOptions = { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader };
+      uploadSnapshotImages(user!.id, cloudId, draft, profile, snapshotOptions)
+        .then((lightSnapshot) => saveCloudSnapshot(cloudId, lightSnapshot))
+        .catch((e) => console.warn("Snapshot save failed:", e));
 
       // Increment report count for free plan
       incrementReportCount().catch(() => {});
