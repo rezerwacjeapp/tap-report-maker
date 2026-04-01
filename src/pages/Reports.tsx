@@ -11,6 +11,8 @@ import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
   getCloudSnapshot, getCloudProfile,
 } from "@/lib/supabase-storage";
+import { downloadSnapshotImages, deleteReportImages } from "@/lib/image-storage";
+import { useAuth } from "@/hooks/use-auth";
 import { STARTER_TEMPLATES } from "@/lib/templates";
 import { toast } from "sonner";
 import {
@@ -44,6 +46,7 @@ function getTemplateIcon(templateName: string) {
 
 export default function Reports() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [reports, setReports] = useState<ReportHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -72,6 +75,7 @@ export default function Reports() {
   const handleDelete = async (id: string) => {
     await removeCloudReport(id).catch(() => {});
     deleteCloudSnapshot(id).catch(() => {});
+    if (user) deleteReportImages(user.id, id).catch(() => {});
     setReports((prev) => prev.filter((r) => r.id !== id));
     setDeleteId(null);
     if (expandedId === id) setExpandedId(null);
@@ -288,7 +292,8 @@ export default function Reports() {
                           try {
                             const snapshot = await getCloudSnapshot(report.id);
                             if (snapshot) {
-                              generateReport(snapshot.profile, snapshot.draft, snapshot.options);
+                              const restored = await downloadSnapshotImages(snapshot);
+                              generateReport(restored.profile, restored.draft, restored.options);
                               toast.success("PDF pobrany!");
                             } else {
                               const profile = await getCloudProfile();
