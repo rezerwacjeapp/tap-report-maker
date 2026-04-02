@@ -25,6 +25,6 @@
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/google05bcb868e7adc9d7.html", "destination": "/google05bcb868e7adc9d7.html" },
-    { "source": "/favicon.ico", "destination": "/favicon-48.png" },
+    { "source": "/favicon.ico", "destination": "/favicon-48.png" }
   ]
 }
