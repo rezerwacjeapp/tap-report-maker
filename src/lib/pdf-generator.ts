@@ -167,6 +167,44 @@ export function generateReport(
   };
 
   customFields.forEach((field) => {
+    // --- HEADING (static section header) ---
+    if (field.type === "heading") {
+      flushDataRows();
+      content.push({
+        text: field.label,
+        style: "sectionHeader",
+        margin: [0, 10, 0, 6] as [number, number, number, number],
+      });
+      return;
+    }
+
+    // --- INFO (static text block) ---
+    if (field.type === "info") {
+      flushDataRows();
+      const infoStack: any[] = [];
+      if (field.label) {
+        infoStack.push({
+          text: field.label,
+          bold: true,
+          fontSize: 10,
+          margin: [0, 6, 0, 4] as [number, number, number, number],
+        });
+      }
+      if (field.content) {
+        infoStack.push({
+          text: field.content,
+          fontSize: 9,
+          color: COLORS.gray,
+          lineHeight: 1.4,
+          margin: [0, 0, 0, 8] as [number, number, number, number],
+        });
+      }
+      if (infoStack.length > 0) {
+        content.push({ stack: infoStack });
+      }
+      return;
+    }
+
     // --- DATA FIELDS (text, textarea, date, number) ---
     if (["text", "textarea", "date", "number"].includes(field.type)) {
       const value = draft.customFields[field.id];
