@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown, Type, AlignLeft, Calendar, Hash, Camera, PenTool, ListChecks } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown, Type, AlignLeft, Calendar, Hash, Camera, PenTool, ListChecks, Heading1, FileText } from "lucide-react";
 import {
   getTemplateById, saveUserTemplate, createBlankTemplate, duplicateTemplate,
   FIELD_CATALOG, getActiveFieldBlockIds,
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   text: "Tekst", textarea: "Tekst długi", date: "Data", number: "Liczba",
   tiles: "Czynności", photos: "Zdjęcia", signature: "Podpis",
+  heading: "Nagłówek", info: "Tekst stały",
 };
 
 const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
@@ -24,6 +25,8 @@ const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
   tiles: "Sekcja z checkboxami do odhaczania — np. lista czynności serwisowych.",
   photos: "Dokumentacja fotograficzna — osobne zdjęcia dla tej sekcji raportu.",
   signature: "Pole na podpis palcem — np. podpis klienta, serwisanta, inspektora.",
+  heading: "Nagłówek sekcji — pogrubiony tekst dzielący raport na części.",
+  info: "Blok tekstu informacyjnego — np. podstawa prawna, uwagi, instrukcje.",
 };
 
 export default function EditTemplate() {
@@ -43,6 +46,7 @@ export default function EditTemplate() {
   const [stagingTilesName, setStagingTilesName] = useState("");
   const [stagingTiles, setStagingTiles] = useState<{id: string; label: string}[]>([]);
   const [stagingTileInput, setStagingTileInput] = useState("");
+  const [stagingInfoContent, setStagingInfoContent] = useState("");
 
   const addStagingTile = () => {
     if (!stagingTileInput.trim()) return;
@@ -191,7 +195,7 @@ export default function EditTemplate() {
     </div>
   );
 
-  const dataFieldCount = template.fields.filter((f) => !["tiles", "photos", "signature"].includes(f.type)).length;
+  const dataFieldCount = template.fields.filter((f) => !["tiles", "photos", "signature", "heading", "info"].includes(f.type)).length;
   const tileOptionCount = countTileOptions(template);
   const sigCount = template.fields.filter((f) => f.type === "signature").length;
   const hasPhotosField = template.fields.some((f) => f.type === "photos");
@@ -279,6 +283,8 @@ export default function EditTemplate() {
               { type: "number" as CustomFieldType, icon: Hash, label: "Liczba", hint: "np. ilość, powierzchnia" },
               { type: "photos" as CustomFieldType, icon: Camera, label: "Zdjęcia", hint: "dokumentacja foto" },
               { type: "signature" as CustomFieldType, icon: PenTool, label: "Podpis", hint: "podpis palcem" },
+              { type: "heading" as CustomFieldType, icon: Heading1, label: "Nagłówek", hint: "tytuł sekcji" },
+              { type: "info" as CustomFieldType, icon: FileText, label: "Tekst stały", hint: "opis, uwagi prawne" },
             ]).map(({ type, icon: Icon, label, hint }) => (
               <button
                 key={type}
@@ -320,9 +326,9 @@ export default function EditTemplate() {
           </button>
 
           {/* === Expanded panel for simple types === */}
-          {expandedAddType && !["signature", "tiles"].includes(expandedAddType) && (
+          {expandedAddType && !["signature", "tiles", "info"].includes(expandedAddType) && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Wpisz nazwę pola typu <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
+              <p className="text-xs text-muted-foreground">Wpisz {expandedAddType === "heading" ? "treść nagłówka" : `nazwę pola typu`} <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
               <div className="flex gap-1.5">
                 <input
                   ref={addFieldInputRef}
@@ -330,12 +336,49 @@ export default function EditTemplate() {
                   value={newFieldLabel}
                   onChange={(e) => setNewFieldLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField(expandedAddType); }}
-                  placeholder={FIELD_TYPE_HINTS[expandedAddType]}
+                  placeholder={expandedAddType === "heading" ? "np. Podstawa prawna" : FIELD_TYPE_HINTS[expandedAddType]}
                 />
                 <Button variant="accent" onClick={() => addCustomField(expandedAddType)} disabled={!newFieldLabel.trim()} className="h-10 px-4 shrink-0">
                   <Plus className="h-4 w-4 mr-1" /> Dodaj
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* === Expanded panel for INFO (static text block) === */}
+          {expandedAddType === "info" && (
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
+              <p className="text-xs text-muted-foreground">Wpisz nazwę sekcji i treść tekstu informacyjnego:</p>
+              <input
+                ref={addFieldInputRef}
+                className="w-full h-10 rounded-xl border border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
+                value={newFieldLabel}
+                onChange={(e) => setNewFieldLabel(e.target.value)}
+                placeholder="Nazwa sekcji — np. Uwagi, Podstawa prawna"
+              />
+              <textarea
+                className="w-full min-h-[100px] rounded-xl border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:border-accent resize-y"
+                value={stagingInfoContent}
+                onChange={(e) => setStagingInfoContent(e.target.value)}
+                placeholder="Treść tekstu — np. Kontrolę należy wykonywać w porze wiosennej..."
+              />
+              <Button variant="accent" onClick={() => {
+                if (!newFieldLabel.trim()) return;
+                const f: CustomFieldDef = {
+                  id: `cf_${Date.now()}`,
+                  label: newFieldLabel.trim(),
+                  type: "info",
+                  remember: false,
+                  order: template!.fields.length,
+                  content: stagingInfoContent.trim(),
+                };
+                setTemplate({ ...template!, fields: [...template!.fields, f] });
+                setNewFieldLabel("");
+                setStagingInfoContent("");
+                setExpandedAddType(null);
+              }} disabled={!newFieldLabel.trim()} className="w-full">
+                <Plus className="h-4 w-4 mr-1" /> Dodaj tekst stały
+              </Button>
             </div>
           )}
 
@@ -415,6 +458,8 @@ export default function EditTemplate() {
                   {/* Editable label for signature fields */}
                   {field.type === "signature" ? (
                     <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Nazwa podpisu" />
+                  ) : field.type === "heading" ? (
+                    <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none font-bold" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Treść nagłówka" />
                   ) : (
                     <span className="text-sm flex-1 truncate">{field.label}</span>
                   )}
@@ -445,6 +490,18 @@ export default function EditTemplate() {
                       />
                       <Button variant="accent" size="icon" onClick={() => addTileOption(field.id)} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
                     </div>
+                  </div>
+                )}
+
+                {/* Info content editor */}
+                {field.type === "info" && (
+                  <div className="ml-6 mt-1 mb-2 border-l-2 border-accent/30 pl-3">
+                    <textarea
+                      className="w-full min-h-[60px] rounded-md border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-accent resize-y"
+                      value={field.content || ""}
+                      onChange={(e) => setTemplate({ ...template, fields: template.fields.map((f) => f.id === field.id ? { ...f, content: e.target.value } : f) })}
+                      placeholder="Treść tekstu informacyjnego..."
+                    />
                   </div>
                 )}
               </div>
