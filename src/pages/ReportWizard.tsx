@@ -354,8 +354,25 @@ export default function ReportWizard() {
               <EyeOff className="h-4 w-4" />
             </button>
 
-            {/* TILES */}
-            {field.type === "tiles" ? (
+            {/* HEADING — static section header */}
+            {field.type === "heading" ? (
+              <div className="pt-2">
+                <h3 className="text-base font-bold text-foreground border-b-2 border-accent/30 pb-1">{field.label}</h3>
+              </div>
+
+            /* INFO — static text block */
+            ) : field.type === "info" ? (
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-1">{field.label}</h4>
+                {field.content && (
+                  <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                    {field.content}
+                  </div>
+                )}
+              </div>
+
+            /* TILES */
+            ) : field.type === "tiles" ? (
               <div>
                 <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
                 {(field.tileOptions || []).length > 0 ? (
