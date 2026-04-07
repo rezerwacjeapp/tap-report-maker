@@ -331,8 +331,16 @@ export default function ReportWizard() {
       </header>
 
       <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto">
-        {/* Report number — editable */}
-        <div>
+        {/* Report number — editable, hideable */}
+        {!hiddenFieldIds.has("__reportNumber") && (
+        <div className="relative">
+          <button
+            onClick={() => toggleFieldVis("__reportNumber")}
+            className="absolute top-0 right-0 p-1 text-muted-foreground hover:text-foreground z-10"
+            title="Ukryj to pole"
+          >
+            <EyeOff className="h-4 w-4" />
+          </button>
           <label className="text-sm font-medium mb-1.5 block">Numer raportu</label>
           <input
             type="text"
@@ -342,6 +350,7 @@ export default function ReportWizard() {
             placeholder="np. 001/2026"
           />
         </div>
+        )}
 
         {visibleFields.map((field) => (
           <div key={field.id} className="relative">
@@ -486,7 +495,12 @@ export default function ReportWizard() {
         {hiddenFieldIds.size > 0 && (
           <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">{hiddenFieldIds.size} ukrytych pól</span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              {hiddenFieldIds.has("__reportNumber") && (
+                <button onClick={() => toggleFieldVis("__reportNumber")} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground bg-card rounded px-2 py-1 border border-border">
+                  <Eye className="h-3 w-3" /> Numer raportu
+                </button>
+              )}
               {allFields.filter((f) => hiddenFieldIds.has(f.id)).map((f) => (
                 <button key={f.id} onClick={() => toggleFieldVis(f.id)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground bg-card rounded px-2 py-1 border border-border">
                   <Eye className="h-3 w-3" /> {f.label}
