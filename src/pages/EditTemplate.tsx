@@ -8,7 +8,8 @@ import {
   getFieldCategories, STARTER_TEMPLATES, countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
-import type { CustomFieldDef, CustomFieldType } from "@/lib/storage";
+import type { CustomFieldDef, CustomFieldType, TextStyle } from "@/lib/storage";
+import { STYLE_COLORS } from "@/lib/storage";
 import { toast } from "sonner";
 
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
@@ -168,6 +169,45 @@ export default function EditTemplate() {
 
   const updateFieldLabel = (id: string, label: string) => {
     setTemplate({ ...template, fields: template.fields.map((f) => f.id === id ? { ...f, label } : f) });
+  };
+
+  const updateFieldStyle = (id: string, key: "labelStyle" | "contentStyle", patch: Partial<TextStyle>) => {
+    setTemplate({ ...template, fields: template.fields.map((f) => {
+      if (f.id !== id) return f;
+      const current = f[key] || {};
+      const updated = { ...current, ...patch };
+      // Remove default color to keep data clean
+      if (updated.color === "default" || updated.color === "#1e293b") delete updated.color;
+      if (!updated.bold) delete updated.bold;
+      if (!updated.italic) delete updated.italic;
+      return { ...f, [key]: Object.keys(updated).length > 0 ? updated : undefined };
+    }) });
+  };
+
+  const StyleToolbar = ({ field, styleKey }: { field: CustomFieldDef; styleKey: "labelStyle" | "contentStyle" }) => {
+    const style = field[styleKey] || {};
+    return (
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => updateFieldStyle(field.id, styleKey, { bold: !style.bold })}
+          className={`w-6 h-6 rounded text-xs font-bold flex items-center justify-center border ${style.bold ? "bg-accent text-white border-accent" : "bg-card text-muted-foreground border-border hover:border-accent"}`}
+        >B</button>
+        <button
+          onClick={() => updateFieldStyle(field.id, styleKey, { italic: !style.italic })}
+          className={`w-6 h-6 rounded text-xs italic flex items-center justify-center border ${style.italic ? "bg-accent text-white border-accent" : "bg-card text-muted-foreground border-border hover:border-accent"}`}
+        >I</button>
+        <span className="w-px h-4 bg-border mx-0.5" />
+        {STYLE_COLORS.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => updateFieldStyle(field.id, styleKey, { color: c.id === "default" ? undefined : c.hex })}
+            className={`w-5 h-5 rounded-full border-2 transition-all ${(style.color === c.hex || (!style.color && c.id === "default")) ? "border-accent scale-110" : "border-transparent hover:border-muted-foreground"}`}
+            style={{ backgroundColor: c.hex }}
+            title={c.label}
+          />
+        ))}
+      </div>
+    );
   };
 
   const handleDragStart = (index: number) => { dragItemRef.current = index; };
@@ -466,6 +506,21 @@ export default function EditTemplate() {
                   <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : ""}</span>
                   <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0"><X className="h-4 w-4" /></button>
                 </div>
+
+                {/* Style toolbar for label */}
+                {!["photos"].includes(field.type) && (
+                  <div className="ml-6 mt-1 mb-1 flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">{field.type === "info" ? "Nazwa:" : "Styl:"}</span>
+                    <StyleToolbar field={field} styleKey="labelStyle" />
+                  </div>
+                )}
+                {/* Style toolbar for info content */}
+                {field.type === "info" && (
+                  <div className="ml-6 mb-1 flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">Treść:</span>
+                    <StyleToolbar field={field} styleKey="contentStyle" />
+                  </div>
+                )}
 
                 {/* Tile options editor */}
                 {field.type === "tiles" && (
