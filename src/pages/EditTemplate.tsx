@@ -348,13 +348,13 @@ export default function EditTemplate() {
           {/* === Expanded panel for INFO (static text block) === */}
           {expandedAddType === "info" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Wpisz nazwę sekcji i treść tekstu informacyjnego:</p>
+              <p className="text-xs text-muted-foreground">Wpisz treść tekstu informacyjnego (nazwa sekcji jest opcjonalna):</p>
               <input
                 ref={addFieldInputRef}
                 className="w-full h-10 rounded-xl border border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
                 value={newFieldLabel}
                 onChange={(e) => setNewFieldLabel(e.target.value)}
-                placeholder="Nazwa sekcji — np. Uwagi, Podstawa prawna"
+                placeholder="Nazwa sekcji (opcjonalnie)"
               />
               <textarea
                 className="w-full min-h-[100px] rounded-xl border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:border-accent resize-y"
@@ -363,7 +363,7 @@ export default function EditTemplate() {
                 placeholder="Treść tekstu — np. Kontrolę należy wykonywać w porze wiosennej..."
               />
               <Button variant="accent" onClick={() => {
-                if (!newFieldLabel.trim()) return;
+                if (!newFieldLabel.trim() && !stagingInfoContent.trim()) return;
                 const f: CustomFieldDef = {
                   id: `cf_${Date.now()}`,
                   label: newFieldLabel.trim(),
@@ -376,7 +376,7 @@ export default function EditTemplate() {
                 setNewFieldLabel("");
                 setStagingInfoContent("");
                 setExpandedAddType(null);
-              }} disabled={!newFieldLabel.trim()} className="w-full">
+              }} disabled={!newFieldLabel.trim() && !stagingInfoContent.trim()} className="w-full">
                 <Plus className="h-4 w-4 mr-1" /> Dodaj tekst stały
               </Button>
             </div>
@@ -461,7 +461,7 @@ export default function EditTemplate() {
                   ) : field.type === "heading" ? (
                     <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none font-bold" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Treść nagłówka" />
                   ) : (
-                    <span className="text-sm flex-1 truncate">{field.label}</span>
+                    <span className="text-sm flex-1 truncate">{field.label || (field.type === "info" && field.content ? field.content.substring(0, 60) + (field.content.length > 60 ? "…" : "") : field.label)}</span>
                   )}
                   <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : ""}</span>
                   <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0"><X className="h-4 w-4" /></button>
