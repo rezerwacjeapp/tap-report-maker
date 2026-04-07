@@ -7,7 +7,7 @@ import { VoiceButton } from "@/components/VoiceButton";
 import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
-  type ReportDraft,
+  type ReportDraft, type TextStyle,
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
 import { generateReport, type TemplateOptions } from "@/lib/pdf-generator";
@@ -25,6 +25,15 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const textStyleToCss = (s?: TextStyle): React.CSSProperties | undefined => {
+  if (!s) return undefined;
+  const css: React.CSSProperties = {};
+  if (s.bold) css.fontWeight = "bold";
+  if (s.italic) css.fontStyle = "italic";
+  if (s.color) css.color = s.color;
+  return Object.keys(css).length > 0 ? css : undefined;
+};
 
 export default function ReportWizard() {
   const navigate = useNavigate();
@@ -366,15 +375,15 @@ export default function ReportWizard() {
             {/* HEADING — static section header */}
             {field.type === "heading" ? (
               <div className="pt-2">
-                <h3 className="text-base font-bold text-foreground border-b-2 border-accent/30 pb-1">{field.label}</h3>
+                <h3 className="text-base font-bold text-foreground border-b-2 border-accent/30 pb-1" style={textStyleToCss(field.labelStyle)}>{field.label}</h3>
               </div>
 
             /* INFO — static text block */
             ) : field.type === "info" ? (
               <div>
-                {field.label && <h4 className="text-sm font-semibold text-foreground mb-1">{field.label}</h4>}
+                {field.label && <h4 className="text-sm font-semibold text-foreground mb-1" style={textStyleToCss(field.labelStyle)}>{field.label}</h4>}
                 {field.content && (
-                  <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed" style={textStyleToCss(field.contentStyle)}>
                     {field.content}
                   </div>
                 )}
@@ -383,7 +392,7 @@ export default function ReportWizard() {
             /* TILES */
             ) : field.type === "tiles" ? (
               <div>
-                <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
+                <label className="text-sm font-medium mb-2 block pr-6" style={textStyleToCss(field.labelStyle)}>{field.label}</label>
                 {(field.tileOptions || []).length > 0 ? (
                   <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
                     {(field.tileOptions || []).map((tile) => {
@@ -437,14 +446,14 @@ export default function ReportWizard() {
             /* PHOTOS */
             ) : field.type === "photos" ? (
               <div>
-                <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
+                <label className="text-sm font-medium mb-2 block pr-6" style={textStyleToCss(field.labelStyle)}>{field.label}</label>
                 <PhotoGallery photos={draft.photosByField[field.id] || []} onChange={(photos) => update({ photosByField: { ...draft.photosByField, [field.id]: photos } })} />
               </div>
 
             /* SIGNATURE */
             ) : field.type === "signature" ? (
               <div>
-                <label className="text-sm font-medium mb-2 block pr-6">{field.label}</label>
+                <label className="text-sm font-medium mb-2 block pr-6" style={textStyleToCss(field.labelStyle)}>{field.label}</label>
                 <SignatureCanvas
                   value={draft.signatures[field.id] || null}
                   onChange={(data) => updateSignature(field.id, data)}
@@ -455,7 +464,7 @@ export default function ReportWizard() {
             /* TEXTAREA */
             ) : field.type === "textarea" ? (
               <div>
-                <label className="text-sm font-medium mb-1.5 block pr-6">
+                <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
@@ -468,7 +477,7 @@ export default function ReportWizard() {
             /* TEXT */
             ) : field.type === "text" ? (
               <div>
-                <label className="text-sm font-medium mb-1.5 block pr-6">
+                <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
@@ -481,7 +490,7 @@ export default function ReportWizard() {
             /* NUMBER / DATE */
             ) : (
               <div>
-                <label className="text-sm font-medium mb-1.5 block pr-6">
+                <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
                 </label>
