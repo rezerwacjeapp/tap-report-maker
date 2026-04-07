@@ -22,6 +22,20 @@ export interface TileItem {
 
 export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles" | "photos" | "signature" | "heading" | "info";
 
+export interface TextStyle {
+  bold?: boolean;
+  italic?: boolean;
+  color?: string; // one of STYLE_COLORS
+}
+
+export const STYLE_COLORS = [
+  { id: "default", label: "Domyślny", hex: "#1e293b" },
+  { id: "gray", label: "Szary", hex: "#6b7280" },
+  { id: "blue", label: "Niebieski", hex: "#2563eb" },
+  { id: "orange", label: "Pomarańczowy", hex: "#ea580c" },
+  { id: "red", label: "Czerwony", hex: "#dc2626" },
+];
+
 export interface CustomFieldDef {
   id: string;
   label: string;
@@ -30,6 +44,8 @@ export interface CustomFieldDef {
   order: number;
   tileOptions?: TileItem[];
   content?: string; // for "info" type — the full text block
+  labelStyle?: TextStyle;
+  contentStyle?: TextStyle; // for "info" type — style of content text
 }
 
 export interface ReportDraft {
