@@ -372,7 +372,7 @@ export default function ReportWizard() {
             /* INFO — static text block */
             ) : field.type === "info" ? (
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-1">{field.label}</h4>
+                {field.label && <h4 className="text-sm font-semibold text-foreground mb-1">{field.label}</h4>}
                 {field.content && (
                   <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
                     {field.content}
