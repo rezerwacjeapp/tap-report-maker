@@ -187,7 +187,7 @@ export function generateReport(
           text: field.label,
           bold: true,
           fontSize: 10,
-          margin: [0, 6, 0, 4] as [number, number, number, number],
+          margin: [4, 6, 0, 4] as [number, number, number, number],
         });
       }
       if (field.content) {
@@ -196,7 +196,7 @@ export function generateReport(
           fontSize: 9,
           color: COLORS.gray,
           lineHeight: 1.4,
-          margin: [0, 0, 0, 8] as [number, number, number, number],
+          margin: [4, 0, 0, 8] as [number, number, number, number],
         });
       }
       if (infoStack.length > 0) {
