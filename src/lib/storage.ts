@@ -25,7 +25,8 @@ export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles" 
 export interface TextStyle {
   bold?: boolean;
   italic?: boolean;
-  color?: string; // one of STYLE_COLORS
+  color?: string;
+  align?: "left" | "center" | "right";
 }
 
 export const STYLE_COLORS = [
