@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw, Star,
 } from "lucide-react";
 import {
-  getUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
+  getUserTemplates, fetchUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
   countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
@@ -66,6 +66,10 @@ export default function SelectTemplate() {
   const navigate = useNavigate();
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUserTemplates().then(setUserTemplates).catch(() => {});
+  }, []);
   const [showStarters, setShowStarters] = useState(true);
   const [hiddenStarters, setHiddenStarters] = useState<Set<string>>(getHiddenStarters);
   const [quickStartIds, setQuickStartIds] = useState<Set<string>>(getQuickStartIds);
@@ -112,14 +116,14 @@ export default function SelectTemplate() {
     navigate(`/edit-template?from=${starter.id}`);
   };
 
-  const handleDuplicateUser = (template: ReportTemplate) => {
-    const dup = duplicateTemplate(template, `${template.name} (kopia)`);
+  const handleDuplicateUser = async (template: ReportTemplate) => {
+    const dup = await duplicateTemplate(template, `${template.name} (kopia)`);
     setUserTemplates(getUserTemplates());
     toast.success(`Skopiowano jako "${dup.name}"`);
   };
 
-  const handleDelete = (id: string) => {
-    deleteUserTemplate(id);
+  const handleDelete = async (id: string) => {
+    await deleteUserTemplate(id);
     setUserTemplates(getUserTemplates());
     setDeleteId(null);
     toast.success("Szablon usunięty");
