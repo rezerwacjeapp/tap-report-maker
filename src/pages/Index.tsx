@@ -62,7 +62,7 @@ const Index = () => {
 
   useEffect(() => {
     checkReportLimit()
-      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan, trial: info.trial, trialDaysLeft: info.trialDaysLeft })))
+      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan, trial: info.trial, trialDaysLeft: info.trialDaysLeft }))
       .catch(() => {});
     getCloudDrafts().then(setCloudDrafts).catch(() => {});
     fetchUserTemplates().then(setUserTemplates).catch(() => {});
