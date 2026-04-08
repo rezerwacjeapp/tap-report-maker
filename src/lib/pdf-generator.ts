@@ -32,7 +32,7 @@ const buildStyledLabel = (text: string, baseStyle: string, style?: TextStyle, ex
   const base = STYLE_DEFAULTS[baseStyle] || {};
   return {
     text,
-    fontSize: base.fontSize,
+    fontSize: style.bold ? base.fontSize + 1 : base.fontSize,
     color: style.color || base.color,
     bold: style.bold ?? base.bold ?? false,
     italics: style.italic || false,
