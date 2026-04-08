@@ -19,13 +19,25 @@ const COLORS = {
   gray: "#6b7280",
 };
 
-/** Apply TextStyle to a pdfmake text object */
-const applyTextStyle = (obj: any, style?: TextStyle): any => {
-  if (!style) return obj;
-  if (style.bold !== undefined) obj.bold = style.bold;
-  if (style.italic) obj.italics = true;
-  if (style.color) obj.color = style.color;
-  return obj;
+/** Build a pdfmake label object with optional TextStyle overrides.
+ *  When labelStyle is provided, we skip the named style to avoid conflicts
+ *  (e.g. fieldLabel has bold:true by default, making bold toggle invisible). */
+const buildStyledLabel = (text: string, baseStyle: string, style?: TextStyle, extra?: any): any => {
+  if (!style) return { text, style: baseStyle, ...extra };
+  // Resolve base style properties manually
+  const STYLE_DEFAULTS: Record<string, any> = {
+    fieldLabel: { fontSize: 9, bold: true, color: COLORS.gray },
+    sectionHeader: { fontSize: 11, bold: true, color: COLORS.primary },
+  };
+  const base = STYLE_DEFAULTS[baseStyle] || {};
+  return {
+    text,
+    fontSize: base.fontSize,
+    color: style.color || base.color,
+    bold: style.bold ?? base.bold ?? false,
+    italics: style.italic || false,
+    ...extra,
+  };
 };
 
 export interface GeneratedReport {
@@ -179,11 +191,9 @@ export function generateReport(
     // --- HEADING (static section header) ---
     if (field.type === "heading") {
       flushDataRows();
-      content.push(applyTextStyle({
-        text: field.label,
-        style: "sectionHeader",
+      content.push(buildStyledLabel(field.label, "sectionHeader", field.labelStyle, {
         margin: [0, 10, 0, 6] as [number, number, number, number],
-      }, field.labelStyle));
+      }));
       return;
     }
 
@@ -192,21 +202,27 @@ export function generateReport(
       flushDataRows();
       const infoStack: any[] = [];
       if (field.label) {
-        infoStack.push(applyTextStyle({
+        const ls = field.labelStyle;
+        infoStack.push({
           text: field.label,
-          bold: true,
+          bold: ls?.bold ?? true,
+          italics: ls?.italic || false,
+          color: ls?.color || COLORS.primary,
           fontSize: 10,
           margin: [4, 6, 0, 4] as [number, number, number, number],
-        }, field.labelStyle));
+        });
       }
       if (field.content) {
-        infoStack.push(applyTextStyle({
+        const cs = field.contentStyle;
+        infoStack.push({
           text: field.content,
+          bold: cs?.bold || false,
+          italics: cs?.italic || false,
+          color: cs?.color || COLORS.gray,
           fontSize: 9,
-          color: COLORS.gray,
           lineHeight: 1.4,
           margin: [4, 0, 0, 8] as [number, number, number, number],
-        }, field.contentStyle));
+        });
       }
       if (infoStack.length > 0) {
         content.push({ stack: infoStack });
@@ -221,14 +237,14 @@ export function generateReport(
 
       if (field.type === "textarea") {
         pendingDataRows.push([
-          applyTextStyle({ text: field.label, style: "fieldLabel", colSpan: 2, border: [false, false, false, false] }, field.labelStyle), {},
+          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
         ]);
         pendingDataRows.push([
           { text: value, style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
         ]);
       } else {
         pendingDataRows.push([
-          applyTextStyle({ text: field.label, style: "fieldLabel", border: [false, false, false, true] }, field.labelStyle),
+          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
           { text: value, style: "fieldValue", border: [false, false, false, true] },
         ]);
       }
@@ -287,7 +303,7 @@ export function generateReport(
       // Wrap header + table in unbreakable stack so they don't split across pages
       content.push({
         stack: [
-          applyTextStyle({ text: field.label, style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] }, field.labelStyle),
+          buildStyledLabel(field.label, "sectionHeader", field.labelStyle, { margin: [0, 4, 0, 8] as [number, number, number, number] }),
           {
             table: { headerRows: 1, widths: [30, "*", 45], body },
             layout: {
