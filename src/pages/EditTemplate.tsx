@@ -178,8 +178,9 @@ export default function EditTemplate() {
       const updated = { ...current, ...patch };
       // Remove default color to keep data clean
       if (updated.color === "default" || updated.color === "#1e293b") delete updated.color;
-      if (!updated.bold) delete updated.bold;
-      if (!updated.italic) delete updated.italic;
+      // Keep bold/italic even when false (explicit user choice)
+      if (updated.bold === undefined) delete updated.bold;
+      if (updated.italic === undefined) delete updated.italic;
       return { ...f, [key]: Object.keys(updated).length > 0 ? updated : undefined };
     }) });
   };
