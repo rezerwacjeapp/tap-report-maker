@@ -378,7 +378,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="px-5 py-3 text-center">
-        <p className="text-[11px] text-muted-foreground">RaportON v1.0 • Działa offline</p>
+        <p className="text-[11px] text-muted-foreground">RaportON v2.0</p>
       </footer>
     </div>
   );
