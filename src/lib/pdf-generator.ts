@@ -36,6 +36,7 @@ const buildStyledLabel = (text: string, baseStyle: string, style?: TextStyle, ex
     color: style.color || base.color,
     bold: style.bold ?? base.bold ?? false,
     italics: style.italic || false,
+    alignment: style.align || undefined,
     ...extra,
   };
 };
@@ -207,6 +208,7 @@ export function generateReport(
           text: field.label,
           bold: ls?.bold ?? true,
           italics: ls?.italic || false,
+          alignment: ls?.align || undefined,
           color: ls?.color || COLORS.primary,
           fontSize: 10,
           margin: [4, 6, 0, 4] as [number, number, number, number],
@@ -218,6 +220,7 @@ export function generateReport(
           text: field.content,
           bold: cs?.bold || false,
           italics: cs?.italic || false,
+          alignment: cs?.align || undefined,
           color: cs?.color || COLORS.gray,
           fontSize: 9,
           lineHeight: 1.4,
