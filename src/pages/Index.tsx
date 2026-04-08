@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight, Zap, Clock, X, LogOut, MessageCircle } from "lucide-react";
 import { getProfile, getReportHistory } from "@/lib/storage";
-import { getUserTemplates, STARTER_TEMPLATES } from "@/lib/templates";
+import { getUserTemplates, fetchUserTemplates, STARTER_TEMPLATES, type ReportTemplate } from "@/lib/templates";
 import { checkReportLimit, getCloudDrafts, deleteCloudDraft, type CloudDraft } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -56,14 +56,16 @@ const Index = () => {
   const reports = getReportHistory();
   const recentReports = reports.slice(0, 3);
 
-  const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string; trial?: boolean; trialDaysLeft?: number } | null>(null);
+  const [planInfo, setPlanInfo] = useState<...>(null);
   const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
+  const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
 
   useEffect(() => {
     checkReportLimit()
-      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan, trial: info.trial, trialDaysLeft: info.trialDaysLeft }))
+      .then(...)
       .catch(() => {});
     getCloudDrafts().then(setCloudDrafts).catch(() => {});
+    fetchUserTemplates().then(setUserTemplates).catch(() => {});
   }, []);
 
   const handleDeleteDraft = (id: string) => {
@@ -73,7 +75,6 @@ const Index = () => {
 
   const hiddenStarters = getHiddenStarters();
   const quickStartIds = getQuickStartIds();
-  const userTemplates = getUserTemplates();
   const userTemplateCount = userTemplates.length;
 
   const quickStartTemplates: { id: string; name: string; icon: string }[] = [];
