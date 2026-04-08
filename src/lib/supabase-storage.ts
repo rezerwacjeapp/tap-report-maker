@@ -383,3 +383,58 @@ export async function getCloudNextReportNumber(): Promise<string> {
   const num = (error ? 0 : (count || 0)) + 1;
   return `${String(num).padStart(3, "0")}/${year}`;
 }
+// ─── USER TEMPLATES ─────────────────────────────────────────
+
+import type { ReportTemplate } from "./templates";
+
+export async function getCloudUserTemplates(): Promise<ReportTemplate[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("user_templates")
+    .select("id, template_data")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+  return data.map((row: any) => ({ ...row.template_data, id: row.id }));
+}
+
+export async function saveCloudUserTemplate(template: ReportTemplate): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { id, ...rest } = template;
+  await supabase
+    .from("user_templates")
+    .upsert({
+      id,
+      user_id: user.id,
+      template_data: { ...rest, id },
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,id" });
+}
+
+export async function deleteCloudUserTemplate(id: string): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("user_templates").delete().eq("id", id).eq("user_id", user.id);
+}
+
+export async function migrateLocalTemplatesToCloud(templates: ReportTemplate[]): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || templates.length === 0) return;
+
+  const rows = templates.map((t) => ({
+    id: t.id,
+    user_id: user.id,
+    template_data: t,
+    updated_at: new Date().toISOString(),
+  }));
+
+  await supabase
+    .from("user_templates")
+    .upsert(rows, { onConflict: "user_id,id" });
+}
