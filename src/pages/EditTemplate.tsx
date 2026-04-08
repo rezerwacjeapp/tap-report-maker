@@ -78,20 +78,23 @@ export default function EditTemplate() {
   const addFieldInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isNew) {
-      setTemplate(createBlankTemplate("Nowy szablon"));
-    } else if (fromStarter) {
-      const starter = STARTER_TEMPLATES.find((s) => s.id === fromStarter);
-      if (starter) setTemplate(duplicateTemplate(starter, starter.name));
-      else navigate("/select-template");
-    } else if (sourceId) {
-      const t = getTemplateById(sourceId);
-      if (t && !t.builtIn) setTemplate({ ...t });
-      else if (t) setTemplate(duplicateTemplate(t, t.name));
-      else navigate("/select-template");
-    } else {
-      navigate("/select-template");
-    }
+    const init = async () => {
+      if (isNew) {
+        setTemplate(await createBlankTemplate("Nowy szablon"));
+      } else if (fromStarter) {
+        const starter = STARTER_TEMPLATES.find((s) => s.id === fromStarter);
+        if (starter) setTemplate(await duplicateTemplate(starter, starter.name));
+        else navigate("/select-template");
+      } else if (sourceId) {
+        const t = getTemplateById(sourceId);
+        if (t && !t.builtIn) setTemplate({ ...t });
+        else if (t) setTemplate(await duplicateTemplate(t, t.name));
+        else navigate("/select-template");
+      } else {
+        navigate("/select-template");
+      }
+    };
+    init();
   }, [sourceId, fromStarter, isNew, navigate]);
 
   if (!template) return null;
@@ -232,9 +235,9 @@ export default function EditTemplate() {
     setTemplate({ ...template, fields: items.map((f, i) => ({ ...f, order: i })) });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!template.name.trim()) { toast.error("Podaj nazwę szablonu"); return; }
-    saveUserTemplate(template);
+    await saveUserTemplate(template);
     toast.success("Szablon zapisany!");
     navigate("/select-template");
   };
