@@ -32,6 +32,7 @@ const textStyleToCss = (s?: TextStyle): React.CSSProperties | undefined => {
   if (s.bold) css.fontWeight = "bold";
   if (s.italic) css.fontStyle = "italic";
   if (s.color) css.color = s.color;
+  if (s.align) css.textAlign = s.align;
   return Object.keys(css).length > 0 ? css : undefined;
 };
 
