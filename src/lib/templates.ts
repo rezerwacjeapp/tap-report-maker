@@ -853,10 +853,18 @@ export const STARTER_TEMPLATES: ReportTemplate[] = [
 ];
 
 // ============================================================
-// USER TEMPLATES — CRUD (localStorage)
+// USER TEMPLATES — CRUD (Supabase + localStorage cache)
 // ============================================================
 
+import {
+  getCloudUserTemplates,
+  saveCloudUserTemplate,
+  deleteCloudUserTemplate,
+  migrateLocalTemplatesToCloud,
+} from "./supabase-storage";
+
 const USER_TEMPLATES_KEY = "docswift_user_templates";
+const TEMPLATES_MIGRATED_KEY = "docswift_templates_migrated";
 
 function getStoredTemplates(): ReportTemplate[] {
   try {
@@ -871,11 +879,34 @@ function saveStoredTemplates(templates: ReportTemplate[]) {
   localStorage.setItem(USER_TEMPLATES_KEY, JSON.stringify(templates));
 }
 
+/** Synchronous — returns cached localStorage templates (for instant UI) */
 export function getUserTemplates(): ReportTemplate[] {
   return getStoredTemplates();
 }
 
-export function saveUserTemplate(template: ReportTemplate): ReportTemplate {
+/** Async — fetches from Supabase, updates cache, migrates if needed */
+export async function fetchUserTemplates(): Promise<ReportTemplate[]> {
+  try {
+    // One-time migration: push localStorage templates to cloud
+    const migrated = localStorage.getItem(TEMPLATES_MIGRATED_KEY);
+    if (!migrated) {
+      const local = getStoredTemplates();
+      if (local.length > 0) {
+        await migrateLocalTemplatesToCloud(local);
+      }
+      localStorage.setItem(TEMPLATES_MIGRATED_KEY, "1");
+    }
+
+    const cloud = await getCloudUserTemplates();
+    saveStoredTemplates(cloud); // update cache
+    return cloud;
+  } catch {
+    return getStoredTemplates(); // fallback to cache
+  }
+}
+
+export async function saveUserTemplate(template: ReportTemplate): Promise<ReportTemplate> {
+  // Update localStorage cache immediately
   const templates = getStoredTemplates();
   const idx = templates.findIndex((t) => t.id === template.id);
   if (idx >= 0) {
@@ -884,15 +915,20 @@ export function saveUserTemplate(template: ReportTemplate): ReportTemplate {
     templates.push(template);
   }
   saveStoredTemplates(templates);
+
+  // Sync to cloud (fire & forget with error handling)
+  try { await saveCloudUserTemplate(template); } catch {}
+
   return template;
 }
 
-export function deleteUserTemplate(id: string) {
+export async function deleteUserTemplate(id: string): Promise<void> {
   const templates = getStoredTemplates().filter((t) => t.id !== id);
   saveStoredTemplates(templates);
+  try { await deleteCloudUserTemplate(id); } catch {}
 }
 
-export function duplicateTemplate(source: ReportTemplate, newName: string): ReportTemplate {
+export async function duplicateTemplate(source: ReportTemplate, newName: string): Promise<ReportTemplate> {
   const newTemplate: ReportTemplate = {
     ...source,
     id: `user_${Date.now()}`,
@@ -902,7 +938,7 @@ export function duplicateTemplate(source: ReportTemplate, newName: string): Repo
   return saveUserTemplate(newTemplate);
 }
 
-export function createBlankTemplate(name: string): ReportTemplate {
+export async function createBlankTemplate(name: string): Promise<ReportTemplate> {
   const now = Date.now();
   return saveUserTemplate({
     id: `user_${now}`,
