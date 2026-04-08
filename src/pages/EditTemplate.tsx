@@ -181,6 +181,7 @@ export default function EditTemplate() {
       // Keep bold/italic even when false (explicit user choice)
       if (updated.bold === undefined) delete updated.bold;
       if (updated.italic === undefined) delete updated.italic;
+      if (!updated.align || updated.align === "left") delete updated.align;
       return { ...f, [key]: Object.keys(updated).length > 0 ? updated : undefined };
     }) });
   };
@@ -206,6 +207,14 @@ export default function EditTemplate() {
             style={{ backgroundColor: c.hex }}
             title={c.label}
           />
+        ))}
+        <span className="w-px h-4 bg-border mx-0.5" />
+        {(["left", "center", "right"] as const).map((a) => (
+          <button
+            key={a}
+            onClick={() => updateFieldStyle(field.id, styleKey, { align: a })}
+            className={`w-6 h-6 rounded text-[10px] flex items-center justify-center border ${(style.align || "left") === a ? "bg-accent text-white border-accent" : "bg-card text-muted-foreground border-border hover:border-accent"}`}
+          >{a === "left" ? "⫷" : a === "center" ? "☰" : "⫸"}</button>
         ))}
       </div>
     );
