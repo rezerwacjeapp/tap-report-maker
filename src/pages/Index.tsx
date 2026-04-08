@@ -56,13 +56,13 @@ const Index = () => {
   const reports = getReportHistory();
   const recentReports = reports.slice(0, 3);
 
-  const [planInfo, setPlanInfo] = useState<...>(null);
+  const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string; trial?: boolean; trialDaysLeft?: number } | null>(null);
   const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
   const [userTemplates, setUserTemplates] = useState<ReportTemplate[]>(getUserTemplates);
 
   useEffect(() => {
     checkReportLimit()
-      .then(...)
+      .then((info) => setPlanInfo({ count: info.count, limit: info.limit, plan: info.plan, trial: info.trial, trialDaysLeft: info.trialDaysLeft })))
       .catch(() => {});
     getCloudDrafts().then(setCloudDrafts).catch(() => {});
     fetchUserTemplates().then(setUserTemplates).catch(() => {});
