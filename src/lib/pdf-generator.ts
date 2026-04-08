@@ -331,10 +331,10 @@ export function generateReport(
       // never splits across pages. The section header stays with the first pair.
       for (let i = 0; i < fieldPhotos.length; i += 2) {
         const cols: any[] = [
-          { image: fieldPhotos[i], width: 240, height: 180, margin: [0, 0, 5, 5] as [number, number, number, number] },
+          { image: fieldPhotos[i], fit: [240, 180], margin: [0, 0, 5, 5] as [number, number, number, number] },
         ];
         if (fieldPhotos[i + 1]) {
-          cols.push({ image: fieldPhotos[i + 1], width: 240, height: 180, margin: [5, 0, 0, 5] as [number, number, number, number] });
+          cols.push({ image: fieldPhotos[i + 1], fit: [240, 180], margin: [5, 0, 0, 5] as [number, number, number, number] });
         } else {
           cols.push({ text: "", width: 240 });
         }
