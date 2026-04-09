@@ -124,7 +124,7 @@ export function generateReport(
     if (profile.logo) {
       headerCols.push({
         image: profile.logo,
-        fit: [50, 50],
+        fit: [120, 50],
       });
     }
 
