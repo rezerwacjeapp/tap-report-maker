@@ -125,6 +125,7 @@ export function generateReport(
       headerCols.push({
         image: profile.logo,
         fit: [120, 50],
+        width: "auto",
       });
     }
 
