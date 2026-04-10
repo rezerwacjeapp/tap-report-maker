@@ -360,22 +360,29 @@ export function generateReport(
     if (field.type === "signature") {
       const sigData = (draft.signatures || {})[field.id];
       flushDataRows();
+      const sigAlign = field.labelStyle?.align || "left";
 
       const sigStack: any[] = [
-        { text: field.label, style: "sectionHeader", margin: [0, 8, 0, 6] as [number, number, number, number] },
+        { text: field.label, style: "sectionHeader", alignment: sigAlign, margin: [0, 8, 0, 6] as [number, number, number, number] },
       ];
 
       if (sigData) {
         // Signed digitally — show image
-        sigStack.push({ image: sigData, width: 150, height: 75 });
+        sigStack.push({ image: sigData, fit: [150, 75], alignment: sigAlign });
       } else {
         // Empty — leave blank space for pen signature
         sigStack.push({ text: "", margin: [0, 0, 0, 55] as [number, number, number, number] });
       }
 
+      // Signature line — position via margin
+      const lineWidth = 200;
+      const pageContentWidth = 515;
+      const lineMarginLeft = sigAlign === "center" ? (pageContentWidth - lineWidth) / 2
+        : sigAlign === "right" ? pageContentWidth - lineWidth : 0;
+
       sigStack.push({
-        canvas: [{ type: "line", x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
-        margin: [0, 2, 0, 8] as [number, number, number, number],
+        canvas: [{ type: "line", x1: 0, y1: 0, x2: lineWidth, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
+        margin: [lineMarginLeft, 2, 0, 8] as [number, number, number, number],
       });
 
       content.push({ stack: sigStack, unbreakable: true });
