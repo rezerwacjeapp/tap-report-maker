@@ -24,6 +24,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [marketing, setMarketing] = useState(false);
 
   const handleGoogle = async () => {
     setError("");
@@ -49,6 +51,10 @@ export default function Register() {
       setError("Hasła nie są identyczne");
       return;
     }
+    if (!terms) {
+      setError("Musisz zaakceptować regulamin");
+      return;
+    }
 
     setLoading(true);
     const { error } = await signUp(email.trim(), password);
@@ -57,6 +63,8 @@ export default function Register() {
     if (error) {
       setError(error);
     } else {
+      // Save consent flags — will be applied when user confirms email and first logs in
+      localStorage.setItem("raporton_pending_consent", JSON.stringify({ terms: true, marketing }));
       setSuccess(true);
     }
   };
@@ -162,6 +170,36 @@ export default function Register() {
                 onChange={(e) => setConfirmPw(e.target.value)}
                 autoComplete="new-password"
               />
+            </div>
+
+            {/* Consent checkboxes */}
+            <div className="space-y-2.5 pt-1">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={terms}
+                  onChange={(e) => { setTerms(e.target.checked); setError(""); }}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
+                />
+                <span className="text-xs leading-snug text-muted-foreground">
+                  Akceptuję{" "}
+                  <a href="/regulamin" target="_blank" className="text-accent underline">Regulamin</a>
+                  {" "}i{" "}
+                  <a href="/prywatnosc" target="_blank" className="text-accent underline">Politykę prywatności</a>
+                  {" "}<span className="text-destructive">*</span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={marketing}
+                  onChange={(e) => setMarketing(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
+                />
+                <span className="text-xs leading-snug text-muted-foreground">
+                  Chcę otrzymywać informacje o nowościach RaportON
+                </span>
+              </label>
             </div>
 
             {error && (
