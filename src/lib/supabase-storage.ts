@@ -52,6 +52,35 @@ export async function saveCloudProfile(profile: CompanyProfile): Promise<void> {
     .eq("id", user.id);
 }
 
+// ─── CONSENT ────────────────────────────────────────────────
+
+export async function hasAcceptedTerms(): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("terms_accepted_at")
+    .eq("id", user.id)
+    .single();
+
+  return !!data?.terms_accepted_at;
+}
+
+export async function saveConsent(marketing: boolean): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const now = new Date().toISOString();
+  await supabase
+    .from("profiles")
+    .update({
+      terms_accepted_at: now,
+      marketing_consent_at: marketing ? now : null,
+    })
+    .eq("id", user.id);
+}
+
 // ─── REPORTS ────────────────────────────────────────────────
 
 export async function getCloudReportHistory(): Promise<ReportHistoryItem[]> {
