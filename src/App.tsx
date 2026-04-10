@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,8 @@ import Landing from "./pages/Landing";
 import Upgrade from "./pages/Upgrade";
 import SetNewPassword from "./pages/SetNewPassword";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
+import { ConsentModal } from "./components/ConsentModal";
+import { hasAcceptedTerms, saveConsent } from "./lib/supabase-storage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +46,30 @@ function AppShell() {
   const { user, loading, isRecovery } = useAuth();
   const hideNav = HIDE_NAV.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"));
 
+  // Consent state — hooks must be before any conditional returns
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [needsConsent, setNeedsConsent] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setConsentChecked(false); setNeedsConsent(false); return; }
+    // Check if there's pending consent from email registration
+    const pending = localStorage.getItem("raporton_pending_consent");
+    if (pending) {
+      try {
+        const { marketing } = JSON.parse(pending);
+        saveConsent(marketing).then(() => {
+          localStorage.removeItem("raporton_pending_consent");
+          setNeedsConsent(false);
+          setConsentChecked(true);
+        });
+        return;
+      } catch { localStorage.removeItem("raporton_pending_consent"); }
+    }
+    hasAcceptedTerms()
+      .then((accepted) => { setNeedsConsent(!accepted); setConsentChecked(true); })
+      .catch(() => setConsentChecked(true));
+  }, [user]);
+
   if (loading) return <LoadingScreen />;
 
   // Password recovery flow — show set-new-password form
@@ -62,7 +89,13 @@ function AppShell() {
     );
   }
 
-  // Logged in — show the app, redirect /login to home
+  // Logged in — check consent
+  if (!consentChecked) return <LoadingScreen />;
+
+  if (needsConsent) {
+    return <ConsentModal onAccepted={() => setNeedsConsent(false)} />;
+  }
+
   return (
     <div className="flex min-h-[100dvh] flex-col">
       {/* Animated mesh background */}
