@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -47,6 +47,8 @@ function AppShell() {
   const { user, loading, isRecovery } = useAuth();
   const hideNav = HIDE_NAV.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"));
 
+  const navigate = useNavigate();
+
   // Consent state — hooks must be before any conditional returns
   const [consentChecked, setConsentChecked] = useState(false);
   const [needsConsent, setNeedsConsent] = useState(false);
@@ -70,6 +72,16 @@ function AppShell() {
       .then((accepted) => { setNeedsConsent(!accepted); setConsentChecked(true); })
       .catch(() => setConsentChecked(true));
   }, [user]);
+
+  // Redirect to pending import after login + consent
+  useEffect(() => {
+    if (!user || !consentChecked || needsConsent) return;
+    const pendingImport = localStorage.getItem("raporton_pending_import");
+    if (pendingImport) {
+      localStorage.removeItem("raporton_pending_import");
+      navigate(`/t/${pendingImport}`, { replace: true });
+    }
+  }, [user, consentChecked, needsConsent, navigate]);
 
   if (loading) return <LoadingScreen />;
 
