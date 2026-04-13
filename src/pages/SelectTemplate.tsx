@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw, Star,
+  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Copy, FileText, EyeOff, RotateCcw, Star, Share2,
 } from "lucide-react";
 import {
   getUserTemplates, fetchUserTemplates, STARTER_TEMPLATES, deleteUserTemplate, duplicateTemplate,
@@ -9,6 +9,7 @@ import {
   type ReportTemplate,
 } from "@/lib/templates";
 import { toast } from "sonner";
+import { shareTemplate } from "@/lib/supabase-storage";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -133,6 +134,21 @@ export default function SelectTemplate() {
     navigate("/edit-template?new=1");
   };
 
+  const handleShare = async (template: ReportTemplate) => {
+    try {
+      const code = await shareTemplate(template);
+      const url = `${window.location.origin}/t/${code}`;
+      if (navigator.share) {
+        await navigator.share({ title: template.name, text: `Szablon: ${template.name}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link skopiowany do schowka");
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") toast.error("Nie udało się udostępnić");
+    }
+  };
+
   return (
     <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
@@ -195,6 +211,9 @@ export default function SelectTemplate() {
                       </button>
                       <button onClick={() => handleDuplicateUser(template)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
                         <Copy className="h-3.5 w-3.5" /> Kopiuj
+                      </button>
+                      <button onClick={() => handleShare(template)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
+                        <Share2 className="h-3.5 w-3.5" /> Udostępnij
                       </button>
                       <button onClick={() => setDeleteId(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 className="h-3.5 w-3.5" /> Usuń
