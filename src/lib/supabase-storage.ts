@@ -467,3 +467,41 @@ export async function migrateLocalTemplatesToCloud(templates: ReportTemplate[]):
     .from("user_templates")
     .upsert(rows, { onConflict: "user_id,id" });
 }
+
+// ─── SHARED TEMPLATES (link sharing) ────────────────────────
+
+function generateCode(): string {
+  const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+  let code = "";
+  for (let i = 0; i < 7; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+export async function shareTemplate(template: ReportTemplate): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const code = generateCode();
+  const { error } = await supabase
+    .from("shared_templates")
+    .insert({
+      code,
+      created_by: user.id,
+      template_data: template,
+      template_name: template.name,
+    });
+
+  if (error) throw error;
+  return code;
+}
+
+export async function getSharedTemplate(code: string): Promise<{ name: string; template: ReportTemplate } | null> {
+  const { data, error } = await supabase
+    .from("shared_templates")
+    .select("template_data, template_name")
+    .eq("code", code)
+    .single();
+
+  if (error || !data) return null;
+  return { name: data.template_name, template: data.template_data as ReportTemplate };
+}
