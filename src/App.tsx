@@ -22,12 +22,13 @@ import SetNewPassword from "./pages/SetNewPassword";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { ConsentModal } from "./components/ConsentModal";
 import { hasAcceptedTerms, saveConsent } from "./lib/supabase-storage";
+import ImportTemplate from "./pages/ImportTemplate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 /** Pages where we hide the bottom nav (full-screen flows) */
-const HIDE_NAV = ["/report", "/edit-template", "/login", "/register"];
+const HIDE_NAV = ["/report", "/edit-template", "/login", "/register", "/t"];
 
 function LoadingScreen() {
   return (
@@ -84,6 +85,7 @@ function AppShell() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/t/:code" element={<ImportTemplate />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -113,6 +115,7 @@ function AppShell() {
           <Route path="/report" element={<ReportWizard />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/upgrade" element={<Upgrade />} />
+          <Route path="/t/:code" element={<ImportTemplate />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="/register" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
