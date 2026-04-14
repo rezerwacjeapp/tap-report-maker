@@ -374,6 +374,18 @@ const Index = () => {
             </p>
           </div>
         )}
+
+        {/* Template request banner */}
+        
+          href="mailto:kontakt.raporton@gmail.com?subject=Prośba o szablon&body=Dzień dobry,%0A%0AChciałbym zamówić szablon do:%0A%0A(opisz rodzaj raportu lub dołącz zdjęcie/PDF dotychczasowego formularza)%0A%0APozdrawiam"
+          className="block rounded-2xl glass-card p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all active:scale-[0.99]"
+          style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}
+        >
+          <p className="text-sm">
+            <strong>Potrzebujesz szablonu?</strong> Wyślij nam swój raport — przygotujemy szablon za Ciebie.{" "}
+            <span className="text-accent font-semibold">Napisz →</span>
+          </p>
+        </a>
       </main>
 
       {/* Footer */}
