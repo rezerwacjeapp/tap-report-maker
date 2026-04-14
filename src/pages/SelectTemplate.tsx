@@ -174,16 +174,13 @@ export default function SelectTemplate() {
         </button>
 
         {/* Template request banner */}
-        <a
-          href="mailto:kontakt.raporton@gmail.com?subject=Prośba o szablon&body=Dzień dobry,%0A%0AChciałbym zamówić szablon do:%0A%0A(opisz rodzaj raportu lub dołącz zdjęcie/PDF dotychczasowego formularza)%0A%0APozdrawiam"
-          className="block rounded-2xl glass-card p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all active:scale-[0.99]"
-          style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}
-        >
+        <div className="rounded-2xl glass-card p-4" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
           <p className="text-sm">
-            <strong>Nie chcesz budować sam?</strong> Wyślij nam zdjęcie lub PDF swojego dotychczasowego raportu — przygotujemy gotowy szablon.{" "}
-            <span className="text-accent font-semibold">Napisz →</span>
+            <strong>Potrzebujesz szablonu?</strong> Wyślij swój raport na{" "}
+            <span className="text-accent font-semibold">kontakt.raporton@gmail.com</span>{" "}
+            — przygotujemy szablon za Ciebie.
           </p>
-        </a>
+        </div>
 
         {/* User templates */}
         {userTemplates.length > 0 && (
