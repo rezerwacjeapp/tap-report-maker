@@ -171,7 +171,8 @@ export default function SelectTemplate() {
               <p className="text-xs text-muted-foreground">Wybierz klocki i zbuduj od zera</p>
             </div>
           </div>
-        
+        </button>
+
         {/* Template request banner */}
         <a
           href="mailto:kontakt.raporton@gmail.com?subject=Prośba o szablon&body=Dzień dobry,%0A%0AChciałbym zamówić szablon do:%0A%0A(opisz rodzaj raportu lub dołącz zdjęcie/PDF dotychczasowego formularza)%0A%0APozdrawiam"
