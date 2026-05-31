@@ -8,8 +8,10 @@ import {
   getFieldCategories, STARTER_TEMPLATES, countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
-import type { CustomFieldDef, CustomFieldType, TextStyle } from "@/lib/storage";
+import type { CustomFieldDef, CustomFieldType, TextStyle, CompanyProfile } from "@/lib/storage";
 import { STYLE_COLORS } from "@/lib/storage";
+import { getCloudProfile } from "@/lib/supabase-storage";
+import { TemplatePreview } from "@/components/TemplatePreview";
 import { toast } from "sonner";
 
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
@@ -38,6 +40,8 @@ export default function EditTemplate() {
   const isNew = searchParams.get("new") === "1";
 
   const [template, setTemplate] = useState<ReportTemplate | null>(null);
+  const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [newFieldLabel, setNewFieldLabel] = useState("");
   const [expandedAddType, setExpandedAddType] = useState<CustomFieldType | null>(null);
@@ -96,6 +100,11 @@ export default function EditTemplate() {
     };
     init();
   }, [sourceId, fromStarter, isNew, navigate]);
+
+  // Load company profile so the preview header matches the real PDF
+  useEffect(() => {
+    getCloudProfile().then(setProfile).catch(() => setProfile(null));
+  }, []);
 
   if (!template) return null;
 
@@ -254,45 +263,61 @@ export default function EditTemplate() {
   const hasPhotosField = template.fields.some((f) => f.type === "photos");
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="px-5 pt-6 pb-2 space-y-2">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <span className="text-sm text-muted-foreground">Edytor szablonu</span>
+    <div className="flex h-[100dvh] flex-col bg-background">
+      {/* Top bar — shared across editor/preview */}
+      <div className="flex items-center gap-3 px-5 pt-5 pb-3 border-b border-border shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <span className="text-sm text-muted-foreground flex-1 truncate">Edytor szablonu</span>
+        {/* Mobile-only tab switch */}
+        <div className="flex lg:hidden rounded-full bg-muted p-0.5">
+          <button
+            onClick={() => setMobileView("edit")}
+            className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "edit" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >Edytuj</button>
+          <button
+            onClick={() => setMobileView("preview")}
+            className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >Podgląd</button>
         </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Nazwa szablonu (widoczna tylko w aplikacji)</label>
-          <input
-            className="text-xl font-bold w-full h-12 rounded-xl border border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
-            value={template.name}
-            onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-            placeholder="np. Przegląd klimatyzacji"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Tytuł dokumentu (widoczny w nagłówku PDF)</label>
-          <input
-            className="w-full h-10 rounded-xl border border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
-            value={template.pdfTitle}
-            onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
-            placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-muted-foreground">Dane firmy w nagłówku PDF</label>
-          <button onClick={() => setTemplate({ ...template, showCompanyHeader: !(template.showCompanyHeader !== false) })}>
-            {renderToggle(template.showCompanyHeader !== false)}
-          </button>
-        </div>
-      </header>
-
-      <div className="px-5 py-1 text-xs text-muted-foreground">
-        {dataFieldCount} pól • {tileOptionCount} czynności • {hasPhotosField ? "zdjęcia" : "bez zdjęć"} • {sigCount} podpisów
       </div>
 
-      <main className="flex-1 px-5 pb-32 overflow-y-auto space-y-4">
+      <div className="flex-1 min-h-0 lg:flex">
+        {/* ===================== EDITOR COLUMN ===================== */}
+        <div className={`flex-col min-h-0 lg:w-[54%] lg:border-r lg:border-border ${mobileView === "preview" ? "hidden lg:flex" : "flex lg:flex"}`}>
+          <header className="px-5 pt-4 pb-2 space-y-2 shrink-0">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Nazwa szablonu (widoczna tylko w aplikacji)</label>
+              <input
+                className="text-xl font-bold w-full h-12 rounded-xl border border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
+                value={template.name}
+                onChange={(e) => setTemplate({ ...template, name: e.target.value })}
+                placeholder="np. Przegląd klimatyzacji"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Tytuł dokumentu (widoczny w nagłówku PDF)</label>
+              <input
+                className="w-full h-10 rounded-xl border border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
+                value={template.pdfTitle}
+                onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
+                placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-muted-foreground">Dane firmy w nagłówku PDF</label>
+              <button onClick={() => setTemplate({ ...template, showCompanyHeader: !(template.showCompanyHeader !== false) })}>
+                {renderToggle(template.showCompanyHeader !== false)}
+              </button>
+            </div>
+          </header>
+
+          <div className="px-5 py-1 text-xs text-muted-foreground shrink-0">
+            {dataFieldCount} pól • {tileOptionCount} czynności • {hasPhotosField ? "zdjęcia" : "bez zdjęć"} • {sigCount} podpisów
+          </div>
+
+          <main className="flex-1 px-5 pb-6 overflow-y-auto space-y-4 min-h-0">
         <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Strzałkami ↑↓ zmień kolejność — ta sama kolejność będzie w raporcie i PDF.</p>
 
         {getFieldCategories().map((cat) => {
@@ -578,10 +603,25 @@ export default function EditTemplate() {
         )}
       </main>
 
-      <div className="sticky bottom-0 bg-background border-t border-border px-5 py-4">
-        <Button variant="accent" size="lg" className="w-full" onClick={handleSave}>
-          <Save className="h-5 w-5 mr-2" /> Zapisz szablon
-        </Button>
+          <div className="bg-background border-t border-border px-5 py-4 shrink-0">
+            <Button variant="accent" size="lg" className="w-full" onClick={handleSave}>
+              <Save className="h-5 w-5 mr-2" /> Zapisz szablon
+            </Button>
+          </div>
+        </div>
+
+        {/* ===================== PREVIEW COLUMN ===================== */}
+        <div className={`flex-col min-h-0 flex-1 bg-muted/30 ${mobileView === "edit" ? "hidden lg:flex" : "flex lg:flex"}`}>
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-5">
+            <TemplatePreview
+              mode="edit"
+              pdfTitle={template.pdfTitle}
+              fields={template.fields}
+              showCompanyHeader={template.showCompanyHeader !== false}
+              profile={profile}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
