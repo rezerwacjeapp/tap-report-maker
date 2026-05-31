@@ -263,7 +263,7 @@ export default function EditTemplate() {
   const hasPhotosField = template.fields.some((f) => f.type === "photos");
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-background">
+    <div className="flex flex-col min-h-[100dvh] lg:h-[100dvh] bg-background">
       {/* Top bar — shared across editor/preview */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-3 border-b border-border shrink-0">
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
@@ -603,7 +603,7 @@ export default function EditTemplate() {
         )}
       </main>
 
-          <div className="bg-background border-t border-border px-5 py-4 shrink-0">
+          <div className="bg-background border-t border-border px-5 py-4 shrink-0 sticky bottom-0 lg:static">
             <Button variant="accent" size="lg" className="w-full" onClick={handleSave}>
               <Save className="h-5 w-5 mr-2" /> Zapisz szablon
             </Button>
