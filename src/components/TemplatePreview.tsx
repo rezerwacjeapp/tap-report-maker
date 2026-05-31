@@ -74,21 +74,26 @@ export function TemplatePreview({
   const [pageH, setPageH] = useState(0);
   const [zoom, setZoom] = useState(1);
 
-  // Measure container width (fit-to-width)
+  // Measure container width + page height with guards so a scrollbar
+  // toggling can never start a setState feedback loop (white-screen bug).
+  // We observe the page element (transform doesn't affect offsetHeight, so
+  // it stays stable) and the wrapper (no vertical scrollbar → stable width).
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
-    if (!wrap) return;
-    const update = () => setContainerW(wrap.clientWidth);
+    const page = pageRef.current;
+    if (!wrap || !page) return;
+    const update = () => {
+      const w = wrap.clientWidth;
+      const h = page.offsetHeight;
+      setContainerW((prev) => (prev === w ? prev : w));
+      setPageH((prev) => (Math.abs(prev - h) < 0.5 ? prev : h));
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(wrap);
+    ro.observe(page);
     return () => ro.disconnect();
   }, []);
-
-  // Measure page natural height after each render so we can reserve scaled space
-  useLayoutEffect(() => {
-    if (pageRef.current) setPageH(pageRef.current.offsetHeight);
-  });
 
   const fit = containerW > 0 ? Math.min((containerW - 4) / PAGE_W, 1) : 0.5;
   const scale = fit * zoom;
@@ -256,40 +261,45 @@ export function TemplatePreview({
   const reportNumLabel = reportNumber?.trim() || (mode === "edit" ? "Nr __/____" : "");
 
   return (
-    <div ref={wrapRef} className="relative w-full overflow-auto" onClick={handleTap}>
-      {/* zoom controls */}
-      <div className="sticky top-1.5 z-10 flex justify-end gap-1 pr-1.5 pointer-events-none">
-        <button
-          onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(0.5, +(z - 0.2).toFixed(2))); }}
-          className="pointer-events-auto w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
-          aria-label="Pomniejsz"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(2.5, +(z + 0.2).toFixed(2))); }}
-          className="pointer-events-auto w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
-          aria-label="Powiększ"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </button>
+    <div ref={wrapRef} className="relative w-full overflow-x-auto" onClick={handleTap}>
+      {/* zoom controls — sticky so they stay visible while scrolling the column */}
+      <div className="sticky top-2 z-10 flex justify-end pr-2 -mb-9 pointer-events-none">
+        <div className="flex gap-1 pointer-events-auto">
+          <button
+            onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(0.5, +(z - 0.2).toFixed(2))); }}
+            className="w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
+            aria-label="Pomniejsz"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(2.5, +(z + 0.2).toFixed(2))); }}
+            className="w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
+            aria-label="Powiększ"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div style={{ height: pageH ? pageH * scale : undefined, overflow: "hidden" }} className="flex justify-center -mt-7">
-        <div
-          ref={pageRef}
-          style={{
-            width: PAGE_W,
-            transform: `scale(${scale})`,
-            transformOrigin: "top center",
-            background: COLORS.white,
-            color: COLORS.primary,
-            fontFamily: "Roboto, system-ui, -apple-system, sans-serif",
-            padding: "48px 50px 60px",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-            boxSizing: "border-box",
-          }}
-        >
+      <div className="flex justify-center pt-1">
+        {/* Outer box takes the real scaled footprint so layout/scroll behave;
+            inner page is scaled from top-left to overlap it exactly. */}
+        <div style={{ width: PAGE_W * scale, height: pageH ? pageH * scale : undefined }}>
+          <div
+            ref={pageRef}
+            style={{
+              width: PAGE_W,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+              background: COLORS.white,
+              color: COLORS.primary,
+              fontFamily: "Roboto, system-ui, -apple-system, sans-serif",
+              padding: "48px 50px 60px",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+              boxSizing: "border-box",
+            }}
+          >
           {/* company header */}
           {showCompanyHeader && (
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
@@ -340,6 +350,7 @@ export function TemplatePreview({
           <div style={{ marginTop: 28, paddingTop: 8, borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", fontSize: 9, color: COLORS.gray }}>
             <span>Wygenerowano: __.__.____ • {companyName || "RaportON"}</span>
             <span>Strona 1 z 1</span>
+          </div>
           </div>
         </div>
       </div>
