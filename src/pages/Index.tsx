@@ -251,7 +251,7 @@ const Index = () => {
                 )}
                 {planInfo.plan === "free" && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold">
-                    {planInfo.count}/{planInfo.limit}
+                    ze znakiem wodnym
                   </span>
                 )}
               </div>
@@ -268,28 +268,15 @@ const Index = () => {
 
             {planInfo.plan === "trial" ? (
               <p className="text-[11px] text-muted-foreground">
-                Bez limitu raportów przez 7 dni. Potem: 5 raportów/mc lub plan Solo bez limitu.
+                Pełny dostęp przez 7 dni — raporty bez znaku wodnego. Potem: nielimitowane raporty ze znakiem lub Solo bez znaku.
               </p>
             ) : planInfo.plan === "free" ? (
-              <>
-                <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      planInfo.count >= planInfo.limit ? "bg-destructive" : "bg-accent"
-                    }`}
-                    style={{ width: `${Math.min((planInfo.count / planInfo.limit) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1.5">
-                  {planInfo.count >= planInfo.limit
-                    ? "Limit raportów osiągnięty. Przejdź na Solo, aby generować bez limitu."
-                    : `${planInfo.limit - planInfo.count} ${planInfo.limit - planInfo.count === 1 ? "raport" : "raporty"} pozostało w tym miesiącu`
-                  }
-                </p>
-              </>
+              <p className="text-[11px] text-muted-foreground">
+                Generujesz raporty bez limitu. Każdy PDF ma znak wodny „RaportON.pl". Przejdź na Solo, aby go usunąć.
+              </p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Bez limitu raportów
+                Raporty bez limitu i bez znaku wodnego
               </p>
             )}
           </div>
