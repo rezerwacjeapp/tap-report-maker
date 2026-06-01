@@ -49,6 +49,8 @@ export interface TemplatePreviewProps {
   signatures?: Record<string, string | null>;
   photosByField?: Record<string, string[]>;
   additionalNotes?: string;
+  /** show diagonal free-plan watermark */
+  watermark?: boolean;
   /** Etap 2 — click a field in the preview to jump to it in the form */
   onFieldClick?: (fieldId: string) => void;
 }
@@ -66,6 +68,7 @@ export function TemplatePreview({
   signatures = {},
   photosByField = {},
   additionalNotes,
+  watermark = false,
   onFieldClick,
 }: TemplatePreviewProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -298,8 +301,18 @@ export function TemplatePreview({
               padding: "48px 50px 60px",
               boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
               boxSizing: "border-box",
+              position: "relative",
             }}
           >
+          {watermark && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", overflow: "hidden", zIndex: 5 }}>
+              <div style={{ transform: "rotate(-35deg)", fontSize: 64, fontWeight: 700, whiteSpace: "nowrap", opacity: 0.13, fontFamily: "Helvetica, Arial, sans-serif" }}>
+                <span style={{ color: COLORS.primary }}>Raport</span>
+                <span style={{ color: COLORS.accent }}>ON</span>
+                <span style={{ color: COLORS.primary }}>.pl</span>
+              </div>
+            </div>
+          )}
           {/* company header */}
           {showCompanyHeader && (
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
