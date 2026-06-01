@@ -95,6 +95,7 @@ export default function ReportWizard() {
 
   // Profile from Supabase (needed for PDF generation)
   const [cloudProfile, setCloudProfile] = useState<CompanyProfile | null>(null);
+  const [isFreePlan, setIsFreePlan] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -102,6 +103,7 @@ export default function ReportWizard() {
 
   useEffect(() => {
     getCloudProfile().then(setCloudProfile).catch(() => {});
+    checkReportLimit().then((l) => setIsFreePlan(l.plan === "free")).catch(() => {});
   }, []);
 
   // Draft
@@ -226,8 +228,11 @@ export default function ReportWizard() {
       // Load profile from Supabase (use cached if available)
       const profile = cloudProfile || await getCloudProfile();
 
+      // Watermark only on free plan (not trial, not solo)
+      const watermark = limit.plan === "free";
+
       const meta = generateReport(profile, draft, {
-        pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader,
+        pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader, watermark,
       });
 
       // Save to Supabase
@@ -596,6 +601,7 @@ export default function ReportWizard() {
               fields={allFields}
               showCompanyHeader={showCompanyHeader}
               profile={cloudProfile}
+              watermark={isFreePlan}
               reportNumber={draft.reportNumber}
               values={draft.customFields}
               tileStates={draft.tileStates || {}}
