@@ -77,10 +77,12 @@ export function TemplatePreview({
   const [pageH, setPageH] = useState(0);
   const [zoom, setZoom] = useState(1);
 
-  // Measure container width + page height with guards so a scrollbar
-  // toggling can never start a setState feedback loop (white-screen bug).
-  // We observe the page element (transform doesn't affect offsetHeight, so
-  // it stays stable) and the wrapper (no vertical scrollbar → stable width).
+  // Measure container width + page height. Guards stop the scrollbar
+  // appear/disappear feedback loop that made the preview jitter while typing:
+  // a vertical scrollbar toggling changes width by ~1 scrollbar (~16px), which
+  // would change scale, which changes height, which toggles the scrollbar again.
+  // We ignore width changes below the scrollbar threshold to break that cycle.
+  // (The scroll container also sets scrollbar-gutter: stable as the primary fix.)
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
     const page = pageRef.current;
@@ -88,7 +90,7 @@ export function TemplatePreview({
     const update = () => {
       const w = wrap.clientWidth;
       const h = page.offsetHeight;
-      setContainerW((prev) => (prev === w ? prev : w));
+      setContainerW((prev) => (prev === 0 || Math.abs(prev - w) > 20 ? w : prev));
       setPageH((prev) => (Math.abs(prev - h) < 0.5 ? prev : h));
     };
     update();
