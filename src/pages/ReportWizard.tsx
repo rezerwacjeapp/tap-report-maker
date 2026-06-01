@@ -320,17 +320,14 @@ export default function ReportWizard() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-accent" />
-              Limit raportów osiągnięty
+              Przejdź na Solo
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3 pt-2">
               <p>
-                Wykorzystałeś {limitInfo?.count}/{limitInfo?.limit} darmowych raportów w tym miesiącu.
+                Na planie Free generujesz raporty bez limitu, ale każdy PDF ma znak wodny „RaportON.pl".
               </p>
-              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
-                <div className="h-full rounded-full bg-destructive w-full" />
-              </div>
               <p>
-                Przejdź na plan <strong>Solo za 19 zł/miesiąc</strong> i generuj raporty bez limitu.
+                Przejdź na plan <strong>Solo za 19 zł/miesiąc</strong>, aby generować raporty bez znaku wodnego.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
