@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Check, Zap, Infinity, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Zap, Infinity, Loader2, Droplet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
@@ -120,26 +120,17 @@ export default function Upgrade() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Bez limitu raportów. Po zakończeniu: 5 raportów/mc lub plan Solo.
+                  Pełny dostęp — raporty bez znaku wodnego. Po zakończeniu raporty będą miały znak wodny, chyba że przejdziesz na Solo.
                 </p>
               </>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold">Twój obecny plan: Free</span>
-                  <span className="text-sm text-accent font-semibold">{planInfo.count}/{planInfo.limit}</span>
+                  <span className="text-sm text-accent font-semibold">ze znakiem wodnym</span>
                 </div>
-                <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${planInfo.count >= planInfo.limit ? "bg-destructive" : "bg-accent"}`}
-                    style={{ width: `${Math.min((planInfo.count / planInfo.limit) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {planInfo.count >= planInfo.limit
-                    ? "Limit osiągnięty — nie możesz generować raportów do następnego miesiąca."
-                    : `Pozostało ${planInfo.limit - planInfo.count} raportów w tym miesiącu.`
-                  }
+                <p className="text-xs text-muted-foreground">
+                  Generujesz raporty bez limitu. Każdy PDF ma znak wodny „RaportON.pl". Przejdź na Solo, aby go usunąć.
                 </p>
               </>
             )}
@@ -163,13 +154,16 @@ export default function Upgrade() {
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Check className="h-4 w-4 text-accent shrink-0" /> 5 raportów miesięcznie
+                <Infinity className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Check className="h-4 w-4 text-accent shrink-0" /> Wszystkie szablony
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Check className="h-4 w-4 text-accent shrink-0" /> Zdjęcia, podpisy, dyktowanie
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Droplet className="h-4 w-4 text-muted-foreground shrink-0" /> Znak wodny „RaportON.pl" na PDF
               </div>
             </div>
           </div>
@@ -190,7 +184,10 @@ export default function Upgrade() {
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <Infinity className="h-4 w-4 text-accent shrink-0" /> <strong>Bez limitu</strong> raportów
+                <Droplet className="h-4 w-4 text-accent shrink-0" /> <strong>Bez znaku wodnego</strong> na PDF
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Infinity className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Check className="h-4 w-4 text-accent shrink-0" /> Wszystko z planu Free
