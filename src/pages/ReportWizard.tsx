@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
+import { TemplatePreview } from "@/components/TemplatePreview";
 import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft,
@@ -76,6 +77,21 @@ export default function ReportWizard() {
   useEffect(() => { setShowCompanyHeader(defaultShowCompanyHeader); }, [defaultShowCompanyHeader]);
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  // Etap 2 — live preview + click-a-field-in-preview to jump to the form
+  const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
+  const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const jumpToField = (id: string) => {
+    // Reveal if hidden, switch to the form on mobile, then scroll + focus
+    setHiddenFieldIds((p) => { if (!p.has(id)) return p; const n = new Set(p); n.delete(id); return n; });
+    setMobileView("fill");
+    setTimeout(() => {
+      const el = fieldRefs.current[id];
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.querySelector<HTMLElement>("input, textarea")?.focus();
+    }, 80);
+  };
 
   // Profile from Supabase (needed for PDF generation)
   const [cloudProfile, setCloudProfile] = useState<CompanyProfile | null>(null);
@@ -278,7 +294,7 @@ export default function ReportWizard() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
+    <div className="flex flex-col min-h-[100dvh] lg:h-[100dvh] bg-background">
       {/* Resume draft dialog */}
       <AlertDialog open={showResume} onOpenChange={setShowResume}>
         <AlertDialogContent>
@@ -326,7 +342,7 @@ export default function ReportWizard() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <header className="flex items-center gap-2 px-5 pt-6 pb-2">
+      <header className="flex items-center gap-2 px-5 pt-6 pb-2 shrink-0 border-b border-border">
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}><ArrowLeft className="h-5 w-5" /></Button>
         <h1 className="text-lg flex-1 truncate">{templateName}</h1>
         <button
@@ -335,12 +351,29 @@ export default function ReportWizard() {
           title={showCompanyHeader ? "Dane firmy widoczne w PDF" : "Dane firmy ukryte w PDF"}
         >
           {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          {showCompanyHeader ? "Dane firmy widoczne" : "Dane firmy ukryte"}
+          <span className="hidden sm:inline">{showCompanyHeader ? "Dane firmy widoczne" : "Dane firmy ukryte"}</span>
         </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
 
-      <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto">
+      {/* Mobile-only tab switch */}
+      <div className="flex lg:hidden justify-center py-2 shrink-0 border-b border-border">
+        <div className="flex rounded-full bg-muted p-0.5">
+          <button
+            onClick={() => setMobileView("fill")}
+            className={`px-5 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "fill" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >Wypełniaj</button>
+          <button
+            onClick={() => setMobileView("preview")}
+            className={`px-5 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >Podgląd</button>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 lg:flex">
+        {/* ===================== FORM COLUMN ===================== */}
+        <div className={`flex-col min-h-0 lg:w-[54%] lg:border-r lg:border-border ${mobileView === "preview" ? "hidden lg:flex" : "flex lg:flex"}`}>
+          <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto lg:min-h-0">
         {/* Report number — editable, hideable */}
         {!hiddenFieldIds.has("__reportNumber") && (
         <div className="relative">
@@ -363,7 +396,7 @@ export default function ReportWizard() {
         )}
 
         {visibleFields.map((field) => (
-          <div key={field.id} className="relative">
+          <div key={field.id} ref={(el) => { fieldRefs.current[field.id] = el; }} className="relative scroll-mt-4">
             {/* Eye toggle */}
             <button
               onClick={() => toggleFieldVis(field.id)}
@@ -544,13 +577,36 @@ export default function ReportWizard() {
         )}
       </main>
 
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4 space-y-2">
-        <button onClick={handleGenerate} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
-          {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
-        </button>
-        <button onClick={handleSaveLater} disabled={savingDraft || generating} className="w-full h-10 rounded-xl border border-border text-muted-foreground font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-muted disabled:opacity-50">
-          {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} {savingDraft ? "Zapisuję..." : "Dokończ później"}
-        </button>
+          <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4 space-y-2 lg:static">
+            <button onClick={handleGenerate} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
+              {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
+            </button>
+            <button onClick={handleSaveLater} disabled={savingDraft || generating} className="w-full h-10 rounded-xl border border-border text-muted-foreground font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-muted disabled:opacity-50">
+              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} {savingDraft ? "Zapisuję..." : "Dokończ później"}
+            </button>
+          </div>
+        </div>
+
+        {/* ===================== PREVIEW COLUMN ===================== */}
+        <div className={`flex-col min-h-0 flex-1 bg-muted/30 ${mobileView === "fill" ? "hidden lg:flex" : "flex lg:flex"}`}>
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-5">
+            <TemplatePreview
+              mode="fill"
+              pdfTitle={pdfTitle}
+              fields={allFields}
+              showCompanyHeader={showCompanyHeader}
+              profile={cloudProfile}
+              reportNumber={draft.reportNumber}
+              values={draft.customFields}
+              tileStates={draft.tileStates || {}}
+              tileNotes={draft.tileNotes || {}}
+              signatures={draft.signatures}
+              photosByField={draft.photosByField}
+              additionalNotes={draft.additionalNotes}
+              onFieldClick={jumpToField}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
