@@ -420,8 +420,8 @@ export function generateReport(
           `<g transform="rotate(-35 ${cx} ${cy})" opacity="0.13">` +
           `<text x="${cx}" y="${cy}" font-size="64" font-weight="bold" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" dominant-baseline="middle">` +
           `<tspan fill="${COLORS.primary}">Raport</tspan>` +
-          `<tspan fill="${COLORS.accent}">ON</tspan>` +
-          `<tspan fill="${COLORS.primary}">.pl</tspan>` +
+          `<tspan dx="0" fill="${COLORS.accent}">ON</tspan>` +
+          `<tspan dx="0" fill="${COLORS.primary}">.pl</tspan>` +
           `</text></g></svg>`;
         return { svg, width: w, height: h, absolutePosition: { x: 0, y: 0 } };
       }
