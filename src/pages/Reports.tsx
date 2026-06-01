@@ -9,7 +9,7 @@ import { type ReportHistoryItem } from "@/lib/storage";
 import { generateReport, regenerateFromHistory } from "@/lib/pdf-generator";
 import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
-  getCloudSnapshot, getCloudProfile,
+  getCloudSnapshot, getCloudProfile, checkReportLimit,
 } from "@/lib/supabase-storage";
 import { downloadSnapshotImages, deleteReportImages } from "@/lib/image-storage";
 import { useAuth } from "@/hooks/use-auth";
@@ -290,14 +290,16 @@ export default function Reports() {
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {
+                            const limit = await checkReportLimit();
+                            const watermark = limit.plan === "free";
                             const snapshot = await getCloudSnapshot(report.id);
                             if (snapshot) {
                               const restored = await downloadSnapshotImages(snapshot);
-                              generateReport(restored.profile, restored.draft, restored.options);
+                              generateReport(restored.profile, restored.draft, { ...restored.options, watermark });
                               toast.success("PDF pobrany!");
                             } else {
                               const profile = await getCloudProfile();
-                              regenerateFromHistory(profile, report);
+                              regenerateFromHistory(profile, report, watermark);
                               toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
                             }
                           } catch {
