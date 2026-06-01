@@ -307,7 +307,6 @@ export async function getCloudDraft(id: string): Promise<CloudDraft | null> {
 
 // ─── PLAN & LIMITS ──────────────────────────────────────────
 
-const FREE_LIMIT = 5;
 const TRIAL_DAYS = 7;
 
 export async function checkReportLimit(): Promise<{
@@ -319,7 +318,7 @@ export async function checkReportLimit(): Promise<{
   trialDaysLeft?: number;
 }> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { allowed: false, count: 0, limit: FREE_LIMIT, plan: "free" };
+  if (!user) return { allowed: false, count: 0, limit: Infinity, plan: "free" };
 
   // Check subscription
   const { data: sub } = await supabase
@@ -343,7 +342,8 @@ export async function checkReportLimit(): Promise<{
     return { allowed: true, count: 0, limit: Infinity, plan: "trial", trial: true, trialDaysLeft };
   }
 
-  // Free plan — check monthly count
+  // Free plan — unlimited reports, but every PDF carries a watermark.
+  // We still track the monthly count for analytics / display, but it never blocks.
   const month = new Date().toISOString().slice(0, 7); // '2026-03'
   const { data: countRow } = await supabase
     .from("report_counts")
@@ -353,7 +353,7 @@ export async function checkReportLimit(): Promise<{
     .maybeSingle();
 
   const count = countRow?.count || 0;
-  return { allowed: count < FREE_LIMIT, count, limit: FREE_LIMIT, plan: "free" };
+  return { allowed: true, count, limit: Infinity, plan: "free" };
 }
 
 export async function incrementReportCount(): Promise<void> {
