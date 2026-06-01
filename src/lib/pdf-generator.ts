@@ -67,6 +67,7 @@ export interface TemplateOptions {
   tiles: import("./storage").TileItem[];
   signatureFields: { id: string; label: string }[];
   showCompanyHeader?: boolean;
+  watermark?: boolean;
 }
 
 export function generateReport(
@@ -80,6 +81,7 @@ export function generateReport(
   const templateName = options?.templateName ?? "Raport serwisowy";
   const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Podpis klienta" }];
   const showCompanyHeader = options?.showCompanyHeader !== false;
+  const watermark = options?.watermark === true;
 
   // Derive selected tiles from tileStates (done) or legacy selectedTiles
   const tileStates = draft.tileStates || {};
@@ -405,9 +407,30 @@ export function generateReport(
   }
 
   // === DOCUMENT DEFINITION ===
+  // Diagonal watermark for free plan — multi-color "RaportON.pl" (ON in accent
+  // green), centered and rotated, drawn behind content on every page.
+  const watermarkBackground = watermark
+    ? (currentPage: number, pageSize: { width: number; height: number }) => {
+        const w = pageSize.width;
+        const h = pageSize.height;
+        const cx = w / 2;
+        const cy = h / 2;
+        const svg =
+          `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">` +
+          `<g transform="rotate(-35 ${cx} ${cy})" opacity="0.13">` +
+          `<text x="${cx}" y="${cy}" font-size="64" font-weight="bold" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" dominant-baseline="middle">` +
+          `<tspan fill="${COLORS.primary}">Raport</tspan>` +
+          `<tspan fill="${COLORS.accent}">ON</tspan>` +
+          `<tspan fill="${COLORS.primary}">.pl</tspan>` +
+          `</text></g></svg>`;
+        return { svg, width: w, height: h, absolutePosition: { x: 0, y: 0 } };
+      }
+    : undefined;
+
   const docDefinition: any = {
     pageSize: "A4",
     pageMargins: [40, 40, 40, 55],
+    background: watermarkBackground,
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
@@ -475,7 +498,8 @@ export function generateReport(
  */
 export function regenerateFromHistory(
   profile: CompanyProfile,
-  item: import("./storage").ReportHistoryItem
+  item: import("./storage").ReportHistoryItem,
+  watermark?: boolean
 ) {
   // Build fields from fieldLabels
   const fields = Object.entries(item.fieldLabels || {}).map(([id, label], i) => ({
@@ -507,5 +531,6 @@ export function regenerateFromHistory(
     fields,
     tiles,
     signatureFields,
+    watermark,
   });
 }
