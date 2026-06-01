@@ -612,7 +612,7 @@ export default function EditTemplate() {
 
         {/* ===================== PREVIEW COLUMN ===================== */}
         <div className={`flex-col min-h-0 flex-1 bg-muted/30 ${mobileView === "edit" ? "hidden lg:flex" : "flex lg:flex"}`}>
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-5">
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-5" style={{ scrollbarGutter: "stable" }}>
             <TemplatePreview
               mode="edit"
               pdfTitle={template.pdfTitle}
