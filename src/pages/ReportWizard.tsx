@@ -63,12 +63,6 @@ export default function ReportWizard() {
     return { allFields: [], allTiles: [], pdfTitle: "RAPORT SERWISOWY", templateName: template?.name || "Raport serwisowy", defaultShowCompanyHeader: true };
   }, [template]);
 
-  // Derive signature fields from fields for PDF generator compatibility
-  const signatureFields = useMemo(() =>
-    allFields.filter((f) => f.type === "signature").map((f) => ({ id: f.id, label: f.label })),
-    [allFields]
-  );
-
   // Field visibility
   const [hiddenFieldIds, setHiddenFieldIds] = useState<Set<string>>(new Set());
   const [showNotes, setShowNotes] = useState(false);
@@ -77,6 +71,20 @@ export default function ReportWizard() {
   useEffect(() => { setShowCompanyHeader(defaultShowCompanyHeader); }, [defaultShowCompanyHeader]);
   const visibleFields = useMemo(() => allFields.filter((f) => !hiddenFieldIds.has(f.id)), [allFields, hiddenFieldIds]);
   const toggleFieldVis = (id: string) => setHiddenFieldIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  // Hidden fields must disappear from the PDF and the preview too — not just the
+  // form. Tiles render inside the field loop and signatures derive from fields,
+  // so we rebuild both from the visible set only. Legacy template-level tiles
+  // (not tied to a field) stay, since they can't be hidden individually.
+  const legacyTiles = useMemo(() => (template?.tiles || []), [template]);
+  const visibleTiles = useMemo(() => [
+    ...visibleFields.filter((f) => f.type === "tiles").flatMap((f) => f.tileOptions || []),
+    ...legacyTiles,
+  ], [visibleFields, legacyTiles]);
+  const visibleSignatureFields = useMemo(() =>
+    visibleFields.filter((f) => f.type === "signature").map((f) => ({ id: f.id, label: f.label })),
+    [visibleFields]
+  );
 
   // Etap 2 — live preview + click-a-field-in-preview to jump to the form
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
@@ -232,14 +240,14 @@ export default function ReportWizard() {
       const watermark = limit.plan === "free";
 
       const meta = generateReport(profile, draft, {
-        pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader, watermark,
+        pdfTitle, templateName, fields: visibleFields, tiles: visibleTiles, signatureFields: visibleSignatureFields, showCompanyHeader, watermark,
       });
 
       // Save to Supabase
       const cloudId = await addCloudReport(meta);
 
       // Save snapshot — upload images to Storage, save lightweight data to DB
-      const snapshotOptions = { pdfTitle, templateName, fields: allFields, tiles: allTiles, signatureFields, showCompanyHeader };
+      const snapshotOptions = { pdfTitle, templateName, fields: visibleFields, tiles: visibleTiles, signatureFields: visibleSignatureFields, showCompanyHeader };
       uploadSnapshotImages(user!.id, cloudId, draft, profile, snapshotOptions)
         .then((lightSnapshot) => saveCloudSnapshot(cloudId, lightSnapshot))
         .catch((e) => console.warn("Snapshot save failed:", e));
@@ -595,11 +603,11 @@ export default function ReportWizard() {
             <TemplatePreview
               mode="fill"
               pdfTitle={pdfTitle}
-              fields={allFields}
+              fields={visibleFields}
               showCompanyHeader={showCompanyHeader}
               profile={cloudProfile}
               watermark={isFreePlan}
-              reportNumber={draft.reportNumber}
+              reportNumber={hiddenFieldIds.has("__reportNumber") ? "" : draft.reportNumber}
               values={draft.customFields}
               tileStates={draft.tileStates || {}}
               tileNotes={draft.tileNotes || {}}
