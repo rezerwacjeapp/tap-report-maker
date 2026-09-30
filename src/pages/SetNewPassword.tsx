@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { BrandLockup } from "@/components/BrandLogo";
 
 export default function SetNewPassword() {
   const { updatePassword } = useAuth();
@@ -67,7 +68,7 @@ export default function SetNewPassword() {
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
-          <span className="text-3xl font-bold text-foreground">Raport<span className="text-accent">ON</span></span>
+          <BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" />
           <p className="text-sm text-muted-foreground">Ustaw nowe hasło</p>
         </div>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { BrandLockup } from "@/components/BrandLogo";
 
 function GoogleIcon() {
   return (
@@ -100,7 +101,7 @@ export default function Register() {
       <div className="w-full max-w-sm space-y-8">
         {/* Brand */}
         <div className="text-center space-y-2">
-          <a href="https://raporton.pl" className="text-3xl font-bold text-foreground inline-block">Raport<span className="text-accent">ON</span></a>
+          <a href="https://raporton.pl" className="inline-block" aria-label="RaportON — strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
           <p className="text-sm text-muted-foreground">Utwórz darmowe konto</p>
         </div>
 

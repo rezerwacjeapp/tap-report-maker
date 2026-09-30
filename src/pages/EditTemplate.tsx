@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown, Type, AlignLeft, Calendar, Hash, Camera, PenTool, ListChecks, Heading1, FileText } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronRight, GripVertical, ArrowUp, ArrowDown, Type, AlignLeft, Calendar, Hash, Camera, PenTool, ListChecks, Heading1, FileText, Table2 } from "lucide-react";
 import {
   getTemplateById, saveUserTemplate, createBlankTemplate, duplicateTemplate,
   FIELD_CATALOG, getActiveFieldBlockIds,
   getFieldCategories, STARTER_TEMPLATES, countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
-import type { CustomFieldDef, CustomFieldType, TextStyle, CompanyProfile } from "@/lib/storage";
+import type { CustomFieldDef, CustomFieldType, TextStyle, CompanyProfile, TableColumnDef } from "@/lib/storage";
 import { STYLE_COLORS } from "@/lib/storage";
 import { getCloudProfile } from "@/lib/supabase-storage";
 import { TemplatePreview } from "@/components/TemplatePreview";
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   text: "Tekst", textarea: "Tekst długi", date: "Data", number: "Liczba",
   tiles: "Czynności", photos: "Zdjęcia", signature: "Podpis",
-  heading: "Nagłówek", info: "Tekst stały",
+  heading: "Nagłówek", info: "Tekst stały", table: "Tabela",
 };
 
 const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
@@ -30,7 +30,88 @@ const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
   signature: "Pole na podpis palcem — np. podpis klienta, serwisanta, inspektora.",
   heading: "Nagłówek sekcji — pogrubiony tekst dzielący raport na części.",
   info: "Blok tekstu informacyjnego — np. podstawa prawna, uwagi, instrukcje.",
+  table: "Tabela z kolumnami — np. wyniki pomiarów per obwód, lista gaśnic, stany liczników.",
 };
+
+const newColId = () => `c_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+const parseOptions = (raw: string) => raw.split(",").map((o) => o.trim()).filter(Boolean);
+const parseStartRows = (raw: string) => raw.split("\n").map((r) => r.trim()).filter(Boolean);
+
+/** Keeps the typed text (commas, spaces) while passing parsed options up. */
+function OptionsInput({ options, onChange }: { options: string[]; onChange: (o: string[]) => void }) {
+  const [raw, setRaw] = useState(options.join(", "));
+  return (
+    <input
+      className="w-full h-8 rounded-md border border-border bg-background px-2.5 text-xs focus:outline-none focus:border-accent"
+      value={raw}
+      onChange={(e) => { setRaw(e.target.value); onChange(parseOptions(e.target.value)); }}
+      placeholder="Opcje po przecinku — np. pozytywna, negatywna"
+    />
+  );
+}
+
+/** Column list for a "Tabela" field: name, kind (tekst / liczba / wybór), options, order. */
+function TableColumnsEditor({ columns, onChange }: { columns: TableColumnDef[]; onChange: (cols: TableColumnDef[]) => void }) {
+  const [newLabel, setNewLabel] = useState("");
+  const update = (id: string, patch: Partial<TableColumnDef>) => onChange(columns.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  const move = (i: number, d: -1 | 1) => {
+    const t = i + d;
+    if (t < 0 || t >= columns.length) return;
+    const next = [...columns];
+    [next[i], next[t]] = [next[t], next[i]];
+    onChange(next);
+  };
+  const add = () => {
+    if (!newLabel.trim()) return;
+    onChange([...columns, { id: newColId(), label: newLabel.trim(), kind: "text" }]);
+    setNewLabel("");
+  };
+  return (
+    <div className="space-y-1.5">
+      {columns.map((c, i) => (
+        <div key={c.id} className="rounded-lg border border-border bg-card p-2 space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <div className="flex flex-col shrink-0">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Kolumna wyżej"><ArrowUp className="h-3 w-3" /></button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === columns.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Kolumna niżej"><ArrowDown className="h-3 w-3" /></button>
+            </div>
+            <input
+              className="flex-1 min-w-0 h-8 rounded-md border border-border bg-background px-2.5 text-xs focus:outline-none focus:border-accent"
+              value={c.label}
+              onChange={(e) => update(c.id, { label: e.target.value })}
+              placeholder="Nazwa kolumny"
+            />
+            <select
+              className="h-8 rounded-md border border-border bg-background px-1.5 text-xs focus:outline-none focus:border-accent"
+              value={c.kind || "text"}
+              onChange={(e) => {
+                const kind = e.target.value as TableColumnDef["kind"];
+                update(c.id, kind === "choice" ? { kind, options: c.options?.length ? c.options : ["pozytywna", "negatywna"] } : { kind, options: undefined });
+              }}
+              aria-label="Rodzaj kolumny"
+            >
+              <option value="text">Tekst</option>
+              <option value="number">Liczba</option>
+              <option value="choice">Wybór</option>
+            </select>
+            <button type="button" onClick={() => onChange(columns.filter((x) => x.id !== c.id))} className="text-muted-foreground hover:text-destructive shrink-0" aria-label="Usuń kolumnę"><X className="h-3.5 w-3.5" /></button>
+          </div>
+          {c.kind === "choice" && <OptionsInput options={c.options || []} onChange={(options) => update(c.id, { options })} />}
+        </div>
+      ))}
+      <div className="flex gap-1.5">
+        <input
+          className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
+          placeholder={columns.length ? "Kolejna kolumna — np. Ocena" : "Pierwsza kolumna — np. Obwód, Nr gaśnicy"}
+          value={newLabel}
+          onChange={(e) => setNewLabel(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+        />
+        <Button type="button" variant="outline" size="icon" onClick={add} className="h-9 w-9 shrink-0" aria-label="Dodaj kolumnę"><Plus className="h-4 w-4" /></Button>
+      </div>
+    </div>
+  );
+}
 
 export default function EditTemplate() {
   const navigate = useNavigate();
@@ -52,6 +133,9 @@ export default function EditTemplate() {
   const [stagingTiles, setStagingTiles] = useState<{id: string; label: string}[]>([]);
   const [stagingTileInput, setStagingTileInput] = useState("");
   const [stagingInfoContent, setStagingInfoContent] = useState("");
+  const [stagingTableName, setStagingTableName] = useState("");
+  const [stagingTableCols, setStagingTableCols] = useState<TableColumnDef[]>([]);
+  const [stagingTableRows, setStagingTableRows] = useState("");
 
   const addStagingTile = () => {
     if (!stagingTileInput.trim()) return;
@@ -75,6 +159,30 @@ export default function EditTemplate() {
     setStagingTilesName("");
     setStagingTiles([]);
     setStagingTileInput("");
+  };
+
+  const commitTableSection = () => {
+    const cols = stagingTableCols.filter((c) => c.label.trim());
+    if (!stagingTableName.trim() || cols.length === 0) return;
+    const starts = parseStartRows(stagingTableRows);
+    const f: CustomFieldDef = {
+      id: `cf_${Date.now()}`,
+      label: stagingTableName.trim(),
+      type: "table",
+      remember: false,
+      order: template!.fields.length,
+      tableColumns: cols,
+      ...(starts.length ? { tableRows: starts } : {}),
+    };
+    setTemplate({ ...template!, fields: [...template!.fields, f] });
+    setStagingTableName("");
+    setStagingTableCols([]);
+    setStagingTableRows("");
+    setExpandedAddType(null);
+  };
+
+  const updateTableField = (id: string, patch: Partial<CustomFieldDef>) => {
+    setTemplate({ ...template!, fields: template!.fields.map((f) => (f.id === id ? { ...f, ...patch } : f)) });
   };
 
   const dragItemRef = useRef<number | null>(null);
@@ -403,8 +511,20 @@ export default function EditTemplate() {
             </div>
           </button>
 
+          {/* Tabela card */}
+          <button
+            onClick={() => setExpandedAddType(expandedAddType === "table" ? null : "table")}
+            className={`w-full rounded-xl border p-2.5 text-left transition-all flex items-center gap-3 ${expandedAddType === "table" ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
+          >
+            <Table2 className={`h-5 w-5 shrink-0 ${expandedAddType === "table" ? "text-accent" : "text-muted-foreground"}`} />
+            <div>
+              <span className="text-xs font-medium">Tabela</span>
+              <span className="text-[10px] text-muted-foreground block">Kolumny ustalasz tu, wiersze dodajesz w terenie — np. pomiary per obwód</span>
+            </div>
+          </button>
+
           {/* === Expanded panel for simple types === */}
-          {expandedAddType && !["signature", "tiles", "info"].includes(expandedAddType) && (
+          {expandedAddType && !["signature", "tiles", "info", "table"].includes(expandedAddType) && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
               <p className="text-xs text-muted-foreground">Wpisz {expandedAddType === "heading" ? "treść nagłówka" : `nazwę pola typu`} <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
               <div className="flex gap-1.5">
@@ -489,6 +609,22 @@ export default function EditTemplate() {
             </div>
           )}
 
+          {/* === Expanded panel for TABLE === */}
+          {expandedAddType === "table" && (
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2.5">
+              <p className="text-xs text-muted-foreground">Nazwij tabelę i dodaj kolumny. W terenie wypełniasz ją wiersz po wierszu, a w PDF wychodzi zwykła tabela z nagłówkiem.</p>
+              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa tabeli — np. Wyniki pomiarów" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
+              <TableColumnsEditor columns={stagingTableCols} onChange={setStagingTableCols} />
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Wiersze startowe (opcjonalnie) — jeden w linii, trafią do pierwszej kolumny</label>
+                <textarea className="w-full min-h-[64px] rounded-md border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-accent resize-y" placeholder={"np.\nGaz [m³]\nWoda zimna [m³]"} value={stagingTableRows} onChange={(e) => setStagingTableRows(e.target.value)} />
+              </div>
+              <Button variant="accent" size="sm" onClick={commitTableSection} className="w-full" disabled={!stagingTableName.trim() || stagingTableCols.filter((c) => c.label.trim()).length === 0}>
+                <Plus className="h-4 w-4 mr-1" /> Dodaj tabelę {stagingTableCols.length > 0 && `(${stagingTableCols.length} kol.)`}
+              </Button>
+            </div>
+          )}
+
           {/* === Expanded panel for TILES/CZYNNOŚCI === */}
           {expandedAddType === "tiles" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
@@ -541,7 +677,7 @@ export default function EditTemplate() {
                   ) : (
                     <span className="text-sm flex-1 truncate">{field.label || (field.type === "info" && field.content ? field.content.substring(0, 60) + (field.content.length > 60 ? "…" : "") : field.label)}</span>
                   )}
-                  <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : ""}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : field.type === "table" ? ` (${(field.tableColumns || []).length} kol.)` : ""}</span>
                   <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0"><X className="h-4 w-4" /></button>
                 </div>
 
@@ -583,6 +719,25 @@ export default function EditTemplate() {
                       />
                       <Button variant="accent" size="icon" onClick={() => addTileOption(field.id)} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
                     </div>
+                  </div>
+                )}
+
+                {/* Table editor */}
+                {field.type === "table" && (
+                  <div className="ml-6 mt-1 mb-2 space-y-2 border-l-2 border-accent/30 pl-3">
+                    <input
+                      className="w-full h-8 rounded-md border border-border bg-card px-2.5 text-xs font-medium focus:outline-none focus:border-accent"
+                      value={field.label}
+                      onChange={(e) => updateFieldLabel(field.id, e.target.value)}
+                      placeholder="Nazwa tabeli"
+                    />
+                    <TableColumnsEditor columns={field.tableColumns || []} onChange={(cols) => updateTableField(field.id, { tableColumns: cols })} />
+                    <textarea
+                      className="w-full min-h-[52px] rounded-md border border-border bg-card px-2.5 py-2 text-xs focus:outline-none focus:border-accent resize-y"
+                      defaultValue={(field.tableRows || []).join("\n")}
+                      onBlur={(e) => updateTableField(field.id, { tableRows: parseStartRows(e.target.value) })}
+                      placeholder="Wiersze startowe — jeden w linii (opcjonalnie)"
+                    />
                   </div>
                 )}
 

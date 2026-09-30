@@ -1,9 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight, Zap, Clock, X, LogOut, MessageCircle } from "lucide-react";
-import { getProfile, getReportHistory } from "@/lib/storage";
+import { Plus, ChevronRight, Zap, Clock, X, LogOut, MessageCircle, CalendarClock, MessageSquareText, Loader2 } from "lucide-react";
+import type { ReportHistoryItem } from "@/lib/storage";
 import { getUserTemplates, fetchUserTemplates, STARTER_TEMPLATES, type ReportTemplate } from "@/lib/templates";
-import { checkReportLimit, getCloudDrafts, deleteCloudDraft, type CloudDraft } from "@/lib/supabase-storage";
+import {
+  checkReportLimit, getCloudDrafts, deleteCloudDraft, getCloudReportHistory, getCloudProfile, type CloudDraft,
+} from "@/lib/supabase-storage";
+import { computeReminders, reminderWhen, formatDatePL, type InspectionReminder } from "@/lib/report-utils";
+import { prepareReuse } from "@/lib/reuse-report";
+import { BrandLockup } from "@/components/BrandLogo";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
@@ -51,10 +57,14 @@ const Index = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
-  const profile = getProfile();
-  const hasProfile = profile.fields?.some((f) => f.value?.trim());
-  const reports = getReportHistory();
+  // Reports and profile live in Supabase (the old localStorage history is no longer written)
+  const [reports, setReports] = useState<ReportHistoryItem[]>([]);
+  const [reportsLoaded, setReportsLoaded] = useState(false);
+  const [hasProfile, setHasProfile] = useState(true);
+  const [companyName, setCompanyName] = useState("");
+  const [reuseBusy, setReuseBusy] = useState<string | null>(null);
   const recentReports = reports.slice(0, 3);
+  const reminders = useMemo(() => computeReminders(reports), [reports]);
 
   const [planInfo, setPlanInfo] = useState<{ count: number; limit: number; plan: string; trial?: boolean; trialDaysLeft?: number } | null>(null);
   const [cloudDrafts, setCloudDrafts] = useState<CloudDraft[]>([]);
@@ -66,7 +76,32 @@ const Index = () => {
       .catch(() => {});
     getCloudDrafts().then(setCloudDrafts).catch(() => {});
     fetchUserTemplates().then(setUserTemplates).catch(() => {});
+    getCloudReportHistory().then(setReports).catch(() => {}).finally(() => setReportsLoaded(true));
+    getCloudProfile()
+      .then((p) => {
+        setHasProfile(!!p.logo || !!p.fields?.some((f) => f.value?.trim()));
+        setCompanyName(p.fields?.[0]?.value?.trim() || "");
+      })
+      .catch(() => {});
   }, []);
+
+  const startNextInspection = async (r: InspectionReminder) => {
+    const report = reports.find((x) => x.id === r.reportId);
+    if (!report || reuseBusy) return;
+    setReuseBusy(r.reportId);
+    try {
+      const url = await prepareReuse(report);
+      if (url) navigate(url);
+      else toast.error("Szablon tego raportu już nie istnieje.");
+    } finally {
+      setReuseBusy(null);
+    }
+  };
+
+  const smsHref = (r: InspectionReminder) => {
+    const body = `Dzień dobry, zbliża się termin przeglądu (${r.templateName.toLowerCase()}) — ${formatDatePL(r.dueDate)}. Kiedy mogę przyjechać?${companyName ? ` ${companyName}` : ""}`;
+    return `sms:${r.phone}?&body=${encodeURIComponent(body)}`;
+  };
 
   const handleDeleteDraft = (id: string) => {
     deleteCloudDraft(id).catch(() => {});
@@ -124,10 +159,9 @@ const Index = () => {
       {/* Header */}
       <header className="px-5 pt-8 pb-2 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl tracking-tight">
-            Raport<span className="text-accent">ON</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Raport serwisowy w minutę</p>
+          <h1 className="sr-only">RaportON</h1>
+          <BrandLockup markClassName="h-8 w-auto" textClassName="text-2xl" />
+          <p className="text-sm text-muted-foreground mt-1">Raport serwisowy w minutę</p>
         </div>
         <div className="flex items-center gap-2 mt-1">
           <a
@@ -218,10 +252,58 @@ const Index = () => {
           </div>
         )}
 
+        {/* Upcoming inspections — from "Data następnego przeglądu" in past reports */}
+        {reminders.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <CalendarClock className="h-3.5 w-3.5" /> Nadchodzące przeglądy
+              </p>
+              <span className="text-[11px] text-muted-foreground">{reminders.length}</span>
+            </div>
+            <div className="rounded-2xl glass-card overflow-hidden">
+              {reminders.slice(0, 5).map((r, i) => {
+                const overdue = r.daysLeft < 0;
+                const soon = r.daysLeft >= 0 && r.daysLeft <= 14;
+                return (
+                  <div key={r.reportId} className={`px-4 py-3.5 ${i < Math.min(reminders.length, 5) - 1 ? "border-b border-border/50" : ""}`}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{r.clientName}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{r.templateName} • {formatDatePL(r.dueDate)}</p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${overdue ? "bg-red-500/10 text-red-600 dark:text-red-400" : soon ? "bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground"}`}>
+                        {reminderWhen(r.daysLeft)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <button
+                        onClick={() => startNextInspection(r)}
+                        disabled={reuseBusy === r.reportId}
+                        className="h-8 rounded-lg bg-accent/10 text-accent px-3 text-xs font-semibold flex items-center gap-1.5 hover:bg-accent/15 transition-colors disabled:opacity-60"
+                      >
+                        {reuseBusy === r.reportId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} Nowy protokół
+                      </button>
+                      {r.phone && (
+                        <a
+                          href={smsHref(r)}
+                          className="h-8 rounded-lg border border-border px-3 text-xs font-medium flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <MessageSquareText className="h-3.5 w-3.5" /> Przypomnij SMS-em
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-2xl glass-card p-3.5">
-            <p className="text-xl font-semibold">{reports.length}</p>
+            <p className="text-xl font-semibold">{reportsLoaded ? (reports.length >= 100 ? "100+" : reports.length) : "…"}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Raportów</p>
           </div>
           <div className="rounded-2xl glass-card p-3.5">

@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   FileText, Search, Trash2, Calendar, Camera,
-  PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown, Loader2,
+  PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown, Loader2, CopyPlus,
 } from "lucide-react";
 import { type ReportHistoryItem } from "@/lib/storage";
-import { generateReport, regenerateFromHistory } from "@/lib/pdf-generator";
+import { generateReportFile, historyTemplateOptions } from "@/lib/pdf-generator";
+import { ReportReadySheet } from "@/components/ReportReadySheet";
+import { parseTable, tableColumns, filledRows, tableSearchText, type TableValue } from "@/lib/table-field";
+import { prepareReuse } from "@/lib/reuse-report";
 import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
   getCloudSnapshot, getCloudProfile, checkReportLimit,
@@ -52,6 +55,8 @@ export default function Reports() {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [ready, setReady] = useState<{ blob: Blob; filename: string; subtitle: string } | null>(null);
 
   useEffect(() => {
     getCloudReportHistory()
@@ -68,7 +73,7 @@ export default function Reports() {
       r.filename.toLowerCase().includes(q) ||
       r.date.includes(q) ||
       r.templateName.toLowerCase().includes(q) ||
-      Object.values(r.customFields).some((v) => v.toLowerCase().includes(q))
+      Object.values(r.customFields).some((v) => typeof v === "string" && tableSearchText(v).toLowerCase().includes(q))
     );
   });
 
@@ -96,11 +101,61 @@ export default function Reports() {
 
   const getFilledFields = (report: ReportHistoryItem) => {
     return Object.entries(report.customFields)
-      .filter(([, value]) => value?.trim())
-      .map(([fieldId, value]) => ({
-        label: report.fieldLabels?.[fieldId] || fieldId,
-        value,
-      }));
+      .filter(([, value]) => typeof value === "string" && value.trim())
+      .map(([fieldId, value]) => {
+        const tv = parseTable(value);
+        return {
+          label: report.fieldLabels?.[fieldId] || fieldId,
+          value,
+          table: tv && filledRows(tv).length ? tv : (null as TableValue | null),
+        };
+      })
+      .filter((f) => !parseTable(f.value) || f.table);
+  };
+
+  /** Rebuild the PDF (from the saved snapshot when available) and open the send/download sheet. */
+  const openPdf = async (report: ReportHistoryItem) => {
+    if (busyId) return;
+    setBusyId(report.id);
+    try {
+      const limit = await checkReportLimit();
+      const watermark = limit.plan === "free";
+      const snapshot = await getCloudSnapshot(report.id);
+      let result: { blob: Blob; meta: { filename: string } };
+      if (snapshot) {
+        const restored = await downloadSnapshotImages(snapshot);
+        result = await generateReportFile(restored.profile, restored.draft, { ...restored.options, watermark });
+      } else {
+        const profile = await getCloudProfile();
+        const { draft, options } = historyTemplateOptions(report, watermark);
+        result = await generateReportFile(profile, draft, options);
+        toast("Ten raport nie ma zapisanej kopii zdjęć i podpisów — PDF odtworzony z samych danych.");
+      }
+      setReady({
+        blob: result.blob,
+        filename: report.filename || result.meta.filename,
+        subtitle: [report.clientName !== "—" ? report.clientName : "", report.templateName].filter(Boolean).join(" • "),
+      });
+    } catch {
+      toast.error("Nie udało się przygotować PDF");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  /** "Nowy na podstawie" — next inspection for the same client/device. */
+  const startFrom = async (report: ReportHistoryItem) => {
+    if (busyId) return;
+    setBusyId(report.id);
+    try {
+      const url = await prepareReuse(report);
+      if (url) navigate(url);
+      else toast.error("Szablon tego raportu już nie istnieje — nie da się skopiować danych.");
+    } catch {
+      toast.error("Nie udało się wczytać raportu");
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
@@ -218,7 +273,25 @@ export default function Reports() {
                       <div className="space-y-2">
                         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dane raportu</p>
                         <div className="space-y-1.5">
-                          {filledFields.map(({ label, value }) => (
+                          {filledFields.map(({ label, value, table }) => table ? (
+                            <div key={label} className="space-y-1">
+                              <span className="text-[11px] text-muted-foreground">{label}:</span>
+                              <div className="overflow-x-auto rounded-lg border border-border">
+                                <table className="w-full text-xs">
+                                  <thead className="bg-muted/60">
+                                    <tr>{tableColumns(undefined, table).map((c) => <th key={c.id} className="px-2 py-1 text-left font-medium whitespace-nowrap">{c.label}</th>)}</tr>
+                                  </thead>
+                                  <tbody>
+                                    {filledRows(table).map((row, i) => (
+                                      <tr key={i} className="border-t border-border">
+                                        {tableColumns(undefined, table).map((c) => <td key={c.id} className="px-2 py-1 whitespace-nowrap">{row[c.id] || ""}</td>)}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ) : (
                             <div key={label} className="flex gap-2">
                               <span className="text-[11px] text-muted-foreground shrink-0 w-28 pt-0.5">{label}:</span>
                               <span className="text-sm break-words">{value}</span>
@@ -282,32 +355,25 @@ export default function Reports() {
                       </div>
                     )}
 
-                    <div className="pt-2 flex items-center justify-between gap-3">
-                      <p className="text-[11px] text-muted-foreground font-mono truncate flex-1">{report.filename}</p>
+                    <p className="pt-1 text-[11px] text-muted-foreground truncate">{report.filename}</p>
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          try {
-                            const limit = await checkReportLimit();
-                            const watermark = limit.plan === "free";
-                            const snapshot = await getCloudSnapshot(report.id);
-                            if (snapshot) {
-                              const restored = await downloadSnapshotImages(snapshot);
-                              generateReport(restored.profile, restored.draft, { ...restored.options, watermark });
-                              toast.success("PDF pobrany!");
-                            } else {
-                              const profile = await getCloudProfile();
-                              regenerateFromHistory(profile, report, watermark);
-                              toast.success("PDF wygenerowany ponownie (bez zdjęć/podpisów)");
-                            }
-                          } catch {
-                            toast.error("Nie udało się pobrać PDF");
-                          }
-                        }}
+                        disabled={busyId === report.id}
+                        onClick={(e) => { e.stopPropagation(); startFrom(report); }}
+                        title="Kolejny przegląd u tego klienta — dane klienta i urządzenia będą już wpisane"
                       >
-                        <FileDown className="h-3.5 w-3.5 mr-1.5" /> Pobierz PDF
+                        <CopyPlus className="h-3.5 w-3.5 mr-1.5" /> Nowy na podstawie
+                      </Button>
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        disabled={busyId === report.id}
+                        onClick={(e) => { e.stopPropagation(); openPdf(report); }}
+                        className="ml-auto"
+                      >
+                        {busyId === report.id ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5 mr-1.5" />} PDF
                       </Button>
                     </div>
                   </div>
@@ -330,6 +396,15 @@ export default function Reports() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ReportReadySheet
+        open={!!ready}
+        blob={ready?.blob ?? null}
+        filename={ready?.filename ?? ""}
+        subtitle={ready?.subtitle}
+        closeLabel="Zamknij"
+        onClose={() => setReady(null)}
+      />
     </div>
   );
 }

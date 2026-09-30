@@ -5,13 +5,19 @@ import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
 import { TemplatePreview } from "@/components/TemplatePreview";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare, History } from "lucide-react";
 import {
-  getDraft, saveDraft, clearDraft, hasDraft,
-  type ReportDraft, type TextStyle,
+  getDraft, saveDraft, clearDraft, hasDraft, getRememberedValues, rememberTemplateValues,
+  type ReportDraft, type TextStyle, type CustomFieldDef,
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
-import { generateReport, type TemplateOptions } from "@/lib/pdf-generator";
+import { generateReportFile, type TemplateOptions } from "@/lib/pdf-generator";
+import { TableFieldInput } from "@/components/TableFieldInput";
+import { ReportReadySheet } from "@/components/ReportReadySheet";
+import { initialTableValue, isTableValue, tableHasContent } from "@/lib/table-field";
+import {
+  todayISO, mainDateFieldId, isNextDateLabel, addMonthsISO, isISODate, buildReuseDraft, formatDatePL,
+} from "@/lib/report-utils";
 import {
   getCloudProfile, addCloudReport, saveCloudSnapshot,
   checkReportLimit, incrementReportCount, getCloudNextReportNumber,
@@ -43,6 +49,7 @@ export default function ReportWizard() {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template") || "";
   const draftParam = searchParams.get("draft") || "";
+  const reuseParam = searchParams.get("reuse") === "1";
   const template = getTemplateById(templateId);
 
   // Cloud draft tracking (editing existing saved draft)
@@ -115,17 +122,30 @@ export default function ReportWizard() {
   }, []);
 
   // Draft
+  // New report: protocol date = today, other dates empty (a pre-filled "today" in
+  // e.g. "Data ważności legalizacji" would be wrong), "remember" fields prefilled.
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
     const ts: Record<string, "done" | "fail" | "na"> = {};
+    const remembered = getRememberedValues();
+    const mainDate = mainDateFieldId(allFields);
     allFields.forEach((f) => {
-      if (f.type === "date") cf[f.id] = new Date().toISOString().split("T")[0];
+      const mem = f.remember && remembered[f.id] ? remembered[f.id] : undefined;
+      if (f.type === "date") cf[f.id] = mem ?? (f.id === mainDate ? todayISO() : "");
       else if (f.type === "tiles") {
         (f.tileOptions || []).forEach((t) => { ts[t.id] = "na"; });
-      } else if (!["tiles", "photos", "signature"].includes(f.type)) cf[f.id] = "";
+      } else if (f.type === "table") cf[f.id] = initialTableValue(f);
+      else if (!["photos", "signature", "heading", "info"].includes(f.type)) cf[f.id] = mem ?? "";
     });
     return { selectedTiles: [], tileStates: ts, tileNotes: {}, photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
   }, [allFields, templateId]);
+
+  // "Nowy na podstawie" — fields copied from a previous report, flagged until edited
+  const [copiedIds, setCopiedIds] = useState<Set<string>>(new Set());
+  const [reuseInfo, setReuseInfo] = useState<string | null>(null);
+
+  // PDF ready sheet
+  const [ready, setReady] = useState<{ blob: Blob; filename: string; subtitle: string } | null>(null);
 
   const [draft, setDraft] = useState<ReportDraft>(buildEmptyDraft);
   const [showResume, setShowResume] = useState(false);
@@ -136,6 +156,24 @@ export default function ReportWizard() {
   useEffect(() => {
     if (didCheckDraft.current) return;
     didCheckDraft.current = true;
+
+    // Starting from a previous report ("Nowy na podstawie")?
+    if (reuseParam) {
+      try {
+        const raw = sessionStorage.getItem("raporton_reuse");
+        sessionStorage.removeItem("raporton_reuse");
+        const payload = raw ? JSON.parse(raw) : null;
+        if (payload?.draft) {
+          const { draft: d, copiedIds: ids } = buildReuseDraft(allFields, buildEmptyDraft(), payload.draft);
+          clearDraft();
+          setDraft(d);
+          setCopiedIds(new Set(ids));
+          setReuseInfo(payload.label || "poprzedniego protokołu");
+          setInitialized(true);
+          return;
+        }
+      } catch { /* fall through to a normal start */ }
+    }
 
     // Loading from a saved cloud draft?
     if (draftParam) {
@@ -158,17 +196,22 @@ export default function ReportWizard() {
     // Existing localStorage draft?
     if (hasDraft()) {
       const saved = getDraft();
+      const empty = buildEmptyDraft();
+      const fieldById = new Map(allFields.map((f) => [f.id, f] as [string, CustomFieldDef]));
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
         Object.values(saved.photosByField || {}).some((arr) => arr.length > 0) ||
         Object.values(saved.signatures || {}).some((v) => !!v) ||
         Object.values(saved.tileStates || {}).some((v) => v !== "na") ||
         Object.values(saved.tileNotes || {}).some((v) => v?.trim()) ||
-        Object.values(saved.customFields).some((v) => v?.trim() && v !== new Date().toISOString().split("T")[0]);
+        Object.entries(saved.customFields).some(([id, v]) => {
+          if (isTableValue(v)) return tableHasContent(v, fieldById.get(id));
+          return !!v?.trim() && v !== (empty.customFields[id] ?? "") && v !== new Date().toISOString().split("T")[0];
+        });
       if (saved.templateId === templateId && hasContent) {
         setShowResume(true);
       } else { clearDraft(); setDraft(buildEmptyDraft()); setInitialized(true); }
     } else { setDraft(buildEmptyDraft()); setInitialized(true); }
-  }, [templateId, buildEmptyDraft, draftParam]);
+  }, [templateId, buildEmptyDraft, draftParam, reuseParam, allFields]);
 
   const handleResume = () => {
     const d = getDraft();
@@ -216,7 +259,20 @@ export default function ReportWizard() {
   const [expandedNoteIds, setExpandedNoteIds] = useState<Set<string>>(new Set());
   const toggleNoteExpand = (id: string) => setExpandedNoteIds((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const updateField = (id: string, value: string) => update({ customFields: { ...draft.customFields, [id]: value } });
+  const updateField = (id: string, value: string) => {
+    if (copiedIds.has(id)) setCopiedIds((p) => { const n = new Set(p); n.delete(id); return n; });
+    update({ customFields: { ...draft.customFields, [id]: value } });
+  };
+
+  // Quick picks for "Data następnego przeglądu" — counted from the protocol date
+  const mainDateId = mainDateFieldId(allFields);
+  const baseDate = (mainDateId && isISODate(draft.customFields[mainDateId]) ? draft.customFields[mainDateId] : todayISO());
+  const NEXT_DATE_PICKS: { label: string; months: number }[] = [
+    { label: "+1 mies.", months: 1 }, { label: "+6 mies.", months: 6 }, { label: "+1 rok", months: 12 }, { label: "+5 lat", months: 60 },
+  ];
+  const copiedTag = (id: string) => copiedIds.has(id)
+    ? <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 align-middle"><History className="h-3 w-3" />z poprzedniego</span>
+    : null;
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
   const handleGenerate = async () => {
@@ -239,7 +295,7 @@ export default function ReportWizard() {
       // Watermark only on free plan (not trial, not solo)
       const watermark = limit.plan === "free";
 
-      const meta = generateReport(profile, draft, {
+      const { meta, blob } = await generateReportFile(profile, draft, {
         pdfTitle, templateName, fields: visibleFields, tiles: visibleTiles, signatureFields: visibleSignatureFields, showCompanyHeader, watermark,
       });
 
@@ -258,9 +314,15 @@ export default function ReportWizard() {
       // Delete cloud draft if we were editing one
       if (cloudDraftId) deleteCloudDraft(cloudDraftId).catch(() => {});
 
-      toast.success("Raport PDF wygenerowany!");
+      // "Zapamiętaj" fields (company data, certificates, instruments) prefill the next report
+      rememberTemplateValues(allFields, draft.customFields);
+
       clearDraft();
-      navigate("/");
+      setReady({
+        blob,
+        filename: meta.filename,
+        subtitle: [meta.clientName !== "—" ? meta.clientName : "", templateName].filter(Boolean).join(" • "),
+      });
     } catch (err) {
       console.error("PDF generation error:", err);
       toast.error("Błąd generowania PDF");
@@ -384,6 +446,18 @@ export default function ReportWizard() {
         {/* ===================== FORM COLUMN ===================== */}
         <div className={`flex-col min-h-0 lg:w-[54%] lg:border-r lg:border-border ${mobileView === "preview" ? "hidden lg:flex" : "flex lg:flex"}`}>
           <main className="flex-1 px-5 py-4 space-y-4 overflow-y-auto lg:min-h-0">
+        {reuseInfo && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+            <History className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm flex-1">
+              Dane klienta i urządzenia skopiowane z {reuseInfo}. Pola oznaczone <strong>„z poprzedniego"</strong> sprawdź przed wygenerowaniem — pomiary, oceny, czynności i podpisy zaczynają się od zera.
+            </p>
+            <button onClick={() => setReuseInfo(null)} className="p-1 -m-1 text-muted-foreground hover:text-foreground" aria-label="Zamknij informację">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {/* Report number — editable, hideable */}
         {!hiddenFieldIds.has("__reportNumber") && (
         <div className="relative">
@@ -505,12 +579,22 @@ export default function ReportWizard() {
                 />
               </div>
 
+            /* TABLE */
+            ) : field.type === "table" ? (
+              <div>
+                <label className="text-sm font-medium mb-1 block pr-6" style={textStyleToCss(field.labelStyle)}>
+                  {field.label}{copiedTag(field.id)}
+                </label>
+                <TableFieldInput field={field} value={draft.customFields[field.id]} onChange={(raw) => updateField(field.id, raw)} />
+              </div>
+
             /* TEXTAREA */
             ) : field.type === "textarea" ? (
               <div>
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {copiedTag(field.id)}
                 </label>
                 <div className="space-y-2">
                   <textarea className="w-full min-h-[80px] rounded-xl border border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
@@ -524,6 +608,7 @@ export default function ReportWizard() {
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {copiedTag(field.id)}
                 </label>
                 <div className="space-y-2">
                   <input type="text" className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
@@ -537,8 +622,28 @@ export default function ReportWizard() {
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
                   {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {copiedTag(field.id)}
                 </label>
                 <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
+                {field.type === "date" && isNextDateLabel(field.label) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    <span className="text-[11px] text-muted-foreground mr-0.5">od {formatDatePL(baseDate)}:</span>
+                    {NEXT_DATE_PICKS.map((p) => {
+                      const v = addMonthsISO(baseDate, p.months);
+                      const on = draft.customFields[field.id] === v;
+                      return (
+                        <button
+                          key={p.months}
+                          type="button"
+                          onClick={() => updateField(field.id, v)}
+                          className={`h-8 rounded-lg px-2.5 text-xs font-medium border transition-colors ${on ? "bg-accent text-white border-accent" : "bg-card text-muted-foreground border-border hover:text-foreground"}`}
+                        >
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -619,6 +724,15 @@ export default function ReportWizard() {
           </div>
         </div>
       </div>
+
+      <ReportReadySheet
+        open={!!ready}
+        blob={ready?.blob ?? null}
+        filename={ready?.filename ?? ""}
+        subtitle={ready?.subtitle}
+        closeLabel="Wróć na pulpit"
+        onClose={() => { setReady(null); navigate("/"); }}
+      />
     </div>
   );
 }
