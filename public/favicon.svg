@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="76.3 60.8 349.5 349.5"><defs>
+    <linearGradient id="rb" x1="280" y1="260" x2="380" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#012e57"/>
+      <stop offset="1" stop-color="#01726f"/>
+    </linearGradient>
+    <linearGradient id="rw" x1="250" y1="0" x2="345" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f1fcfe"/>
+    </linearGradient>
+    <linearGradient id="rs" x1="276.7" y1="266.3" x2="292" y2="291" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a4d5e" stop-opacity=".32"/>
+      <stop offset=".45" stop-color="#2a4d5e" stop-opacity=".1"/>
+      <stop offset="1" stop-color="#2a4d5e" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M147 66H289L379 156V381A24 24 0 0 1 355 405H147A24 24 0 0 1 123 381V90A24 24 0 0 1 147 66Z" fill="url(#rb)"/>
+  <path d="M289 66V139A12 12 0 0 0 301 151H374Z" fill="#03b989"/>
+  <path d="M252 202H379V282.5H250.4L174 330.6L240 250H208Z" fill="url(#rw)"/>
+  <path d="M303 250L250.4 282.5H345L370 250Z" fill="url(#rs)"/>
+  <path d="M303 250L250.4 282.5L174 330.6L240 250Z" fill="#fefefe"/>
+</svg>

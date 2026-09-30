@@ -2,27 +2,33 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RaportON | Raporty, protokoły i oferty PDF w 60 sekund</title>
-  <meta name="description" content="Błyskawiczne dokumenty PDF w terenie — raporty, protokoły, oferty, zlecenia, WZ. Z telefonu w 60 sekund. Zdjęcia, podpisy, dyktowanie w jednej aplikacji.">
-  <meta property="og:title" content="RaportON — Raporty, protokoły i oferty w 60 sekund">
-  <meta property="og:description" content="Wypełnij formularz, dodaj zdjęcia, podpis klienta — raport, protokół, oferta czy WZ jako PDF z logo Twojej firmy gotowy.">
+  <meta name="description" content="Protokoły serwisowe i raporty PDF z telefonu: tabele pomiarów, zdjęcia, podpis klienta, wysyłka na WhatsApp i e-mail, przypomnienia o przeglądach. Gotowe szablony dla klimatyzacji, elektryki, gazu i PPOŻ.">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#031B33">
+  <meta property="og:title" content="RaportON — protokół gotowy, zanim wyjdziesz od klienta">
+  <meta property="og:description" content="Wypełniasz na telefonie, klient podpisuje palcem, PDF z logo Twojej firmy od razu idzie do niego na WhatsAppa albo e-mail.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://raporton.pl">
   <meta property="og:image" content="https://raporton.pl/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta property="og:site_name" content="RaportON">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RaportON — Raporty, protokoły i oferty w 60 sekund">
-  <meta name="twitter:description" content="Wypełnij formularz, dodaj zdjęcia, podpis klienta — raport, protokół, oferta czy WZ jako PDF z logo Twojej firmy gotowy.">
+  <meta name="twitter:title" content="RaportON — protokół gotowy, zanim wyjdziesz od klienta">
+  <meta name="twitter:description" content="Wypełniasz na telefonie, klient podpisuje palcem, PDF z logo Twojej firmy od razu idzie do niego na WhatsAppa albo e-mail.">
   <meta name="twitter:image" content="https://raporton.pl/og-image.png">
-  <meta name="keywords" content="raporty serwisowe, protokoły odbioru, oferty i wyceny, zlecenia, dokumenty WZ, karty pracy, generator dokumentów PDF, PDF z telefonu, protokół zdawczo-odbiorczy, aplikacja dla instalatorów, HVAC, F-gaz, prawo budowlane">
+  <meta name="keywords" content="protokół serwisowy, raporty serwisowe, protokoły odbioru, protokół pomiarów elektrycznych, protokół przeglądu klimatyzacji, F-gaz, przegląd gaśnic, protokół zdawczo-odbiorczy, oferty i wyceny, generator dokumentów PDF, PDF z telefonu, aplikacja dla instalatorów, prawo budowlane">
   <meta name="robots" content="index, follow">
   <meta name="author" content="RaportON">
   <link rel="canonical" href="https://raporton.pl">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -30,1276 +36,855 @@
     "name": "RaportON",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web, Android, iOS",
-    "description": "Aplikacja do generowania profesjonalnych dokumentów PDF z telefonu w 60 sekund — raporty, protokoły, oferty, zlecenia, WZ. Zdjęcia, podpisy, dyktowanie głosowe.",
+    "description": "Aplikacja do protokołów serwisowych i dokumentów PDF z telefonu — tabele pomiarów, zdjęcia, podpis klienta, wysyłka PDF, przypomnienia o przeglądach.",
     "url": "https://raporton.pl",
     "offers": [
       { "@type": "Offer", "price": "0", "priceCurrency": "PLN", "name": "Free", "description": "Dokumenty bez limitu ze znakiem wodnym" },
-      { "@type": "Offer", "price": "19", "priceCurrency": "PLN", "name": "Solo", "description": "Bez limitu dokumentów" }
+      { "@type": "Offer", "price": "19", "priceCurrency": "PLN", "name": "Solo", "description": "Dokumenty bez limitu, bez znaku wodnego" }
     ],
-    "inLanguage": "pl",
-    "availableLanguage": "pl"
+    "inLanguage": "pl"
   }
   </script>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f172a'/%3E%3Cpath d='M9 16.5l4 4 10-10' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M12 16.5l4 4 10-10' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none' opacity='0.4'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://code.iconify.design/iconify-icon/2.0.0/iconify-icon.min.js"></script>
-
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Jakie dokumenty mogę tworzyć?", "acceptedAnswer": { "@type": "Answer", "text": "Raporty serwisowe, protokoły przeglądów i odbiorów, oferty i wyceny, zlecenia, dokumenty WZ, karty pracy — wszystko, co regularnie wystawiasz klientom. Do nietypowych dokumentów zbudujesz własny szablon." } },
+      { "@type": "Question", "name": "Czy mogę dodać tabelę do protokołu?", "acceptedAnswer": { "@type": "Answer", "text": "Tak. W edytorze szablonu dodajesz pole Tabela i ustalasz kolumny: tekst, liczba albo wybór. Wiersze dodajesz w terenie, a w PDF wychodzi tabela z nagłówkiem powtarzanym na każdej stronie." } },
+      { "@type": "Question", "name": "Jak wysłać PDF klientowi?", "acceptedAnswer": { "@type": "Answer", "text": "Po wygenerowaniu dotykasz Wyślij klientowi i wybierasz WhatsApp, e-mail albo SMS — PDF idzie jako załącznik. Na komputerze plik się pobiera." } },
+      { "@type": "Question", "name": "Skąd RaportON wie, kiedy wrócić do klienta?", "acceptedAnswer": { "@type": "Answer", "text": "Z protokołu: data następnego przeglądu trafia na pulpit do listy Nadchodzące przeglądy. Stamtąd zaczynasz nowy protokół z danymi klienta i urządzenia albo wysyłasz przypomnienie SMS-em." } },
+      { "@type": "Question", "name": "Czy potrzebuję internetu?", "acceptedAnswer": { "@type": "Answer", "text": "Aplikacja wymaga połączenia z internetem do logowania, zapisu dokumentów i synchronizacji danych. Możesz ją zainstalować na telefonie jak zwykłą aplikację (PWA)." } },
+      { "@type": "Question", "name": "Czy muszę podawać kartę kredytową?", "acceptedAnswer": { "@type": "Answer", "text": "Nie. Plan Free jest darmowy i nie wymaga danych płatniczych. Rejestrujesz się mailem lub kontem Google." } },
+      { "@type": "Question", "name": "Czy raporty są zgodne z polskimi przepisami?", "acceptedAnswer": { "@type": "Answer", "text": "Szablony są przygotowane z uwzględnieniem wymagań Prawa budowlanego (art. 62) oraz rozporządzenia F-gaz (UE 2024/573). Każdy protokół zawiera wymagane pola, dane firmy, podpisy i dokumentację fotograficzną." } }
+    ]
+  }
+  </script>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --primary: #0f172a;
-      --text: #334155;
-      --text-muted: #64748b;
-      --accent: #10b981;
-      --accent-glow: rgba(16, 185, 129, 0.15);
-      --glass-bg: rgba(255,255,255,0.55);
-      --glass-border: rgba(255,255,255,0.7);
-      --glass-hover: rgba(255,255,255,0.7);
-      --radius: 2rem;
+      --navy: #012e57;
+      --navy-deep: #031b33;
+      --navy-night: #02142a;
+      --ink: #0e2338;
+      --ink-soft: #4a5d70;
+      --paper: #f2f5f3;
+      --sheet: #ffffff;
+      --rule: #d7dfdc;
+      --emerald: #03b989;
+      --emerald-ink: #027a5b;
+      --on-emerald: #03261d;
+      --teal: #01726f;
+      --signal: #f2a60c;
+      --pdf-head: #1e2a38;
+      --no: #b42318;
+      --on-dark: #eef4f7;
+      --on-dark-soft: #a9bccb;
+      --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+      --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --doc: "Roboto", "Helvetica Neue", Arial, sans-serif;
     }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Outfit', system-ui, sans-serif;
-      color: var(--primary);
-      background: #f0f2f5;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* ── Animated mesh background ── */
-    .mesh-bg {
-      position: fixed; inset: 0; z-index: -1; overflow: hidden;
-      background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 50%, #f5f7fa 100%);
-    }
-    .mesh-bg .blob {
-      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
-      animation: drift 20s ease-in-out infinite alternate;
-    }
-    .mesh-bg .blob:nth-child(1) { width: 600px; height: 600px; background: #dbeafe; top: -10%; left: -5%; animation-duration: 22s; }
-    .mesh-bg .blob:nth-child(2) { width: 500px; height: 500px; background: #d1fae5; top: 30%; right: -10%; animation-duration: 26s; animation-delay: -5s; }
-    .mesh-bg .blob:nth-child(3) { width: 700px; height: 700px; background: #e0e7ff; bottom: -15%; left: 25%; animation-duration: 30s; animation-delay: -10s; }
-    @keyframes drift {
-      0% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(40px, -30px) scale(1.05); }
-      66% { transform: translate(-20px, 20px) scale(0.97); }
-      100% { transform: translate(30px, -10px) scale(1.02); }
-    }
-
-    /* ── Glass panels ── */
-    .glass {
-      background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.04);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass:hover {
-      background: var(--glass-hover);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.07);
-      transform: translateY(-4px);
-    }
-
-    /* ── Section spacing ── */
-    section { position: relative; }
-    .section-pad { padding: 8rem 1.5rem; }
-    .section-narrow { max-width: 1300px; margin: 0 auto; }
-
-    /* ── Typography ── */
-    h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
-    h1 { font-size: clamp(2.8rem, 5.5vw, 5rem); }
-    h2 { font-size: clamp(2.2rem, 4vw, 3.5rem); }
-    h3 { font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
-    .text-muted { color: var(--text-muted); }
-    .text-light { font-weight: 300; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+    body { margin: 0; font-family: var(--body); font-size: 1.0625rem; line-height: 1.6; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; }
+    h1, h2, h3 { font-family: var(--display); font-stretch: 112%; line-height: 1.06; margin: 0; letter-spacing: -0.012em; }
+    h2 { font-size: clamp(1.9rem, 3.4vw, 2.9rem); font-weight: 800; }
+    h3 { font-size: 1.15rem; font-weight: 700; font-stretch: 100%; letter-spacing: 0; line-height: 1.25; }
+    p { margin: 0; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    section { scroll-margin-top: 72px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    :focus-visible { outline: 3px solid var(--emerald); outline-offset: 3px; border-radius: 6px; }
 
     /* ── Buttons ── */
-    .btn-primary {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 1rem 2.5rem; font-size: 0.95rem; font-weight: 500; font-family: inherit;
-      color: #fff; background: var(--primary); border: none; border-radius: 50px; cursor: pointer;
-      box-shadow: 0 15px 35px rgba(15,23,42,0.12);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-    }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 25px 50px rgba(15,23,42,0.18); }
-
-    .btn-glass {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 1rem 2.5rem; font-size: 0.95rem; font-weight: 500; font-family: inherit;
-      color: var(--primary); background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8);
-      border-radius: 50px; cursor: pointer; backdrop-filter: blur(15px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-    }
-    .btn-glass:hover { background: rgba(255,255,255,0.85); transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,0.07); }
-
-    .btn-accent {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 1rem 2.5rem; font-size: 0.95rem; font-weight: 500; font-family: inherit;
-      color: #fff; background: var(--accent); border: none; border-radius: 50px; cursor: pointer;
-      box-shadow: 0 15px 35px rgba(16,185,129,0.2);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-    }
-    .btn-accent:hover { transform: translateY(-3px); box-shadow: 0 25px 50px rgba(16,185,129,0.3); background: #059669; }
-
-    /* ── Pill badge ── */
-    .pill {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.4rem 1rem; border-radius: 50px;
-      background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.8);
-      backdrop-filter: blur(12px); font-size: 0.75rem; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted);
-    }
-    .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-    /* ── Marquee ── */
-    .marquee-wrap { overflow: hidden; }
-    .marquee-track { display: flex; animation: marquee 35s linear infinite; will-change: transform; }
-    .marquee-track:hover { animation-play-state: paused; }
-    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .marquee-fade {
-      mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
-      -webkit-mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
-    }
-
-    /* ── Reveal animation ── */
-    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-
-    /* ── Float animation ── */
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .float { animation: float 6s ease-in-out infinite; }
-
-    /* ── Breathe animation ── */
-    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-
-    /* ── Phone mockup ── */
-    .phone-shell {
-      position: relative; width: 320px; height: 680px;
-    }
-    .phone-body {
-      position: absolute; inset: 0; background: #e2e8f0; border-radius: 3.5rem;
-      box-shadow: 20px 30px 60px rgba(15,23,42,0.12), inset -5px -5px 14px rgba(15,23,42,0.06), inset 5px 5px 14px rgba(255,255,255,0.9);
-      border: 4px solid #f1f5f9;
-    }
-    .phone-screen {
-      position: absolute; inset: 10px; background: #f8f9fb; border-radius: 3rem;
-      overflow: hidden; display: flex; flex-direction: column;
-      box-shadow: inset 0 0 16px rgba(15,23,42,0.05); border: 1px solid rgba(203,213,225,0.5);
-    }
-    .phone-island {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 110px; height: 28px; background: #0f172a; border-radius: 50px; z-index: 50;
-      box-shadow: inset 0 -2px 4px rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
-    }
-    .phone-island .cam { width: 10px; height: 10px; background: #1e293b; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); }
-    .phone-island .led { width: 5px; height: 5px; background: #10b981; border-radius: 50%; box-shadow: 0 0 4px rgba(16,185,129,0.6); animation: breathe 3s ease-in-out infinite; }
-    .phone-status {
-      height: 52px; padding: 12px 24px 0; display: flex; justify-content: space-between; align-items: center;
-      font-size: 12px; font-weight: 600; color: #334155; z-index: 40;
-    }
-    .phone-content { flex: 1; padding: 8px 14px 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-    .phone-home-indicator {
-      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-      width: 120px; height: 4px; background: rgba(15,23,42,0.1); border-radius: 4px; z-index: 40;
-    }
-    /* Side buttons */
-    .phone-btn-l { position: absolute; left: -8px; width: 8px; background: #e2e8f0; border-radius: 4px 0 0 4px;
-      box-shadow: inset 2px 2px 4px rgba(255,255,255,0.9), inset -2px -2px 4px rgba(15,23,42,0.1);
-      border: 1px solid rgba(255,255,255,0.6); border-right: 0; }
-    .phone-btn-r { position: absolute; right: -8px; width: 8px; background: #e2e8f0; border-radius: 0 4px 4px 0;
-      box-shadow: inset -2px 2px 4px rgba(255,255,255,0.9), inset 2px -2px 4px rgba(15,23,42,0.1);
-      border: 1px solid rgba(255,255,255,0.6); border-left: 0; }
-
-    /* ── Phone mini-cards ── */
-    .ph-card {
-      background: rgba(255,255,255,0.9); border-radius: 14px; padding: 12px 14px;
-      border: 1px solid rgba(226,232,240,0.6);
-      box-shadow: 0 2px 8px rgba(15,23,42,0.03);
-    }
-
-    /* ── Timeline spine ── */
-    .tl-spine {
-      position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
-      transform: translateX(-50%); background: rgba(226,232,240,0.35); overflow: hidden;
-      display: none;
-      mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
-      -webkit-mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
-    }
-    .tl-spine.active::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent, rgba(148,163,184,0.5), transparent);
-      transform-origin: top; animation: spine-grow 1.5s ease forwards;
-    }
-    @keyframes spine-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-    @media (min-width: 768px) { .tl-spine { display: block; } }
-
-    .tl-node {
-      width: 56px; height: 56px; background: #fff; border-radius: 50%; border: 1px solid rgba(226,232,240,0.8);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,0.9);
-      display: flex; align-items: center; justify-content: center;
-      animation: breathe 6s ease-in-out infinite;
-    }
-
-    .tl-card {
-      background: #fff; border-radius: 1.25rem; padding: 2.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 12px 24px rgba(0,0,0,0.02), inset 0 1px 0 #fff;
-      border: 1px solid rgba(226,232,240,0.6);
-      transition: transform 0.5s ease, box-shadow 0.5s ease;
-    }
-    .tl-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.05), 0 20px 40px rgba(0,0,0,0.03), inset 0 1px 0 #fff; }
-
-    /* ── Pricing ── */
-    .price-card {
-      background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
-      border-radius: var(--radius); padding: 3rem; position: relative;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .price-card:hover { transform: translateY(-6px); box-shadow: 0 25px 60px rgba(0,0,0,0.08); }
-    .price-card.featured { border: 2px solid var(--accent); }
-    .price-card.featured::before {
-      content: 'Popularne'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 600;
-      padding: 0.3rem 1rem; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.1em;
-    }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; height: 52px; padding: 0 1.5rem; border-radius: 12px; font: 650 1rem/1 var(--body); font-stretch: 104%; text-decoration: none; border: 0; cursor: pointer; transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease; }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .btn-primary { background: var(--emerald); color: var(--on-emerald); box-shadow: 0 10px 30px -10px rgba(3,185,137,.65); }
+    .btn-primary:hover { background: #10c996; }
+    .btn-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule); }
+    .btn-line:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+    .btn-sm { height: 42px; padding: 0 1.1rem; font-size: .95rem; border-radius: 10px; }
 
     /* ── Header ── */
-    .site-header {
-      position: fixed; top: 16px; left: 0; width: 100%; z-index: 100; padding: 0 1rem;
-      pointer-events: none;
-    }
-    .header-bar {
-      max-width: 1100px; margin: 0 auto; pointer-events: auto;
-      background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.5); border-radius: 50px;
-      padding: 0.5rem 0.5rem 0.5rem 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-      transition: all 0.5s ease;
-    }
-    .header-bar:hover { background: rgba(255,255,255,0.85); box-shadow: 0 15px 40px rgba(0,0,0,0.07); }
-    .header-brand { font-weight: 700; font-size: 1.8rem; letter-spacing: -0.04em; color: var(--primary); text-decoration: none; }
-    .header-brand span { color: var(--accent); }
-    .header-nav { display: none; position: absolute; left: 50%; transform: translateX(-50%); }
-    .header-nav a {
-      padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.12em; text-decoration: none; border-radius: 50px;
-      transition: all 0.3s;
-    }
-    .header-nav a:hover { color: var(--primary); background: rgba(255,255,255,0.6); }
-    .header-actions { display: flex; align-items: center; gap: 0.5rem; }
-    .header-login {
-      display: none; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 500; color: var(--text-muted);
-      text-decoration: none; transition: color 0.3s;
-    }
-    .header-login:hover { color: var(--primary); }
-    .header-cta {
-      padding: 0.6rem 1.5rem; font-size: 0.75rem; font-weight: 600; color: #fff;
-      background: var(--primary); border-radius: 50px; text-decoration: none;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      box-shadow: 0 8px 20px rgba(15,23,42,0.1);
-      transition: all 0.3s;
-    }
-    .header-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(15,23,42,0.15); }
-    .mobile-toggle {
-      display: flex; width: 40px; height: 40px; align-items: center; justify-content: center;
-      border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 50%;
-      transition: background 0.3s;
-    }
-    .mobile-toggle:hover { background: rgba(255,255,255,0.6); }
-
-    /* Mobile menu */
-    .mobile-menu {
-      position: absolute; top: calc(100% + 12px); left: 0; right: 0; padding: 0 1rem;
-      transform: scale(0.95); opacity: 0; visibility: hidden; pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-    .mobile-menu.open { transform: scale(1); opacity: 1; visibility: visible; pointer-events: auto; }
-    .mobile-menu-inner {
-      background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.6);
-      border-radius: var(--radius); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-    }
-    .mobile-menu-inner a {
-      display: block; padding: 1rem; text-align: center; font-size: 0.9rem; font-weight: 500;
-      color: var(--text-muted); text-decoration: none; border-radius: 1rem; transition: all 0.2s;
-    }
-    .mobile-menu-inner a:hover { color: var(--primary); background: rgba(255,255,255,0.6); }
-    .mobile-menu-inner .sep { height: 1px; background: rgba(226,232,240,0.4); margin: 0.25rem 1.5rem; }
-    .mobile-menu-inner .mm-cta {
-      color: #fff; background: var(--primary); font-weight: 600;
-      box-shadow: 0 8px 20px rgba(15,23,42,0.1);
+    .site-header { position: sticky; top: 0; z-index: 50; background: rgba(3,27,51,.94); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); border-bottom: 1px solid rgba(255,255,255,.07); }
+    .site-header .wrap { height: 66px; display: flex; align-items: center; gap: 2rem; }
+    .brand { display: inline-flex; align-items: center; gap: .55rem; text-decoration: none; color: #fff; font: 800 1.35rem/1 var(--display); font-stretch: 108%; letter-spacing: -.01em; }
+    .brand svg { height: 30px; width: auto; }
+    .brand b { color: var(--emerald); font-weight: 800; }
+    .nav { display: flex; gap: 1.6rem; margin-left: .5rem; }
+    .nav a { color: var(--on-dark-soft); text-decoration: none; font-size: .95rem; font-weight: 500; transition: color .15s; }
+    .nav a:hover { color: #fff; }
+    .head-right { margin-left: auto; display: flex; align-items: center; gap: 1.1rem; }
+    .login { color: var(--on-dark); text-decoration: none; font-weight: 550; font-size: .95rem; }
+    .login:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .menu-btn { display: none; width: 44px; height: 44px; margin-right: -10px; border: 0; background: transparent; color: #fff; cursor: pointer; }
+    .mobile-menu { display: none; }
+    @media (max-width: 900px) {
+      .nav, .head-right .btn { display: none; }
+      .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+      .mobile-menu.open { display: block; background: var(--navy-deep); border-top: 1px solid rgba(255,255,255,.07); padding: .5rem 24px 1.25rem; }
+      .mobile-menu a { display: block; padding: .8rem 0; color: var(--on-dark); text-decoration: none; font-weight: 550; border-bottom: 1px solid rgba(255,255,255,.07); }
+      .mobile-menu .btn { margin-top: 1rem; width: 100%; border: 0; }
     }
 
-    @media (min-width: 768px) {
-      .header-nav { display: flex; align-items: center; gap: 0.25rem; }
-      .header-login { display: inline-flex; }
-      .mobile-toggle { display: none; }
-    }
+    /* ── Hero ── */
+    .hero { position: relative; background: var(--navy-deep); color: var(--on-dark); overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 28px 28px; mask-image: radial-gradient(ellipse 70% 80% at 72% 40%, #000 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 70% 80% at 72% 40%, #000 30%, transparent 75%); pointer-events: none; }
+    .hero::after { content: ""; position: absolute; width: 900px; height: 900px; right: -260px; top: -300px; background: radial-gradient(circle, rgba(1,114,111,.35), transparent 62%); pointer-events: none; }
+    .hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 3rem; align-items: center; padding-top: 4.5rem; padding-bottom: 5rem; }
+    .hero h1 { font-size: clamp(2.45rem, 4.3vw, 3.85rem); font-weight: 800; color: #f6fafc; }
+    .hero .lede { margin-top: 1.4rem; font-size: 1.15rem; line-height: 1.6; color: var(--on-dark-soft); max-width: 34rem; }
+    .hero .lede strong { color: var(--on-dark); font-weight: 600; }
+    .hero-cta { margin-top: 2.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 1.6rem; }
+    .hero-cta .more { color: var(--on-dark); font-weight: 550; text-decoration: underline; text-decoration-color: rgba(255,255,255,.35); text-underline-offset: 5px; }
+    .hero-cta .more:hover { text-decoration-color: var(--emerald); }
+    .hero-note { margin-top: 1.4rem; font-size: .9rem; color: #8ea4b5; }
 
-    /* ── Orbit cards ── */
-    .pain-card-orbit {
-      background: rgba(255,255,255,0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.65); padding: 18px 22px; border-radius: 20px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.05);
-      display: flex; align-items: center; gap: 14px;
-      transition: all 0.3s ease;
-    }
-    .pain-card-orbit:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.08); transform: translateY(-2px); }
-    .pain-icon-orbit {
-      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(241,245,249,0.85); border: 1px solid rgba(226,232,240,0.6);
-      display: flex; align-items: center; justify-content: center; color: #64748b;
-    }
-    .pain-title-orbit { font-size: 0.95rem; font-weight: 600; color: var(--primary); }
-    .pain-sub-orbit { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
+    /* ── Stage (animated demo) ── */
+    .stage-wrap { position: relative; width: 100%; aspect-ratio: 600 / 560; }
+    .stage-wrap.narrow { aspect-ratio: 470 / 560; overflow: visible; margin-bottom: 1.2rem; }
+    .stage-wrap.narrow .stage { clip-path: inset(-40px 0 -40px -40px); }
+    .stage.narrow .bubble { right: auto; left: 168px; bottom: 16px; }
+    .stage { position: absolute; left: 0; top: 0; width: 600px; height: 560px; transform-origin: 0 0; transform: scale(var(--s, 1)); }
+    .stage-pause { position: absolute; right: 0; bottom: -2.2rem; z-index: 2; background: transparent; border: 0; color: #8ea4b5; font: 500 .8rem var(--body); cursor: pointer; padding: .4rem 0; text-decoration: underline; text-underline-offset: 3px; }
+    .stage-pause:hover { color: #fff; }
 
-    /* ── FAQ ── */
-    .faq-item summary::-webkit-details-marker { display: none; }
-    .faq-item summary::marker { display: none; content: ''; }
-    .faq-item[open] summary iconify-icon { transform: rotate(180deg); }
-    .faq-item:hover { background: var(--glass-hover); box-shadow: 0 12px 30px rgba(0,0,0,0.05); }
+    /* The PDF sheet — sized in em so it can be reused larger in the "anatomy" section */
+    .sheet { font-family: var(--doc); font-size: 10px; color: #111827; background: var(--sheet); border-radius: 3px; padding: 2.2em 2.4em 2em; position: relative; }
+    .stage .sheet { position: absolute; left: 212px; top: 6px; width: 382px; min-height: 536px; transform: rotate(1.2deg); box-shadow: 0 40px 80px -20px rgba(0,0,0,.55), 0 2px 0 rgba(255,255,255,.4) inset; }
+    .sh-head { display: flex; align-items: center; gap: .9em; position: relative; }
+    .sh-logo { width: 3em; height: 3em; border-radius: .5em; background: linear-gradient(135deg, #1f3b5c, #0f2338); color: #fff; font: 700 1.1em/3em var(--doc); text-align: center; letter-spacing: .02em; flex: none; }
+    .sh-co b { display: block; font-size: 1.25em; font-weight: 700; color: #1e2a38; }
+    .sh-co small { display: block; font-size: .85em; color: #6b7280; margin-top: .15em; }
+    .sh-rule { height: 2px; background: #10b981; margin: 1.1em 0 1.2em; }
+    .sh-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; font-size: 1.2em; font-weight: 500; color: #1e2a38; position: relative; }
+    .sh-nr { font-size: .8em; color: #6b7280; font-weight: 400; white-space: nowrap; }
+    .sh-data { width: 100%; border-collapse: collapse; margin-top: 1.2em; position: relative; }
+    .sh-data th { text-align: left; font-weight: 400; color: #6b7280; width: 34%; font-size: .9em; padding: .45em 0; border-bottom: 1px solid #e5e7eb; }
+    .sh-data td { padding: .45em 0; border-bottom: 1px solid #e5e7eb; height: 2.2em; }
+    .sh-sec { font-size: 1.05em; font-weight: 500; color: #1e2a38; margin: 1.4em 0 .55em; position: relative; }
+    .sh-grid { width: 100%; border-collapse: collapse; font-size: .9em; position: relative; }
+    .sh-grid th { background: var(--pdf-head); color: #fff; font-weight: 700; text-align: left; padding: .45em .5em; font-size: .92em; }
+    .sh-grid td { padding: .42em .5em; border: .5px solid #d1d5db; height: 2.05em; }
+    .sh-grid tbody tr:nth-child(odd) td { background: #f3f4f6; }
+    .sh-grid td:first-child, .sh-grid th:first-child { text-align: center; width: 2.4em; }
+    .sh-grid .st { text-align: center; font-weight: 700; width: 4.2em; }
+    .sh-res td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .sh-res td.oc { font-weight: 700; }
+    .sh-foot { display: flex; gap: 1.6em; align-items: flex-end; margin-top: 1.6em; position: relative; }
+    .sh-photo { margin: 0; width: 9.2em; height: 6.4em; border-radius: .2em; overflow: hidden; background: #eef1f3; position: relative; }
+    .sh-sign { flex: 1; position: relative; }
+    .sh-sign svg { height: 3.4em; width: 11em; margin-left: .6em; }
+    .sh-sign .line { border-top: 1px solid #6b7280; padding-top: .35em; font-size: .85em; color: #6b7280; }
+    .sheet .mk { display: none; }
+    /* dynamic bits */
+    .sheet tr.r td { transition: opacity .35s ease; }
+    .sheet tr.r:not(.on) td { opacity: 0; }
+    [data-show] { transition: opacity .45s ease, transform .45s ease; }
+    [data-show]:not(.on) { opacity: 0; transform: scale(.94); }
+    .sheet .sh-sign svg:not(.on) { transform: none; }
 
-    /* ── Footer ── */
-    footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
-    footer a:hover { color: var(--primary); }
+    /* Phone */
+    .phone { position: absolute; left: 0; top: 44px; width: 236px; height: 486px; border-radius: 36px; background: #0a0e13; padding: 9px; box-shadow: 0 50px 80px -30px rgba(0,0,0,.7), inset 0 0 0 1.5px #2a3440; }
+    .ph-screen { position: relative; width: 100%; height: 100%; border-radius: 28px; overflow: hidden; background: #edf0f4; font-family: var(--body); color: #0f172a; }
+    .ph-bar { position: absolute; z-index: 3; left: 0; right: 0; top: 0; height: 58px; padding: 26px 12px 0; display: flex; align-items: center; gap: 7px; background: rgba(237,240,244,.94); border-bottom: 1px solid #dfe5ea; font-size: 11px; }
+    .ph-bar::before { content: ""; position: absolute; top: 7px; left: 50%; width: 64px; height: 17px; margin-left: -32px; background: #0a0e13; border-radius: 10px; }
+    .ph-bar b { font-weight: 700; flex: 1; font-size: 11.5px; }
+    .ph-back { font-size: 17px; line-height: 1; color: #64748b; margin-top: -2px; }
+    .ph-num { font-size: 9px; color: #64748b; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 5px; }
+    .ph-scroll { position: absolute; left: 0; right: 0; top: 58px; padding: 10px 11px 80px; transition: transform .7s cubic-bezier(.3,.7,.2,1); }
+    .ph-sec { margin-bottom: 14px; }
+    .ph-h { font-size: 10px; font-weight: 700; color: #334155; margin: 0 0 6px 2px; }
+    .ph-f { display: block; font-size: 9px; color: #64748b; margin-bottom: 8px; }
+    .ph-in { display: block; margin-top: 3px; height: 30px; border-radius: 9px; background: #fff; border: 1px solid #dbe2e8; padding: 0 9px; font-size: 11px; line-height: 29px; color: #0f172a; white-space: nowrap; overflow: hidden; }
+    .ph-in.typing { border-color: var(--emerald); }
+    .ph-in.typing::after, .ph-cell.typing::after { content: ""; display: inline-block; width: 1px; height: 12px; margin-left: 1px; vertical-align: -2px; background: var(--emerald); animation: caret 1s steps(1) infinite; }
+    @keyframes caret { 50% { opacity: 0; } }
+    .ph-tile { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #dfe5ea; border-radius: 10px; padding: 6px 6px 6px 9px; margin-bottom: 5px; font-size: 9.5px; }
+    .ph-tile span { flex: 1; }
+    .ph-tile i { font-style: normal; width: 24px; height: 22px; border-radius: 6px; border: 1px solid #e2e8f0; display: grid; place-items: center; font-size: 9px; color: #94a3b8; transition: background-color .2s, color .2s, border-color .2s; }
+    .ph-tile i.yes.on { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+    .ph-row { background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; padding: 7px 8px 8px; margin-bottom: 6px; transition: opacity .35s ease, transform .35s ease; }
+    .ph-row:not(.on) { opacity: 0; transform: translateY(6px); }
+    .ph-row .top { display: flex; justify-content: space-between; font-size: 8.5px; color: #64748b; margin-bottom: 4px; }
+    .ph-row .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .ph-row .full { grid-column: 1 / -1; }
+    .ph-row label { font-size: 8px; color: #64748b; }
+    .ph-cell { display: block; margin-top: 2px; height: 24px; border-radius: 7px; border: 1px solid #dbe2e8; padding: 0 7px; font-size: 10px; line-height: 23px; white-space: nowrap; overflow: hidden; }
+    .ph-choice { display: flex; gap: 4px; margin-top: 2px; }
+    .ph-choice i { font-style: normal; flex: 1; text-align: center; height: 22px; line-height: 21px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; color: #64748b; transition: background-color .2s, color .2s; }
+    .ph-choice i.on { background: var(--emerald); border-color: var(--emerald); color: #fff; font-weight: 700; }
+    .ph-add { border: 1px dashed #cbd5e1; border-radius: 12px; height: 28px; line-height: 27px; text-align: center; font-size: 9.5px; color: #64748b; }
+    .ph-media { display: flex; gap: 6px; }
+    .ph-cam { flex: 1; height: 58px; border-radius: 12px; border: 1px dashed #cbd5e1; display: grid; place-items: center; font-size: 9px; color: #64748b; text-align: center; }
+    .ph-thumb { width: 72px; height: 58px; border-radius: 10px; overflow: hidden; background: #e2e8f0; }
+    .ph-pad { margin-top: 8px; height: 74px; background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; position: relative; padding: 6px 10px; }
+    .ph-pad small { position: absolute; left: 10px; bottom: 6px; font-size: 8px; color: #94a3b8; }
+    .ph-pad svg { height: 48px; width: 150px; }
+    .ph-cta { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; padding: 10px 11px 16px; background: linear-gradient(transparent, #edf0f4 30%); }
+    .ph-cta span { display: block; height: 38px; line-height: 38px; text-align: center; border-radius: 11px; background: var(--emerald); color: #fff; font-weight: 700; font-size: 11.5px; box-shadow: 0 8px 18px -8px rgba(3,185,137,.8); }
+    .ph-ready { position: absolute; z-index: 5; inset: 0; background: rgba(2,12,24,.45); display: flex; align-items: flex-end; transition: opacity .3s ease; }
+    .ph-ready:not(.on) { opacity: 0; pointer-events: none; }
+    .ph-card { width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 14px 14px 18px; text-align: center; transition: transform .45s cubic-bezier(.2,.9,.2,1); }
+    .ph-ready:not(.on) .ph-card { transform: translateY(100%); }
+    .ph-doc { width: 44px; height: 56px; margin: 2px auto 8px; border-radius: 4px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 6px 14px -6px rgba(0,0,0,.3); padding: 7px 6px; position: relative; }
+    .ph-doc::before { content: ""; display: block; height: 4px; width: 60%; background: var(--navy); border-radius: 2px; box-shadow: 0 7px 0 #cbd5e1, 0 13px 0 #e2e8f0, 0 19px 0 #cbd5e1, 0 25px 0 #e2e8f0; }
+    .ph-doc::after { content: "✓"; position: absolute; right: -8px; bottom: -6px; width: 18px; height: 18px; border-radius: 50%; background: var(--emerald); color: #fff; font-size: 10px; line-height: 18px; font-weight: 700; }
+    .ph-card b { display: block; font-size: 13px; }
+    .ph-card small { display: block; font-size: 8.5px; color: #64748b; margin: 2px 0 10px; }
+    .ph-send, .ph-dl { display: block; height: 32px; line-height: 32px; border-radius: 9px; font-size: 10.5px; font-weight: 700; }
+    .ph-send { background: var(--emerald); color: #fff; }
+    .ph-dl { margin-top: 5px; border: 1px solid #e2e8f0; color: #334155; font-weight: 600; }
+    .tap { position: absolute; z-index: 9; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: rgba(3,185,137,.28); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 2px 8px rgba(0,0,0,.25); opacity: 0; pointer-events: none; }
+    .tap.go { animation: tap .55s ease-out; }
+    @keyframes tap { 0% { opacity: 0; transform: scale(1.5); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.8); } }
 
-    /* ── Responsive grid helpers ── */
-    @media (max-width: 768px) {
-      .header-cta { padding: 0.45rem 0.9rem; font-size: 0.65rem; white-space: nowrap; }
-      .header-brand { font-size: 1.4rem; }
-      .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
-      .hero-text { align-items: center !important; }
-      .hero-phone { margin-top: 2rem; }
-      .phone-shell { width: 260px; height: 560px; }
-      .phone-screen { border-radius: 2.5rem; }
-      .phone-body { border-radius: 3rem; }
-      .bento-grid { grid-template-columns: 1fr !important; }
-      .bento-wide { grid-column: span 1 !important; }
-      .bento-deco { display: none !important; }
-      .bento-grid .glass { padding: 1.75rem !important; }
-      .tl-grid { grid-template-columns: 1fr !important; }
-      .tl-right { padding-left: 0 !important; }
-      .tl-left { padding-right: 0 !important; text-align: left !important; }
-      .price-grid { grid-template-columns: 1fr !important; }
-      .pillars-grid { grid-template-columns: 1fr !important; }
-      .pillar-deco { display: none !important; }
-      .pillars-grid .glass { min-height: auto !important; padding: 1.75rem !important; }
-      .steps-grid { grid-template-columns: 1fr !important; }
-      .steps-grid .glass { padding: 1.75rem !important; }
-      .section-pad { padding: 5rem 1.25rem; }
-      .pain-orbit { display: none !important; }
-      .pain-mobile { display: flex !important; }
+    /* Chat bubble */
+    .bubble { position: absolute; z-index: 6; right: -6px; bottom: 26px; width: 292px; background: #fff; color: #0f172a; border-radius: 16px 16px 4px 16px; padding: 10px 11px 8px; box-shadow: 0 24px 50px -16px rgba(0,0,0,.55); transition: opacity .35s ease, transform .45s cubic-bezier(.2,1.3,.4,1); }
+    .bubble:not(.on) { opacity: 0; transform: translateY(14px) scale(.96); }
+    .bub-to { font-size: 10.5px; color: #64748b; margin-bottom: 6px; }
+    .bub-file { display: flex; gap: 9px; align-items: center; background: #f1f5f4; border-radius: 10px; padding: 8px; }
+    .pdf-ico { width: 30px; height: 36px; border-radius: 5px; background: #d93a3a; color: #fff; font: 700 8.5px/36px var(--body); text-align: center; flex: none; }
+    .bub-file b { display: block; font-size: 11.5px; overflow-wrap: anywhere; line-height: 1.25; }
+    .bub-file small { display: block; font-size: 10px; color: #64748b; margin-top: 1px; }
+    .bub-meta { text-align: right; font-size: 10px; color: #64748b; margin-top: 4px; }
+    .bub-meta i { font-style: normal; color: #2f9fd8; letter-spacing: -2px; margin-left: 3px; }
+
+    /* ── Sections ── */
+    .sec { padding: 6.5rem 0; }
+    .sec-head { max-width: 46rem; }
+    .sec-head p { margin-top: 1.1rem; color: var(--ink-soft); font-size: 1.1rem; }
+
+    /* Anatomy */
+    .anatomy { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 4rem; align-items: start; margin-top: 3.5rem; }
+    .doc-frame { position: relative; }
+    .doc-frame .sheet { font-size: clamp(8.4px, 1.18vw, 13px); box-shadow: 0 30px 70px -30px rgba(14,35,56,.45), 0 0 0 1px rgba(14,35,56,.06); }
+    .sheet--annotated .mk { display: grid; position: absolute; right: -3.4em; top: 50%; transform: translateY(-50%); width: 2.1em; height: 2.1em; border-radius: 50%; background: var(--emerald); color: var(--on-emerald); font: 800 1.05em/1 var(--body); place-items: center; box-shadow: 0 0 0 .35em var(--paper); }
+    .sheet--annotated .sh-foot .mk { top: auto; bottom: .3em; transform: none; }
+    .sheet--annotated .sh-photo .mk { right: auto; left: -1em; top: -1em; transform: none; }
+    .callouts { list-style: none; margin: 0; padding: 0; counter-reset: c; }
+    .callouts li { position: relative; padding: 0 0 1.5rem 3.1rem; counter-increment: c; }
+    .callouts li::before { content: counter(c); position: absolute; left: 0; top: -.1rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--emerald); color: var(--on-emerald); font: 800 .95rem/2rem var(--body); text-align: center; }
+    .callouts h3 { margin-bottom: .3rem; }
+    .callouts p { color: var(--ink-soft); font-size: 1rem; }
+    .new { display: inline-block; margin-left: .45rem; padding: .12rem .45rem; border-radius: 6px; background: rgba(242,166,12,.18); color: #8a5a00; font: 700 .72rem/1.4 var(--body); vertical-align: .15rem; }
+
+    /* Send & remind */
+    .sr { background: #fff; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+    .sr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-top: 3.2rem; }
+    .panel { border: 1px solid var(--rule); border-radius: 18px; padding: 1.6rem; background: var(--paper); display: flex; flex-direction: column; gap: 1.2rem; }
+    .panel > p { color: var(--ink-soft); font-size: 1rem; }
+    .chat { background: #e8efe9; border-radius: 14px; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; min-height: 212px; justify-content: flex-end; }
+    .chat .bubble { position: static; width: auto; max-width: 290px; align-self: flex-end; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .chat .bubble:not(.on) { opacity: 1; transform: none; }
+    .chat .reply { align-self: flex-start; background: #fff; border-radius: 14px 14px 14px 4px; padding: .55rem .8rem; font-size: .92rem; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .chat .reply small { display: block; text-align: right; font-size: .72rem; color: #64748b; }
+    .rem { background: #fff; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+    .rem-head { display: flex; justify-content: space-between; padding: .8rem 1rem; font-size: .8rem; font-weight: 700; color: var(--ink-soft); border-bottom: 1px solid var(--rule); }
+    .rem-item { padding: .85rem 1rem; border-bottom: 1px solid #edf1ef; }
+    .rem-item:last-child { border-bottom: 0; }
+    .rem-top { display: flex; gap: .75rem; align-items: flex-start; }
+    .rem-top div { flex: 1; min-width: 0; }
+    .rem-top b { display: block; font-size: .95rem; }
+    .rem-top small { display: block; font-size: .8rem; color: var(--ink-soft); }
+    .chip { flex: none; border-radius: 999px; padding: .15rem .55rem; font-size: .75rem; font-weight: 700; background: #eef2f0; color: var(--ink-soft); }
+    .chip.soon { background: rgba(242,166,12,.18); color: #8a5a00; }
+    .chip.late { background: rgba(180,35,24,.1); color: var(--no); }
+    .rem-act { display: flex; gap: .45rem; margin-top: .6rem; }
+    .rem-act span { font-size: .78rem; font-weight: 650; padding: .3rem .65rem; border-radius: 8px; }
+    .rem-act .a { background: rgba(3,185,137,.12); color: var(--emerald-ink); }
+    .rem-act .b { border: 1px solid var(--rule); color: var(--ink-soft); }
+
+    /* Templates as binder dividers */
+    .tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap: 2.2rem 1rem; margin-top: 3.6rem; }
+    .tab { position: relative; background: #fff; border: 1px solid var(--rule); border-radius: 4px 12px 12px 12px; padding: 1.2rem 1.1rem 1.1rem; }
+    .tab::before { content: attr(data-tab); position: absolute; left: -1px; bottom: 100%; padding: .28rem .7rem .22rem; border-radius: 8px 8px 0 0; background: var(--navy); color: #fff; font: 700 .72rem/1.2 var(--body); font-stretch: 90%; letter-spacing: .04em; }
+    .tab:nth-child(3n+2)::before { background: var(--teal); }
+    .tab:nth-child(3n)::before { background: #2c4a66; }
+    .tab h3 { font-size: 1.05rem; }
+    .tab p { margin-top: .35rem; font-size: .9rem; color: var(--ink-soft); line-height: 1.45; }
+    .tab.own { border-style: dashed; background: transparent; }
+    .tab.own::before { background: var(--emerald); color: var(--on-emerald); }
+    .legal { margin-top: 2.2rem; font-size: .95rem; color: var(--ink-soft); max-width: 50rem; }
+
+    /* Start steps */
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 3rem; counter-reset: s; }
+    .step { counter-increment: s; border-top: 3px solid var(--ink); padding-top: 1.1rem; }
+    .step::before { content: counter(s); display: block; font: 800 2.6rem/1 var(--display); font-stretch: 112%; color: var(--emerald-ink); margin-bottom: .8rem; }
+    .step p { margin-top: .4rem; color: var(--ink-soft); font-size: 1rem; }
+
+    /* Pricing as a protocol table */
+    .price { margin-top: 3rem; background: #fff; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; max-width: 860px; }
+    .price table { width: 100%; border-collapse: collapse; font-size: 1rem; table-layout: fixed; }
+    .price th, .price td { padding: .9rem 1.1rem; text-align: left; border-bottom: 1px solid #e8eeeb; }
+    .price thead th { background: var(--pdf-head); color: #fff; font-weight: 700; }
+    .price thead th:not(:first-child), .price td:not(:first-child) { text-align: center; width: 24%; }
+    .price tbody tr:nth-child(even) td { background: #f7f9f8; }
+    .price .amt { font: 800 2rem/1 var(--display); font-stretch: 108%; }
+    .price .amt small { font: 500 .85rem var(--body); color: var(--ink-soft); }
+    .yes { color: var(--emerald-ink); font-weight: 800; }
+    .no { color: var(--no); font-weight: 800; }
+    .dash { color: #9aa9b5; }
+    .price tfoot td { border-bottom: 0; padding: 1.1rem; }
+    .price tfoot .btn { width: 100%; height: 46px; padding: 0 .5rem; white-space: nowrap; font-size: .95rem; }
+    .price-note { margin-top: 1rem; font-size: .92rem; color: var(--ink-soft); }
+
+    /* FAQ */
+    .faq { max-width: 860px; margin-top: 2.6rem; border-top: 1px solid var(--rule); }
+    .faq details { border-bottom: 1px solid var(--rule); }
+    .faq summary { list-style: none; cursor: pointer; display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding: 1.2rem 0; font-weight: 650; font-size: 1.08rem; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: ""; flex: none; width: 12px; height: 12px; border-right: 2px solid var(--ink-soft); border-bottom: 2px solid var(--ink-soft); transform: rotate(45deg) translate(-3px, -3px); transition: transform .2s; }
+    .faq details[open] summary::after { transform: rotate(-135deg) translate(-3px, -3px); }
+    .faq details p { padding: 0 0 1.3rem; color: var(--ink-soft); max-width: 46rem; }
+
+    /* Closing */
+    .closing { background: var(--navy-deep); color: var(--on-dark); text-align: center; padding: 6rem 0 5.5rem; position: relative; overflow: hidden; }
+    .closing h2 { color: #f6fafc; }
+    .closing p { color: var(--on-dark-soft); margin: 1rem auto 0; max-width: 34rem; }
+    .signoff { margin: 2.6rem auto 0; width: min(340px, 80%); }
+    .signoff svg { width: 190px; height: 58px; margin: 0 auto -6px; }
+    .signoff .line { border-top: 1.5px solid rgba(255,255,255,.35); padding-top: .5rem; font-size: .82rem; color: #8ea4b5; }
+    .closing .btn { margin-top: 2.2rem; }
+
+    footer { background: var(--navy-night); color: #8ea4b5; font-size: .9rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; padding-top: 2rem; padding-bottom: 2rem; }
+    footer nav { display: flex; gap: 1.5rem; }
+    footer a { color: #c4d2dd; text-decoration: none; }
+    footer a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+    .cookie { position: fixed; z-index: 200; left: 12px; right: 12px; bottom: 12px; max-width: 760px; margin: 0 auto; background: var(--navy-night); color: #c4d2dd; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: .9rem 1rem; display: none; align-items: center; gap: 1rem; font-size: .85rem; line-height: 1.45; box-shadow: 0 20px 50px -20px rgba(0,0,0,.6); }
+    .cookie a { color: var(--emerald); }
+    .cookie .btn { height: 38px; flex: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1020px) {
+      .hero .wrap { grid-template-columns: 1fr; gap: 2.5rem; padding-top: 3rem; padding-bottom: 4.5rem; }
+      .stage-wrap { max-width: 600px; }
+      .anatomy { grid-template-columns: 1fr; gap: 2.5rem; }
+      .doc-frame { max-width: 560px; }
+      .doc-frame .sheet { font-size: clamp(7.6px, 2.1vw, 12px); }
     }
-    @media (min-width: 769px) {
-      .step-arrow { display: flex !important; }
-      .steps-grid .glass { position: relative; }
+    @media (max-width: 760px) {
+      body { font-size: 1rem; }
+      .sec { padding: 4.5rem 0; }
+      .sr-grid, .steps { grid-template-columns: 1fr; }
+      .tabs { grid-template-columns: 1fr 1fr; gap: 2rem .7rem; }
+      .price th, .price td { padding: .7rem .5rem; font-size: .88rem; }
+      .price thead th:not(:first-child), .price td:not(:first-child) { width: 27%; }
+      .price .amt { font-size: 1.3rem; }
+      .price .amt small { display: block; font-size: .72rem; margin-top: .2rem; }
+      .price tfoot td { padding: .8rem .35rem; }
+      .price tfoot .btn { font-size: .82rem; height: 42px; }
+      .cookie { font-size: .78rem; padding: .75rem .8rem; }
+      .sheet--annotated .mk { right: -2.9em; }
+      .doc-frame { margin-right: 1.4rem; }
     }
-
-    /* ── Orbit ── */
-    @keyframes orbit-spin { to { transform: rotate(360deg); } }
-    @keyframes orbit-counter { to { transform: rotate(-360deg); } }
-    @keyframes logo-pulse { 0%,100% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.04); opacity: 1; } }
+    @media (max-width: 420px) { .tabs { grid-template-columns: 1fr; } .hero h1 { font-size: 2.35rem; } .price tfoot .btn { font-size: .76rem; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+      .stage-pause { display: none; }
+    }
   </style>
 </head>
 <body>
 
-<!-- Animated mesh background -->
-<div class="mesh-bg" aria-hidden="true">
-  <div class="blob"></div>
-  <div class="blob"></div>
-  <div class="blob"></div>
-</div>
-
-<!-- ═══════════════════════ HEADER ═══════════════════════ -->
 <header class="site-header">
-  <div class="header-bar">
-    <a href="https://raporton.pl" class="header-brand">Raport<span>ON</span></a>
-    <nav class="header-nav">
-      <a href="#funkcje">Funkcje</a>
-      <a href="#proces">Proces</a>
+  <div class="wrap">
+    <a href="https://raporton.pl" class="brand" aria-label="RaportON — strona główna">
+      <svg viewBox="118 62 266 348" aria-hidden="true"><defs><linearGradient id="lg-b" x1="280" y1="260" x2="380" y2="380" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#012e57"/><stop offset="1" stop-color="#01726f"/></linearGradient><linearGradient id="lg-w" x1="250" y1="0" x2="345" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f1fcfe"/></linearGradient></defs><path d="M147 66H289L379 156V381A24 24 0 0 1 355 405H147A24 24 0 0 1 123 381V90A24 24 0 0 1 147 66Z" fill="url(#lg-b)" stroke="rgba(255,255,255,.28)" stroke-width="6"/><path d="M289 66V139A12 12 0 0 0 301 151H374Z" fill="#03b989"/><path d="M252 202H379V282.5H250.4L174 330.6L240 250H208Z" fill="url(#lg-w)"/><path d="M303 250L250.4 282.5L174 330.6L240 250Z" fill="#fefefe"/></svg>
+      <span>Raport<b>ON</b></span>
+    </a>
+    <nav class="nav" aria-label="Sekcje strony">
+      <a href="#protokol">Protokół</a>
+      <a href="#przeglady">Przeglądy</a>
+      <a href="#branze">Branże</a>
       <a href="#cennik">Cennik</a>
+      <a href="#pytania">Pytania</a>
     </nav>
-    <div class="header-actions">
-      <a href="https://raporton.pl/login" class="header-login">Zaloguj się</a>
-      <a href="https://raporton.pl/register" class="header-cta">Wypróbuj za darmo</a>
-      <button class="mobile-toggle" id="menuBtn" aria-label="Menu">
-        <iconify-icon icon="solar:hamburger-menu-linear" width="20" height="20" id="menuIconOpen"></iconify-icon>
-        <iconify-icon icon="solar:close-circle-linear" width="20" height="20" id="menuIconClose" style="display:none"></iconify-icon>
+    <div class="head-right">
+      <a class="login" href="https://raporton.pl/login">Zaloguj się</a>
+      <a class="btn btn-primary btn-sm" href="https://raporton.pl/register">Zacznij za darmo</a>
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path id="menuIcon" d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
     </div>
   </div>
   <div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-menu-inner">
-      <a href="#funkcje">Funkcje</a>
-      <a href="#proces">Proces</a>
-      <a href="#cennik">Cennik</a>
-      <div class="sep"></div>
-      <a href="https://raporton.pl/login">Zaloguj się</a>
-      <a href="https://raporton.pl/register" class="mm-cta">Wypróbuj za darmo</a>
-    </div>
+    <a href="#protokol">Protokół</a>
+    <a href="#przeglady">Przeglądy</a>
+    <a href="#branze">Branże</a>
+    <a href="#cennik">Cennik</a>
+    <a href="#pytania">Pytania</a>
+    <a class="btn btn-primary" href="https://raporton.pl/register">Zacznij za darmo</a>
   </div>
 </header>
 
-<!-- ═══════════════════════ HERO ═══════════════════════ -->
-<section style="min-height: 100vh; display: flex; align-items: center; padding: 7rem 1.5rem 4rem;">
-  <div class="section-narrow hero-grid" style="display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; width: 100%;">
-
-    <!-- Text -->
-    <div class="hero-text" style="display: flex; flex-direction: column; align-items: flex-start;">
-      <div class="pill" style="margin-bottom: 1.5rem;">
-        <span class="dot"></span>
-        Za darmo, bez limitu dokumentów
+<main>
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Protokół gotowy, zanim wyjdziesz od klienta.</h1>
+        <p class="lede">Wypełniasz na telefonie, klient podpisuje palcem, a&nbsp;PDF z&nbsp;logo Twojej firmy od razu idzie do niego na <strong>WhatsAppa albo e-mail</strong>. Raporty serwisowe, protokoły przeglądów, pomiarów i&nbsp;odbiorów, oferty&nbsp;— bez Worda i&nbsp;bez wieczorów przy komputerze.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://raporton.pl/register">Zacznij za darmo</a>
+          <a class="more" href="#protokol">Zobacz, co dostaje klient</a>
+        </div>
+        <p class="hero-note">Plan Free: dokumenty bez limitu, bez karty płatniczej.</p>
       </div>
-      <h1>Raporty, protokoły, oferty <br>w 60 sekund.</h1>
-      <p style="margin-top: 1.5rem; font-size: clamp(1.05rem,1.5vw,1.2rem); color: var(--text-muted); max-width: 520px; line-height: 1.65; font-weight: 300;">
-        Raport, protokół odbioru, oferta, zlecenie, WZ — wypełnij formularz, dodaj zdjęcia i&nbsp;podpis, a&nbsp;PDF z&nbsp;logo Twojej firmy jest gotowy. Bez Worda, bez siedzenia wieczorami.
-      </p>
-      <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2.5rem;">
-        <a href="https://raporton.pl/register" class="btn-primary">Zacznij za darmo</a>
-        <a href="#cennik" class="btn-glass">Zobacz cennik</a>
-      </div>
-      <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">
-        <span style="display: flex; align-items: center; gap: 0.4rem;"><iconify-icon icon="solar:check-circle-linear" width="15" height="15" style="color: var(--accent);"></iconify-icon>Bez zobowiązań</span>
-        <span style="display: flex; align-items: center; gap: 0.4rem;"><iconify-icon icon="solar:check-circle-linear" width="15" height="15" style="color: var(--accent);"></iconify-icon>Własne szablony</span>
-      </div>
-    </div>
 
-    <!-- Phone mockup -->
-    <div class="hero-phone" style="display: flex; justify-content: center; align-items: center; perspective: 1200px; padding-top: 2rem;">
-      <div class="float">
-        <div class="phone-shell">
-          <!-- Side buttons -->
-          <div class="phone-btn-l" style="top: 120px; height: 26px;"></div>
-          <div class="phone-btn-l" style="top: 170px; height: 52px;"></div>
-          <div class="phone-btn-l" style="top: 235px; height: 52px;"></div>
-          <div class="phone-btn-r" style="top: 185px; height: 72px;"></div>
-
-          <div class="phone-body"></div>
-          <div class="phone-screen">
-            <div class="phone-island"><div class="cam"></div><div class="led"></div></div>
-            <div class="phone-status">
-              <span>9:41</span>
-              <div style="display:flex; gap:4px; align-items:center; opacity:0.7;">
-                <iconify-icon icon="solar:wi-fi-router-linear" width="13" height="13"></iconify-icon>
-                <iconify-icon icon="solar:battery-full-linear" width="15" height="15"></iconify-icon>
+      <div class="stage-wrap" id="stageWrap">
+        <div class="stage" id="stage" role="img" aria-label="Animacja: na telefonie wypełnia się protokół pomiarów elektrycznych, obok powstaje z niego PDF, który trafia do klienta.">
+          <article class="sheet" id="sheet" aria-hidden="true">
+            <div class="sh-head">
+              <div class="sh-logo">EM</div>
+              <div class="sh-co"><b>ELEKTRO-MAX Jan Nowak</b><small>NIP 734-000-00-00 · ul. Kolejowa 5, Nowy Sącz · tel. 600 000 000</small></div>
+              <span class="mk">1</span>
+            </div>
+            <div class="sh-rule"></div>
+            <div class="sh-title"><span>PROTOKÓŁ POMIARÓW INSTALACJI ELEKTRYCZNEJ</span><span class="sh-nr">047/2026</span><span class="mk">2</span></div>
+            <table class="sh-data">
+              <tr><th>Zleceniodawca</th><td data-k="client"></td></tr>
+              <tr><th>Adres obiektu</th><td data-k="addr"></td></tr>
+              <tr><th>Data pomiarów</th><td data-k="date"></td></tr>
+            </table>
+            <p class="sh-sec">Wykonane pomiary i oględziny</p>
+            <table class="sh-grid">
+              <thead><tr><th>Lp.</th><th>Opis czynności</th><th class="st">Status</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Oględziny instalacji elektrycznej</td><td class="st" data-k="t1"></td></tr>
+                <tr><td>2</td><td>Pomiar rezystancji izolacji</td><td class="st" data-k="t2"></td></tr>
+                <tr><td>3</td><td>Badanie wyłączników RCD</td><td class="st" data-k="t3"></td></tr>
+              </tbody>
+            </table>
+            <p class="sh-sec">Wyniki — rezystancja izolacji<span class="mk">3</span></p>
+            <table class="sh-grid sh-res">
+              <thead><tr><th>Lp.</th><th>Obwód</th><th>L-PE [MΩ]</th><th>L-N [MΩ]</th><th>Ocena</th></tr></thead>
+              <tbody>
+                <tr class="r" data-row="1"><td>1</td><td data-k="r1a"></td><td class="n" data-k="r1b"></td><td class="n" data-k="r1c"></td><td class="oc" data-k="r1d"></td></tr>
+                <tr class="r" data-row="2"><td>2</td><td data-k="r2a"></td><td class="n" data-k="r2b"></td><td class="n" data-k="r2c"></td><td class="oc" data-k="r2d"></td></tr>
+              </tbody>
+            </table>
+            <div class="sh-foot">
+              <figure class="sh-photo" data-show="photo"><svg viewBox="0 0 92 64" preserveAspectRatio="xMidYMid slice"><rect width="92" height="64" fill="#c9d3da"/><rect x="10" y="6" width="72" height="52" rx="3" fill="#eef2f4" stroke="#9aa9b5"/><g fill="#fff" stroke="#8b9aa7" stroke-width=".8"><rect x="16" y="14" width="7" height="14" rx="1"/><rect x="25" y="14" width="7" height="14" rx="1"/><rect x="34" y="14" width="7" height="14" rx="1"/><rect x="43" y="14" width="7" height="14" rx="1"/><rect x="52" y="14" width="14" height="14" rx="1"/><rect x="16" y="34" width="7" height="14" rx="1"/><rect x="25" y="34" width="7" height="14" rx="1"/><rect x="34" y="34" width="7" height="14" rx="1"/><rect x="43" y="34" width="7" height="14" rx="1"/></g><g fill="#1f3b5c"><rect x="18" y="19" width="3" height="4"/><rect x="27" y="19" width="3" height="4"/><rect x="36" y="19" width="3" height="4"/><rect x="45" y="19" width="3" height="4"/><rect x="18" y="39" width="3" height="4"/><rect x="27" y="39" width="3" height="4"/><rect x="36" y="39" width="3" height="4"/><rect x="45" y="39" width="3" height="4"/></g><rect x="55" y="17" width="8" height="6" fill="#03b989"/><path d="M0 64 L92 40 L92 64Z" fill="#000" opacity=".06"/></svg><span class="mk">4</span></figure>
+              <div class="sh-sign">
+                <svg viewBox="0 0 150 46" fill="none" data-show="sign"><path class="sig" d="M6 34c7-18 13-26 15-19s-6 22 1 19 9-24 16-22-3 19 4 18 7-15 12-15 1 12 7 11 10-12 15-11 0 10 6 9 8-7 12-7 3 5 8 4 12-3 20-3" stroke="#1e2a38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="line">Podpis wykonującego (SEP E)</div>
+                <span class="mk">5</span>
               </div>
             </div>
+          </article>
 
-            <!-- App content: simplified dashboard -->
-            <div class="phone-content" style="background: linear-gradient(to bottom right, #f8f9fb, rgba(226,232,240,0.25));">
-              <!-- App header -->
-              <div style="margin-left: 2px; margin-bottom: 2px;">
-                <div style="font-size: 17px; font-weight: 600; color: #0f172a; letter-spacing: -0.02em;">Raport<span style="color:#10b981;">ON</span></div>
-                <div style="font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 1px;">Dokument gotowy w minutę</div>
-              </div>
-
-              <!-- New report button -->
-              <div style="background: linear-gradient(135deg, #059669, #10b981); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; color: #fff;">
-                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                  <iconify-icon icon="solar:add-circle-linear" width="20" height="20"></iconify-icon>
+          <div class="phone" aria-hidden="true">
+            <div class="ph-screen" id="phScreen">
+              <div class="ph-bar"><span class="ph-back">‹</span><b>Pomiary elektryczne</b><span class="ph-num">047/2026</span></div>
+              <div class="ph-scroll" id="phScroll">
+                <div class="ph-sec" data-sec="1">
+                  <span class="ph-f">Zleceniodawca<span class="ph-in" data-k="client"></span></span>
+                  <span class="ph-f">Adres obiektu<span class="ph-in" data-k="addr"></span></span>
+                  <span class="ph-f">Data pomiarów<span class="ph-in" data-k="date"></span></span>
                 </div>
-                <div style="flex: 1;">
-                  <div style="font-size: 14px; font-weight: 600;">Nowy dokument</div>
-                  <div style="font-size: 10px; opacity: 0.75; margin-top: 1px;">Wybierz szablon i wypełnij</div>
+                <div class="ph-sec" data-sec="2">
+                  <p class="ph-h">Wykonane pomiary i oględziny</p>
+                  <div class="ph-tile" data-tile="t1"><span>Oględziny instalacji</span><i class="yes">✓</i><i>✗</i><i>nd.</i></div>
+                  <div class="ph-tile" data-tile="t2"><span>Rezystancja izolacji</span><i class="yes">✓</i><i>✗</i><i>nd.</i></div>
+                  <div class="ph-tile" data-tile="t3"><span>Wyłączniki RCD</span><i class="yes">✓</i><i>✗</i><i>nd.</i></div>
                 </div>
-                <iconify-icon icon="solar:alt-arrow-right-linear" width="16" height="16" style="opacity: 0.6;"></iconify-icon>
-              </div>
-
-              <!-- Stats row -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 10px 12px; border: 1px solid rgba(226,232,240,0.5);">
-                  <div style="font-size: 18px; font-weight: 600; color: #0f172a;">12</div>
-                  <div style="font-size: 9px; color: #94a3b8; font-weight: 500;">Dokumentów</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 10px 12px; border: 1px solid rgba(226,232,240,0.5);">
-                  <div style="font-size: 18px; font-weight: 600; color: #0f172a;">4</div>
-                  <div style="font-size: 9px; color: #94a3b8; font-weight: 500;">Szablonów</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 10px 12px; border: 1px solid rgba(226,232,240,0.5);">
-                  <div style="font-size: 18px; font-weight: 600; color: #0f172a;">18 mar</div>
-                  <div style="font-size: 9px; color: #94a3b8; font-weight: 500;">Ostatni</div>
-                </div>
-              </div>
-
-              <!-- Recent reports -->
-              <div>
-                <div style="font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Ostatnie dokumenty</div>
-                <div style="background: rgba(255,255,255,0.85); border-radius: 14px; border: 1px solid rgba(226,232,240,0.5); overflow: hidden;">
-                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(226,232,240,0.4);">
-                    <div style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; flex-shrink: 0;"></div>
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 12px; font-weight: 500; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Jan Kowalski</div>
-                      <div style="font-size: 9px; color: #94a3b8;">18 mar • <span style="color: #10b981; font-weight: 500;">Raport serwisowy</span></div>
+                <div class="ph-sec" data-sec="3">
+                  <p class="ph-h">Wyniki — rezystancja izolacji</p>
+                  <div class="ph-row" data-row="1">
+                    <div class="top"><span>1. wiersz</span><span>Powiel</span></div>
+                    <div class="grid">
+                      <label class="full">Obwód<span class="ph-cell" data-k="r1a"></span></label>
+                      <label>L-PE [MΩ]<span class="ph-cell" data-k="r1b"></span></label>
+                      <label>L-N [MΩ]<span class="ph-cell" data-k="r1c"></span></label>
+                      <label class="full">Ocena<span class="ph-choice" data-choice="r1d"><i>pozytywna</i><i>negatywna</i></span></label>
                     </div>
                   </div>
-                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(226,232,240,0.4);">
-                    <div style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; flex-shrink: 0;"></div>
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 12px; font-weight: 500; color: #0f172a;">Firma ABC sp. z o.o.</div>
-                      <div style="font-size: 9px; color: #94a3b8;">17 mar • <span style="color: #10b981; font-weight: 500;">Oferta</span></div>
+                  <div class="ph-row" data-row="2">
+                    <div class="top"><span>2. wiersz</span><span>Powiel</span></div>
+                    <div class="grid">
+                      <label class="full">Obwód<span class="ph-cell" data-k="r2a"></span></label>
+                      <label>L-PE [MΩ]<span class="ph-cell" data-k="r2b"></span></label>
+                      <label>L-N [MΩ]<span class="ph-cell" data-k="r2c"></span></label>
+                      <label class="full">Ocena<span class="ph-choice" data-choice="r2d"><i>pozytywna</i><i>negatywna</i></span></label>
                     </div>
                   </div>
-                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px;">
-                    <div style="width: 7px; height: 7px; border-radius: 50%; background: #a855f7; flex-shrink: 0;"></div>
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 12px; font-weight: 500; color: #0f172a;">Anna Nowak</div>
-                      <div style="font-size: 9px; color: #94a3b8;">16 mar • <span style="color: #10b981; font-weight: 500;">Protokół odbioru</span></div>
-                    </div>
+                  <div class="ph-add" id="phAdd">+ Dodaj wiersz</div>
+                </div>
+                <div class="ph-sec" data-sec="4">
+                  <p class="ph-h">Zdjęcia i podpis</p>
+                  <div class="ph-media">
+                    <div class="ph-cam" id="phCam">Zrób zdjęcie</div>
+                    <div class="ph-thumb" data-show="photo"><svg viewBox="0 0 92 64" preserveAspectRatio="xMidYMid slice"><rect width="92" height="64" fill="#c9d3da"/><rect x="10" y="6" width="72" height="52" rx="3" fill="#eef2f4" stroke="#9aa9b5"/><g fill="#fff" stroke="#8b9aa7" stroke-width=".8"><rect x="16" y="14" width="7" height="14" rx="1"/><rect x="25" y="14" width="7" height="14" rx="1"/><rect x="34" y="14" width="7" height="14" rx="1"/><rect x="43" y="14" width="7" height="14" rx="1"/><rect x="52" y="14" width="14" height="14" rx="1"/><rect x="16" y="34" width="7" height="14" rx="1"/><rect x="25" y="34" width="7" height="14" rx="1"/><rect x="34" y="34" width="7" height="14" rx="1"/><rect x="43" y="34" width="7" height="14" rx="1"/></g><rect x="55" y="17" width="8" height="6" fill="#03b989"/></svg></div>
                   </div>
+                  <div class="ph-pad" id="phPad"><svg viewBox="0 0 150 46" fill="none" data-show="sign"><path class="sig" d="M6 34c7-18 13-26 15-19s-6 22 1 19 9-24 16-22-3 19 4 18 7-15 12-15 1 12 7 11 10-12 15-11 0 10 6 9 8-7 12-7 3 5 8 4 12-3 20-3" stroke="#1e2a38" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Podpis wykonującego</small></div>
                 </div>
               </div>
-
-              <!-- Quick start chips -->
-              <div style="display: flex; gap: 6px; overflow: hidden; margin-top: auto;">
-                <div style="background: rgba(219,234,254,0.6); border: 1px solid rgba(219,234,254,0.8); border-radius: 10px; padding: 8px 10px; text-align: center; min-width: 70px;">
-                  <div style="font-size: 16px;">📋</div>
-                  <div style="font-size: 8px; font-weight: 500; color: #334155; margin-top: 2px;">Raport</div>
-                </div>
-                <div style="background: rgba(254,243,199,0.6); border: 1px solid rgba(254,243,199,0.8); border-radius: 10px; padding: 8px 10px; text-align: center; min-width: 70px;">
-                  <div style="font-size: 16px;">🧾</div>
-                  <div style="font-size: 8px; font-weight: 500; color: #334155; margin-top: 2px;">Oferta</div>
-                </div>
-                <div style="background: rgba(237,233,254,0.6); border: 1px solid rgba(237,233,254,0.8); border-radius: 10px; padding: 8px 10px; text-align: center; min-width: 70px;">
-                  <div style="font-size: 16px;">✅</div>
-                  <div style="font-size: 8px; font-weight: 500; color: #334155; margin-top: 2px;">Protokół</div>
+              <div class="ph-cta"><span id="phGen">Generuj PDF</span></div>
+              <div class="ph-ready" id="phReady">
+                <div class="ph-card">
+                  <div class="ph-doc"></div>
+                  <b>PDF gotowy</b>
+                  <small>Protokol_pomiarow_047-2026.pdf</small>
+                  <span class="ph-send" id="phSend">Wyślij klientowi</span>
+                  <span class="ph-dl">Pobierz PDF</span>
                 </div>
               </div>
-            </div>
-
-            <!-- Bottom nav -->
-            <div style="display: flex; border-top: 1px solid rgba(226,232,240,0.5); background: rgba(255,255,255,0.9); padding: 6px 0 14px; z-index: 40;">
-              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #10b981;">
-                <iconify-icon icon="solar:home-2-bold" width="18" height="18"></iconify-icon>
-                <span style="font-size: 8px; font-weight: 600;">Start</span>
-              </div>
-              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #94a3b8;">
-                <iconify-icon icon="solar:widget-2-linear" width="18" height="18"></iconify-icon>
-                <span style="font-size: 8px; font-weight: 500;">Szablony</span>
-              </div>
-              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #94a3b8;">
-                <iconify-icon icon="solar:clipboard-list-linear" width="18" height="18"></iconify-icon>
-                <span style="font-size: 8px; font-weight: 500;">Historia</span>
-              </div>
-              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #94a3b8;">
-                <iconify-icon icon="solar:user-linear" width="18" height="18"></iconify-icon>
-                <span style="font-size: 8px; font-weight: 500;">Profil</span>
-              </div>
-            </div>
-
-            <div class="phone-home-indicator"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ MARQUEE: DOCUMENT TYPES ═══════════════════════ -->
-<section style="padding: 5rem 0; border-top: 1px solid rgba(226,232,240,0.3);">
-  <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 3rem;">
-    Nie tylko raporty — twórz dowolne dokumenty PDF
-  </p>
-  <div class="marquee-wrap marquee-fade">
-    <div class="marquee-track">
-      <div style="display: flex; align-items: center; gap: clamp(2rem,5vw,4rem); padding-right: clamp(2rem,5vw,4rem);">
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#3b82f6'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:clipboard-text-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Raporty serwisowe</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#10b981'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:clipboard-check-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Protokoły odbioru</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#f59e0b'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:tag-price-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Oferty i wyceny</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#f97316'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:clipboard-list-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Zlecenia i WZ</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#a855f7'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:notebook-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Karty pracy</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap; transition:all 0.3s; cursor:pointer;" onmouseenter="this.style.opacity='1';this.style.color='#0ea5e9'" onmouseleave="this.style.opacity='0.6';this.style.color='#94a3b8'">
-          <iconify-icon icon="solar:document-add-linear" width="32" height="32"></iconify-icon>
-          <span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500; letter-spacing:-0.02em;">Własne szablony</span>
-        </div>
-      </div>
-      <!-- Duplicate for seamless loop -->
-      <div style="display: flex; align-items: center; gap: clamp(2rem,5vw,4rem); padding-right: clamp(2rem,5vw,4rem);">
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:clipboard-text-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Raporty serwisowe</span></div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:clipboard-check-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Protokoły odbioru</span></div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:tag-price-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Oferty i wyceny</span></div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:clipboard-list-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Zlecenia i WZ</span></div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:notebook-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Karty pracy</span></div>
-        <div style="display:flex; align-items:center; gap:10px; color:#94a3b8; opacity:0.6; white-space:nowrap;"><iconify-icon icon="solar:document-add-linear" width="32" height="32"></iconify-icon><span style="font-size:clamp(1.1rem,2vw,1.5rem); font-weight:500;">Własne szablony</span></div>
-      </div>
-    </div>
-  </div>
-  <p style="text-align: center; margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-    <iconify-icon icon="solar:shield-check-linear" width="16" height="16" style="color: var(--accent);"></iconify-icon>
-    Gotowe szablony branżowe lub własny szablon do dowolnego dokumentu
-  </p>
-</section>
-<section id="funkcje" class="section-pad">
-  <div class="section-narrow">
-    <div class="reveal" style="text-align: center; margin-bottom: 4rem;">
-      <h2>Wszystko czego potrzebujesz<br>w terenie</h2>
-      <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Zarządzaj dokumentacją z&nbsp;telefonu, bez zbędnej papierologii.
-      </p>
-    </div>
-
-    <div class="bento-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-
-      <!-- PDF w sekundę — wide -->
-      <div class="glass bento-wide reveal" style="grid-column: span 2; border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="width: 48px; height: 48px; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
-            <iconify-icon icon="solar:document-text-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          </div>
-          <h3 style="margin-top: 1rem;">PDF w sekundę</h3>
-          <p style="margin-top: 0.75rem; color: var(--text-muted); font-weight: 300; font-size: 1.05rem; max-width: 500px;">
-            Profesjonalny dokument z&nbsp;logo Twojej firmy — gotowy do wysłania klientowi od razu po zakończeniu zlecenia.
-          </p>
-        </div>
-        <div class="bento-deco" style="margin-top: 2.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap;">
-          <div style="flex: 2; min-width: 200px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 1rem; padding: 1.25rem; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 0.7rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Generowanie</span>
-              <div style="display: flex; gap: 4px;"><div style="width:5px;height:5px;border-radius:50%;background:#64748b;"></div><div style="width:5px;height:5px;border-radius:50%;background:#cbd5e1;"></div><div style="width:5px;height:5px;border-radius:50%;background:#cbd5e1;"></div></div>
-            </div>
-            <div style="display: flex; align-items: flex-end; gap: 4px; height: 60px; padding-top: 1rem;">
-              <div style="flex:1;background:rgba(100,116,139,0.08);height:25%;border-radius:2px 2px 0 0;"></div>
-              <div style="flex:1;background:rgba(100,116,139,0.15);height:45%;border-radius:2px 2px 0 0;"></div>
-              <div style="flex:1;background:rgba(100,116,139,0.25);height:70%;border-radius:2px 2px 0 0;"></div>
-              <div style="flex:1;background:rgba(16,185,129,0.5);height:100%;border-radius:2px 2px 0 0;position:relative;"><div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,0.5);"></div></div>
-              <div style="flex:1;background:rgba(100,116,139,0.15);height:55%;border-radius:2px 2px 0 0;"></div>
-              <div style="flex:1;background:rgba(100,116,139,0.08);height:35%;border-radius:2px 2px 0 0;"></div>
+              <span class="tap" id="tap"></span>
             </div>
           </div>
-          <div style="flex: 1; min-width: 160px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 1rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
-            <span style="font-size: 0.7rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Status</span>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;color:var(--accent);">
-                <iconify-icon icon="solar:check-circle-linear" width="16" height="16"></iconify-icon>
-              </div>
-              <div style="flex:1;"><div style="height:6px;background:rgba(100,116,139,0.2);border-radius:4px;width:80%;"></div><div style="height:5px;background:rgba(100,116,139,0.1);border-radius:4px;width:55%;margin-top:6px;"></div></div>
+
+          <div class="bubble" id="bubble" aria-hidden="true">
+            <div class="bub-to">WhatsApp · Wspólnota Lipowa 14</div>
+            <div class="bub-file"><span class="pdf-ico">PDF</span><div><b>Protokol_pomiarow_047-2026.pdf</b><small>2 strony · 214 KB</small></div></div>
+            <div class="bub-meta">15:42<i>✓✓</i></div>
+          </div>
+        </div>
+        <button class="stage-pause" id="stagePause" type="button" aria-pressed="false">Wstrzymaj animację</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── What the client gets ── -->
+  <section class="sec" id="protokol">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Tak wygląda PDF, który dostaje klient</h2>
+        <p>Porządny dokument z&nbsp;Twoim logo, a&nbsp;nie zdjęcie kartki z&nbsp;notatkami. Wszystko, co wpiszesz na telefonie, układa się w&nbsp;czytelny protokół.</p>
+      </div>
+      <div class="anatomy">
+        <div class="doc-frame" id="docFrame"></div>
+        <ol class="callouts">
+          <li><h3>Logo i dane Twojej firmy</h3><p>Wpisujesz raz w&nbsp;profilu. Pojawiają się w&nbsp;nagłówku każdego dokumentu.</p></li>
+          <li><h3>Numeracja sama się pilnuje</h3><p>Kolejny numer protokołu nadaje się automatycznie, np. 047/2026.</p></li>
+          <li><h3>Tabele pomiarów<span class="new">Nowość</span></h3><p>Obwody, gaśnice, liczniki, punkty pomiarowe&nbsp;— wiersz po wierszu z&nbsp;telefonu. W&nbsp;PDF nagłówek tabeli powtarza się na każdej stronie.</p></li>
+          <li><h3>Zdjęcia z obiektu</h3><p>Tabliczka znamionowa, rozdzielnica, usterka&nbsp;— zdjęcie trafia prosto do dokumentu.</p></li>
+          <li><h3>Podpis palcem na ekranie</h3><p>Klient podpisuje się na telefonie. Koniec z&nbsp;„podeślę panu mailem”.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Send & remind ── -->
+  <section class="sec sr" id="przeglady">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Wysyłasz od razu. Wracasz na czas.</h2>
+        <p>Klient dostaje protokół, zanim odjedziesz spod budynku. A&nbsp;kiedy zbliża się kolejny przegląd, RaportON Ci o&nbsp;tym przypomni&nbsp;— bez żadnego systemu do wdrażania.</p>
+      </div>
+      <div class="sr-grid">
+        <div class="panel">
+          <div class="chat" aria-hidden="true">
+            <div class="bubble on">
+              <div class="bub-file"><span class="pdf-ico">PDF</span><div><b>Protokol_klimatyzacji_112.pdf</b><small>3 strony · 486 KB</small></div></div>
+              <div class="bub-meta">14:05<i>✓✓</i></div>
             </div>
+            <div class="reply">Dziękuję, dotarło. Do zobaczenia za rok.<small>14:07</small></div>
           </div>
+          <h3>WhatsApp, e-mail, SMS&nbsp;— jednym dotknięciem</h3>
+          <p>Po wygenerowaniu wybierasz „Wyślij klientowi” i&nbsp;aplikację, którą chcesz. PDF idzie jako załącznik, prosto z&nbsp;telefonu, bez szukania pliku w&nbsp;pobranych.</p>
         </div>
-      </div>
-
-      <!-- Zdjęcia -->
-      <div class="glass reveal" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="width: 48px; height: 48px; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
-            <iconify-icon icon="solar:camera-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
+        <div class="panel">
+          <div class="rem" aria-hidden="true">
+            <div class="rem-head"><span>Nadchodzące przeglądy</span><span>3</span></div>
+            <div class="rem-item"><div class="rem-top"><div><b>Pensjonat Pod Jaworem</b><small>Przegląd klimatyzacji · 06.10.2026</small></div><span class="chip soon">za 6 dni</span></div><div class="rem-act"><span class="a">+ Nowy protokół</span><span class="b">Przypomnij SMS-em</span></div></div>
+            <div class="rem-item"><div class="rem-top"><div><b>Piekarnia Kłos</b><small>Przegląd gaśnic · 27.10.2026</small></div><span class="chip">za 27 dni</span></div></div>
+            <div class="rem-item"><div class="rem-top"><div><b>Wspólnota Ogrodowa 3</b><small>Przegląd gazowy · 27.09.2026</small></div><span class="chip late">po terminie 3 dni</span></div></div>
           </div>
-          <h3 style="margin-top: 1rem;">Zdjęcia w dokumencie</h3>
-          <p style="margin-top: 0.75rem; color: var(--text-muted); font-weight: 300;">
-            Sfotografuj instalację, uszkodzenie, tabliczkę. Zdjęcia lądują prosto w&nbsp;PDF.
-          </p>
-        </div>
-        <div class="bento-deco" style="margin-top: 2rem; height: 140px; position: relative; display: flex; align-items: flex-end; justify-content: center; mask-image: linear-gradient(180deg, transparent, black 40%); -webkit-mask-image: linear-gradient(180deg, transparent, black 40%);">
-          <div style="position:absolute;bottom:48px;width:82%;height:60px;background:rgba(241,245,249,0.5);border:1px solid rgba(226,232,240,0.3);border-radius:12px;"></div>
-          <div style="position:absolute;bottom:24px;width:90%;height:60px;background:rgba(248,250,252,0.7);border:1px solid rgba(226,232,240,0.4);border-radius:12px;backdrop-filter:blur(4px);"></div>
-          <div style="position:relative;width:100%;height:60px;background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.8);border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 6px 20px rgba(0,0,0,0.06);display:flex;align-items:center;padding:0 16px;gap:12px;">
-            <div style="width:36px;height:36px;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
-              <iconify-icon icon="solar:gallery-linear" width="18" height="18"></iconify-icon>
-            </div>
-            <div><div style="height:8px;background:rgba(100,116,139,0.2);border-radius:4px;width:80px;"></div><div style="height:6px;background:rgba(100,116,139,0.1);border-radius:4px;width:50px;margin-top:6px;"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Podpis -->
-      <div class="glass reveal" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="width: 48px; height: 48px; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
-            <iconify-icon icon="solar:pen-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          </div>
-          <h3 style="margin-top: 1rem;">Podpis na telefonie</h3>
-          <p style="margin-top: 0.75rem; color: var(--text-muted); font-weight: 300;">
-            Klient podpisuje palcem na ekranie. Koniec z&nbsp;"dośle Panu mailem".
-          </p>
-        </div>
-        <div class="bento-deco" style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.9);padding:12px 16px;border-radius:12px;backdrop-filter:blur(8px);">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:28px;height:28px;border-radius:8px;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;color:var(--text);"><iconify-icon icon="solar:user-check-linear" width="14" height="14"></iconify-icon></div>
-              <div style="height:8px;width:90px;background:var(--primary);border-radius:4px;opacity:0.7;"></div>
-            </div>
-            <div style="width:40px;height:22px;background:var(--primary);border-radius:50px;position:relative;"><div style="position:absolute;right:2px;top:2px;width:18px;height:18px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.1);"></div></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.6);padding:12px 16px;border-radius:12px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:28px;height:28px;border-radius:8px;background:rgba(241,245,249,0.5);border:1px solid rgba(226,232,240,0.4);display:flex;align-items:center;justify-content:center;color:var(--text-muted);"><iconify-icon icon="solar:user-cross-linear" width="14" height="14"></iconify-icon></div>
-              <div style="height:7px;width:100px;background:rgba(100,116,139,0.3);border-radius:4px;"></div>
-            </div>
-            <div style="width:40px;height:22px;background:rgba(226,232,240,0.6);border-radius:50px;position:relative;border:1px solid rgba(203,213,225,0.5);"><div style="position:absolute;left:2px;top:2px;width:18px;height:18px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,0.05);"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dyktowanie — wide -->
-      <div class="glass bento-wide reveal" style="grid-column: span 2; border-radius: var(--radius); padding: 2.5rem;">
-        <div>
-          <div style="width: 48px; height: 48px; background: rgba(241,245,249,0.8); border: 1px solid rgba(226,232,240,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
-            <iconify-icon icon="solar:microphone-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          </div>
-          <h3 style="margin-top: 1rem;">Dyktuj, nie pisz</h3>
-          <p style="margin-top: 0.75rem; color: var(--text-muted); font-weight: 300; max-width: 500px; font-size: 1.05rem;">
-            Mów do telefonu - tekst wpisuje się sam. Działa w&nbsp;języku polskim.
-          </p>
-        </div>
-        <div class="bento-deco" style="margin-top: 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap;">
-          <div style="flex: 2; min-width: 200px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 1rem; min-height: 140px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-            <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.25;" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M 10,50 Q 25,30 40,50 T 70,50 T 100,50" stroke="#cbd5e1" stroke-width="1.5" fill="none"/>
-              <path d="M 10,50 Q 25,70 40,50 T 70,50 T 100,50" stroke="#cbd5e1" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div style="width:48px;height:48px;border-radius:50%;background:#fff;border:2px solid rgba(226,232,240,0.6);box-shadow:0 0 20px rgba(148,163,184,0.25);display:flex;align-items:center;justify-content:center;z-index:1;">
-              <div style="width:14px;height:14px;background:#64748b;border-radius:50%;animation:breathe 3s ease-in-out infinite;"></div>
-            </div>
-          </div>
-          <div style="flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 1rem;">
-            <div style="background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 0.75rem; padding: 1.25rem; flex: 1;">
-              <div style="font-size:0.7rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Rozpoznane słowa</div>
-              <div style="font-size:1.8rem;font-weight:600;color:var(--primary);margin-top:0.25rem;">142</div>
-              <div style="margin-top:0.75rem;height:5px;background:rgba(226,232,240,0.5);border-radius:4px;overflow:hidden;"><div style="height:100%;width:85%;background:rgba(100,116,139,0.4);border-radius:4px;"></div></div>
-            </div>
-            <div style="background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 0.75rem; padding: 1.25rem; flex: 1;">
-              <div style="font-size:0.7rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Dokładność</div>
-              <div style="font-size:1.8rem;font-weight:600;color:var(--primary);margin-top:0.25rem;">99%</div>
-              <div style="margin-top:0.75rem;display:flex;gap:4px;"><div style="height:7px;flex:1;background:rgba(100,116,139,0.4);border-radius:4px;"></div><div style="height:7px;flex:1;background:rgba(100,116,139,0.4);border-radius:4px;"></div><div style="height:7px;flex:1;background:rgba(100,116,139,0.4);border-radius:4px;"></div><div style="height:7px;flex:0.5;background:rgba(226,232,240,0.5);border-radius:4px;"></div></div>
-            </div>
-          </div>
+          <h3>Lista przeglądów układa się sama</h3>
+          <p>Datę następnego przeglądu wpisujesz w&nbsp;protokole i&nbsp;tyle. Na pulpicie widzisz, do kogo wrócić, a&nbsp;nowy protokół zaczynasz z&nbsp;danymi klienta i&nbsp;urządzenia z&nbsp;poprzedniego razu&nbsp;— wyniki pomiarów, podpisy i&nbsp;zdjęcia oczywiście od zera.</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══════════════════════ TIMELINE: 3 STEPS ═══════════════════════ -->
-<section id="proces" class="section-pad" style="background: rgba(248,250,252,0.4); border-top: 1px solid rgba(226,232,240,0.3);">
-  <div class="section-narrow">
-    <div class="reveal" style="text-align: center; margin-bottom: 4rem;">
-      <div class="pill"><span class="dot" style="background:#94a3b8;"></span> Proces</div>
-      <h2 style="margin-top: 1.5rem;">Dokument w 3 krokach.</h2>
-      <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300; max-width: 550px; margin-left: auto; margin-right: auto;">
-        Od wejścia na obiekt do wysłania gotowego dokumentu.
-      </p>
+  <!-- ── Templates ── -->
+  <section class="sec" id="branze">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Gotowe protokoły dla Twojej branży</h2>
+        <p>Wybierasz szablon i&nbsp;od razu wypełniasz. Każdy możesz skopiować i&nbsp;przerobić pod siebie&nbsp;— dodać pola, czynności, tabele.</p>
+      </div>
+      <div class="tabs">
+        <div class="tab" data-tab="KLIMA"><h3>Przegląd klimatyzacji</h3><p>Serwis z kontrolą szczelności F-gaz</p></div>
+        <div class="tab" data-tab="SEP"><h3>Pomiary elektryczne</h3><p>Izolacja, pętla zwarcia, RCD, PE, uziemienie</p></div>
+        <div class="tab" data-tab="GAZ"><h3>Przegląd gazowy</h3><p>Kontrola instalacji gazowej i kotła</p></div>
+        <div class="tab" data-tab="CO"><h3>Przegląd kotła / CO</h3><p>Instalacja grzewcza i kocioł</p></div>
+        <div class="tab" data-tab="PPOŻ"><h3>Przegląd gaśnic</h3><p>Przegląd i konserwacja gaśnic</p></div>
+        <div class="tab" data-tab="PPOŻ"><h3>Przegląd hydrantów</h3><p>Hydranty wewnętrzne, ciśnienie i wydajność</p></div>
+        <div class="tab" data-tab="UDT"><h3>Konserwacja windy</h3><p>Dziennik konserwacji dźwigu osobowego</p></div>
+        <div class="tab" data-tab="PV"><h3>Przegląd fotowoltaiki</h3><p>Instalacja PV wg PN-EN 62446</p></div>
+        <div class="tab" data-tab="WENT"><h3>Przegląd wentylacji</h3><p>Wentylacja mechaniczna, przepływy per punkt</p></div>
+        <div class="tab" data-tab="LOKAL"><h3>Zdawczo-odbiorczy</h3><p>Lokal, liczniki, klucze, wyposażenie</p></div>
+        <div class="tab own" data-tab="TWÓJ"><h3>Własny szablon</h3><p>Oferta, zlecenie, WZ, karta pracy albo cokolwiek innego</p></div>
+      </div>
+      <p class="legal">Szablony są przygotowane z&nbsp;uwzględnieniem wymagań Prawa budowlanego (art.&nbsp;62) oraz rozporządzenia F-gaz (UE&nbsp;2024/573). Każdy protokół zawiera wymagane pola, dane firmy, podpisy i&nbsp;dokumentację fotograficzną.</p>
     </div>
+  </section>
 
-    <div class="steps-grid reveal" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-      <!-- Step 1 -->
-      <div class="glass" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column;">
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 1px solid rgba(226,232,240,0.5); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(15,23,42,0.04); margin-bottom: 1.5rem; position: relative;">
-          <iconify-icon icon="solar:document-add-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          <div style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16,185,129,0.3);">1</div>
-        </div>
-        <h3 style="margin-bottom: 0.75rem;">Wypełnij</h3>
-        <p style="color: var(--text-muted); font-weight: 300; font-size: 1.05rem; line-height: 1.6;">
-          Formularz na telefonie — pola dopasowane do Twojego dokumentu. Możesz dyktować tekst, a&nbsp;system zapisze go za Ciebie.
-        </p>
-        <!-- Connector arrow (desktop) -->
-        <div class="step-arrow" style="display: none; position: absolute; right: -1.25rem; top: 50%; transform: translateY(-50%); color: rgba(203,213,225,0.6);">
-          <iconify-icon icon="solar:arrow-right-linear" width="20" height="20"></iconify-icon>
-        </div>
-      </div>
-
-      <!-- Step 2 -->
-      <div class="glass" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column;">
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 1px solid rgba(226,232,240,0.5); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(15,23,42,0.04); margin-bottom: 1.5rem; position: relative;">
-          <iconify-icon icon="solar:camera-add-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          <div style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16,185,129,0.3);">2</div>
-        </div>
-        <h3 style="margin-bottom: 0.75rem;">Dodaj dowody</h3>
-        <p style="color: var(--text-muted); font-weight: 300; font-size: 1.05rem; line-height: 1.6;">
-          Zrób zdjęcia instalacji i&nbsp;załącz je do dokumentu. Poproś klienta o&nbsp;podpis palcem bezpośrednio na ekranie smartfona.
-        </p>
-        <div class="step-arrow" style="display: none; position: absolute; right: -1.25rem; top: 50%; transform: translateY(-50%); color: rgba(203,213,225,0.6);">
-          <iconify-icon icon="solar:arrow-right-linear" width="20" height="20"></iconify-icon>
-        </div>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="glass" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column;">
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 1px solid rgba(226,232,240,0.5); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(15,23,42,0.04); margin-bottom: 1.5rem; position: relative;">
-          <iconify-icon icon="solar:file-download-linear" width="22" height="22" style="color: var(--text);"></iconify-icon>
-          <div style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16,185,129,0.3);">3</div>
-        </div>
-        <h3 style="margin-bottom: 0.75rem;">Generuj PDF</h3>
-        <p style="color: var(--text-muted); font-weight: 300; font-size: 1.05rem; line-height: 1.6;">
-          Jedno kliknięcie — profesjonalny dokument w&nbsp;formacie PDF, gotowy do wysłania klientowi i&nbsp;do biura.
-        </p>
+  <!-- ── Getting started ── -->
+  <section class="sec sr" id="start">
+    <div class="wrap">
+      <div class="sec-head"><h2>Pierwszy protokół jeszcze dziś</h2></div>
+      <div class="steps">
+        <div class="step"><h3>Załóż konto</h3><p>Mailem albo kontem Google. Bez karty płatniczej.</p></div>
+        <div class="step"><h3>Dodaj logo i dane firmy</h3><p>Raz, w profilu. Trafią do nagłówka każdego PDF-a.</p></div>
+        <div class="step"><h3>Wybierz szablon i jedź na zlecenie</h3><p>Dyktuj zamiast pisać, rób zdjęcia, zbierz podpis, wyślij.</p></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══════════════════════ PAIN POINTS: ORBIT ═══════════════════════ -->
-<section class="section-pad" style="overflow: hidden;">
-  <div class="section-narrow">
-    <div class="reveal" style="text-align: center; margin-bottom: 4rem;">
-      <h2>Ile godzin w tym tygodniu<br>spędziłeś nad dokumentacją?</h2>
-      <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300; max-width: 550px; margin-left: auto; margin-right: auto;">
-        Rozwiąż problemy, z&nbsp;którymi mierzysz się po powrocie z&nbsp;obiektu.
-      </p>
-    </div>
-
-    <!-- DESKTOP: Orbital -->
-    <div class="pain-orbit reveal" style="width: 550px; height: 550px; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center;">
-
-      <!-- Center logo sphere -->
-      <div style="position:relative;z-index:10;width:110px;height:110px;border-radius:50%;background:#eef2f6;border:1px solid rgba(255,255,255,0.7);box-shadow:0 16px 40px rgba(15,23,42,0.07),inset 5px 5px 12px rgba(255,255,255,0.9),inset -6px -6px 14px rgba(148,163,184,0.08);display:flex;align-items:center;justify-content:center;">
-        <div style="width:76px;height:76px;border-radius:50%;border:1px solid rgba(203,213,225,0.3);background:linear-gradient(135deg,#fff,#f1f5f9);box-shadow:inset 0 2px 6px rgba(255,255,255,0.9),0 6px 16px rgba(15,23,42,0.03);display:flex;align-items:center;justify-content:center;animation:logo-pulse 4s ease-in-out infinite;">
-          <iconify-icon icon="solar:check-read-linear" width="26" height="26" style="color:#64748b;"></iconify-icon>
-        </div>
-        <div style="position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:11px;text-transform:uppercase;letter-spacing:0.3em;color:#94a3b8;font-weight:600;white-space:nowrap;">Raport<span style="color:#10b981;">ON</span></div>
+  <!-- ── Pricing ── -->
+  <section class="sec" id="cennik">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Cennik</h2>
+        <p>Zaczynasz za darmo. Na Solo przechodzisz, gdy chcesz PDF bez znaku wodnego.</p>
       </div>
+      <div class="price">
+        <table>
+          <thead><tr><th scope="col"><span class="sr-only">Funkcja</span></th><th scope="col">Free</th><th scope="col">Solo</th></tr></thead>
+          <tbody>
+            <tr><th scope="row" style="font-weight:600">Cena</th><td><span class="amt">0 zł</span></td><td><span class="amt">19 zł <small>/ mies.</small></span></td></tr>
+            <tr><th scope="row" style="font-weight:500">Dokumenty</th><td>bez limitu</td><td>bez limitu</td></tr>
+            <tr><th scope="row" style="font-weight:500">Gotowe i własne szablony</th><td class="yes">TAK</td><td class="yes">TAK</td></tr>
+            <tr><th scope="row" style="font-weight:500">Tabele, zdjęcia, podpisy, dyktowanie</th><td class="yes">TAK</td><td class="yes">TAK</td></tr>
+            <tr><th scope="row" style="font-weight:500">Wysyłka PDF i lista przeglądów</th><td class="yes">TAK</td><td class="yes">TAK</td></tr>
+            <tr><th scope="row" style="font-weight:500">PDF bez znaku wodnego „RaportON.pl”</th><td class="no">NIE</td><td class="yes">TAK</td></tr>
+            <tr><th scope="row" style="font-weight:500">Priorytetowe wsparcie</th><td class="dash">—</td><td class="yes">TAK</td></tr>
+          </tbody>
+          <tfoot><tr><td></td><td><a class="btn btn-line" href="https://raporton.pl/register">Załóż konto</a></td><td><a class="btn btn-primary" href="https://raporton.pl/register">Wybierz Solo</a></td></tr></tfoot>
+        </table>
+      </div>
+      <p class="price-note">Bez zobowiązań&nbsp;— rezygnujesz, kiedy chcesz.</p>
+    </div>
+  </section>
 
-      <!-- Decorative rings -->
-      <div style="position:absolute;inset:90px;border:1px solid rgba(15,23,42,0.025);border-radius:50%;pointer-events:none;"></div>
-      <div style="position:absolute;inset:40px;border:1px solid rgba(15,23,42,0.015);border-radius:50%;pointer-events:none;"></div>
-
-      <!-- Spinning orbit track -->
-      <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(15,23,42,0.03);animation:orbit-spin 35s linear infinite;">
-
-        <!-- Card: Top -->
-        <div style="position:absolute;top:0;left:50%;transform:translate(-50%,-50%);width:300px;">
-          <div style="animation:orbit-counter 35s linear infinite;">
-            <div class="pain-card-orbit">
-              <div class="pain-icon-orbit"><iconify-icon icon="solar:moon-linear" width="22" height="22"></iconify-icon></div>
-              <div><div class="pain-title-orbit">Wieczory nad Wordem</div><div class="pain-sub-orbit">Zamiast czasu z rodziną</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card: Right -->
-        <div style="position:absolute;top:50%;right:0;transform:translate(50%,-50%);width:300px;">
-          <div style="animation:orbit-counter 35s linear infinite;">
-            <div class="pain-card-orbit">
-              <div class="pain-icon-orbit"><iconify-icon icon="solar:shield-cross-linear" width="22" height="22"></iconify-icon></div>
-              <div><div class="pain-title-orbit">Brak profesjonalizmu</div><div class="pain-sub-orbit">Trudno zdobyć zaufanie klienta</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card: Bottom -->
-        <div style="position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);width:300px;">
-          <div style="animation:orbit-counter 35s linear infinite;">
-            <div class="pain-card-orbit">
-              <div class="pain-icon-orbit"><iconify-icon icon="solar:notes-minimalistic-linear" width="22" height="22"></iconify-icon></div>
-              <div><div class="pain-title-orbit">Nieczytelne notatki</div><div class="pain-sub-orbit">Gubienie ważnych danych z obiektów</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card: Left -->
-        <div style="position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:300px;">
-          <div style="animation:orbit-counter 35s linear infinite;">
-            <div class="pain-card-orbit">
-              <div class="pain-icon-orbit"><iconify-icon icon="solar:users-group-two-rounded-linear" width="22" height="22"></iconify-icon></div>
-              <div><div class="pain-title-orbit">Spory z klientami</div><div class="pain-sub-orbit">Brak dowodów wykonania usługi</div></div>
-            </div>
-          </div>
-        </div>
-
+  <!-- ── FAQ ── -->
+  <section class="sec sr" id="pytania">
+    <div class="wrap">
+      <h2>Pytania</h2>
+      <div class="faq">
+        <details><summary>Jakie dokumenty mogę tworzyć?</summary><p>Raporty serwisowe, protokoły przeglądów i&nbsp;odbiorów, oferty i&nbsp;wyceny, zlecenia, dokumenty WZ, karty pracy&nbsp;— wszystko, co regularnie wystawiasz klientom. A&nbsp;jeśli potrzebujesz czegoś nietypowego, zbudujesz własny szablon do dowolnego dokumentu.</p></details>
+        <details><summary>Czy mogę dodać tabelę do protokołu?</summary><p>Tak. W&nbsp;edytorze szablonu dodajesz pole „Tabela” i&nbsp;ustalasz kolumny: tekst, liczba albo wybór (np. pozytywna / negatywna). Wiersze dodajesz w&nbsp;terenie, a&nbsp;w&nbsp;PDF wychodzi tabela z&nbsp;nagłówkiem powtarzanym na każdej stronie. Gotowe szablony pomiarów elektrycznych, gazu, fotowoltaiki, wentylacji i&nbsp;protokół zdawczo-odbiorczy już je mają.</p></details>
+        <details><summary>Jak wysłać PDF klientowi?</summary><p>Po wygenerowaniu dotykasz „Wyślij klientowi” i&nbsp;wybierasz WhatsApp, e-mail albo SMS&nbsp;— PDF idzie jako załącznik. Na komputerze plik po prostu się pobiera.</p></details>
+        <details><summary>Skąd RaportON wie, kiedy wrócić do klienta?</summary><p>Z&nbsp;protokołu. Jeśli wpiszesz datę następnego przeglądu, pojawi się ona na pulpicie w&nbsp;„Nadchodzących przeglądach”. Stamtąd jednym dotknięciem zaczniesz nowy protokół z&nbsp;danymi klienta i&nbsp;urządzenia, a&nbsp;jeśli w&nbsp;protokole jest numer telefonu&nbsp;— wyślesz klientowi przypomnienie SMS-em.</p></details>
+        <details><summary>Czy potrzebuję internetu?</summary><p>Aplikacja wymaga połączenia z&nbsp;internetem do logowania, zapisu dokumentów i&nbsp;synchronizacji danych. Możesz ją też zainstalować na telefonie jak zwykłą aplikację (PWA).</p></details>
+        <details><summary>Czy muszę podawać kartę kredytową?</summary><p>Nie. Plan Free jest całkowicie darmowy i&nbsp;nie wymaga żadnych danych płatniczych. Rejestrujesz się mailem lub kontem Google i&nbsp;od razu możesz generować dokumenty.</p></details>
+        <details><summary>Czy mogę dodać logo swojej firmy do dokumentów?</summary><p>Tak&nbsp;— w&nbsp;profilu firmy wgrywasz logo, podajesz dane (NIP, adres, telefon) i&nbsp;te informacje automatycznie pojawiają się w&nbsp;nagłówku każdego PDF-a. Dostępne już w&nbsp;planie Free.</p></details>
+        <details><summary>Jakie branże obsługujecie?</summary><p>Gotowe szablony: klimatyzacja (F-gaz), pomiary elektryczne, instalacje gazowe, kotły i&nbsp;CO, gaśnice, hydranty, windy, fotowoltaika, wentylacja oraz protokół zdawczo-odbiorczy lokalu. Do tego własne szablony dla dowolnej branży.</p></details>
+        <details><summary>Czy raporty są zgodne z polskimi przepisami?</summary><p>Szablony są przygotowane z&nbsp;uwzględnieniem wymagań Prawa budowlanego (art.&nbsp;62) oraz rozporządzenia F-gaz (UE&nbsp;2024/573). Każdy protokół zawiera wymagane pola, dane firmy, podpisy i&nbsp;dokumentację fotograficzną.</p></details>
       </div>
     </div>
+  </section>
 
-    <!-- MOBILE: Static cards (hidden on desktop) -->
-    <div class="pain-mobile reveal" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 2rem;">
-      <div class="glass" style="border-radius: 1.25rem; padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width:44px;height:44px;border-radius:50%;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748b;"><iconify-icon icon="solar:moon-linear" width="20" height="20"></iconify-icon></div>
-        <div><div style="font-size:0.95rem;font-weight:600;">Wieczory nad Wordem</div><div style="font-size:0.85rem;color:var(--text-muted);font-weight:300;margin-top:2px;">Zamiast czasu z rodziną</div></div>
+  <!-- ── Closing ── -->
+  <section class="closing">
+    <div class="wrap">
+      <h2>Następny protokół zrób w&nbsp;RaportON.</h2>
+      <p>Załóż konto w&nbsp;minutę i&nbsp;wygeneruj pierwszy PDF jeszcze na obiekcie.</p>
+      <div class="signoff" aria-hidden="true">
+        <svg viewBox="0 0 150 46" fill="none"><path d="M6 34c7-18 13-26 15-19s-6 22 1 19 9-24 16-22-3 19 4 18 7-15 12-15 1 12 7 11 10-12 15-11 0 10 6 9 8-7 12-7 3 5 8 4 12-3 20-3" stroke="#e9f1f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="line">podpis serwisanta</div>
       </div>
-      <div class="glass" style="border-radius: 1.25rem; padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width:44px;height:44px;border-radius:50%;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748b;"><iconify-icon icon="solar:shield-cross-linear" width="20" height="20"></iconify-icon></div>
-        <div><div style="font-size:0.95rem;font-weight:600;">Brak profesjonalizmu</div><div style="font-size:0.85rem;color:var(--text-muted);font-weight:300;margin-top:2px;">Trudno zdobyć zaufanie klienta</div></div>
-      </div>
-      <div class="glass" style="border-radius: 1.25rem; padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width:44px;height:44px;border-radius:50%;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748b;"><iconify-icon icon="solar:notes-minimalistic-linear" width="20" height="20"></iconify-icon></div>
-        <div><div style="font-size:0.95rem;font-weight:600;">Nieczytelne notatki</div><div style="font-size:0.85rem;color:var(--text-muted);font-weight:300;margin-top:2px;">Gubienie ważnych danych z obiektów</div></div>
-      </div>
-      <div class="glass" style="border-radius: 1.25rem; padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width:44px;height:44px;border-radius:50%;background:rgba(241,245,249,0.8);border:1px solid rgba(226,232,240,0.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748b;"><iconify-icon icon="solar:users-group-two-rounded-linear" width="20" height="20"></iconify-icon></div>
-        <div><div style="font-size:0.95rem;font-weight:600;">Spory z klientami</div><div style="font-size:0.85rem;color:var(--text-muted);font-weight:300;margin-top:2px;">Brak dowodów wykonania usługi</div></div>
-      </div>
+      <a class="btn btn-primary" href="https://raporton.pl/register">Zacznij za darmo</a>
     </div>
+  </section>
+</main>
 
-  </div>
-</section>
-
-<!-- ═══════════════════════ PILLARS ═══════════════════════ -->
-<section class="section-pad" style="border-top: 1px solid rgba(226,232,240,0.3);">
-  <div class="section-narrow">
-    <div class="reveal" style="text-align: center; margin-bottom: 5rem;">
-      <h2>Zaprojektowane dla rzemieślników</h2>
-      <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Narzędzie, które realnie przyspiesza pracę, bez zbędnych komplikacji.
-      </p>
-    </div>
-
-    <div class="pillars-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-      <!-- Szybkość -->
-      <div class="glass reveal" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; min-height: 420px;">
-        <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.7);border:1px solid rgba(226,232,240,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 8px 20px rgba(15,23,42,0.04);margin-bottom:2rem;">
-          <iconify-icon icon="solar:rocket-linear" width="24" height="24"></iconify-icon>
-        </div>
-        <h3>Szybkość</h3>
-        <p style="margin-top:1rem;color:var(--text-muted);font-weight:300;line-height:1.6;">
-          Skróć czas tworzenia dokumentacji o&nbsp;80%. Wypełniaj na bieżąco podczas pracy — dokument będzie gotowy zanim wyjdziesz od klienta.
-        </p>
-        <div class="pillar-deco" style="margin-top:auto;padding-top:2rem;">
-          <div style="background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);border-radius:1rem;padding:1rem;height:100px;display:flex;align-items:flex-end;gap:4px;">
-            <div style="flex:1;background:rgba(16,185,129,0.15);height:30%;border-radius:3px 3px 0 0;"></div>
-            <div style="flex:1;background:rgba(16,185,129,0.25);height:50%;border-radius:3px 3px 0 0;"></div>
-            <div style="flex:1;background:rgba(16,185,129,0.35);height:40%;border-radius:3px 3px 0 0;"></div>
-            <div style="flex:1;background:rgba(16,185,129,0.5);height:75%;border-radius:3px 3px 0 0;"></div>
-            <div style="flex:1;background:var(--accent);height:100%;border-radius:3px 3px 0 0;position:relative;"><div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent-glow);"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Prostota -->
-      <div class="glass reveal" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; min-height: 420px;">
-        <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.7);border:1px solid rgba(226,232,240,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 8px 20px rgba(15,23,42,0.04);margin-bottom:2rem;">
-          <iconify-icon icon="solar:smartphone-linear" width="24" height="24"></iconify-icon>
-        </div>
-        <h3>Prostota</h3>
-        <p style="margin-top:1rem;color:var(--text-muted);font-weight:300;line-height:1.6;">
-          Duże przyciski, minimum kroków, zero instrukcji. Zaprojektowane dla rąk w&nbsp;rękawicach i&nbsp;ekranów w&nbsp;słońcu.
-        </p>
-        <div class="pillar-deco" style="margin-top:auto;padding-top:2rem;">
-          <div style="background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;"><div style="width:24px;height:24px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;"><iconify-icon icon="solar:check-read-linear" width="12" height="12"></iconify-icon></div><div style="height:6px;background:rgba(100,116,139,0.15);border-radius:4px;flex:1;"></div></div>
-            <div style="display:flex;align-items:center;gap:10px;"><div style="width:24px;height:24px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;"><iconify-icon icon="solar:check-read-linear" width="12" height="12"></iconify-icon></div><div style="height:6px;background:rgba(100,116,139,0.15);border-radius:4px;flex:1;"></div></div>
-            <div style="display:flex;align-items:center;gap:10px;"><div style="width:24px;height:24px;border-radius:8px;background:rgba(226,232,240,0.6);border:1px solid rgba(203,213,225,0.5);flex-shrink:0;"></div><div style="height:6px;background:rgba(100,116,139,0.08);border-radius:4px;flex:1;"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Profesjonalizm -->
-      <div class="glass reveal" style="border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; min-height: 420px;">
-        <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.7);border:1px solid rgba(226,232,240,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 8px 20px rgba(15,23,42,0.04);margin-bottom:2rem;">
-          <iconify-icon icon="solar:shield-check-linear" width="24" height="24"></iconify-icon>
-        </div>
-        <h3>Profesjonalizm</h3>
-        <p style="margin-top:1rem;color:var(--text-muted);font-weight:300;line-height:1.6;">
-          Twój klient dostaje elegancki PDF z&nbsp;logo, danymi firmy i&nbsp;podpisem. Budujesz zaufanie przy każdym zleceniu.
-        </p>
-        <div class="pillar-deco" style="margin-top:auto;padding-top:2rem;">
-          <div style="background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:6px;">
-            <div style="height:8px;background:rgba(100,116,139,0.15);border-radius:4px;width:60%;"></div>
-            <div style="height:6px;background:rgba(100,116,139,0.08);border-radius:4px;width:40%;"></div>
-            <div style="height:1px;background:rgba(226,232,240,0.5);margin:4px 0;"></div>
-            <div style="display:flex;gap:8px;">
-              <div style="flex:1;height:32px;background:rgba(226,232,240,0.3);border-radius:6px;"></div>
-              <div style="flex:1;height:32px;background:rgba(226,232,240,0.3);border-radius:6px;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ MARQUEE: KEYWORDS ═══════════════════════ -->
-<section style="padding: 6rem 0; border-top: 1px solid rgba(226,232,240,0.2); border-bottom: 1px solid rgba(226,232,240,0.2); overflow: hidden;">
-  <div class="marquee-wrap marquee-fade">
-    <div class="marquee-track" style="animation-duration: 25s;">
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">RAPORTY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">PROTOKOŁY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">OFERTY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">PODPIS · ZDJĘCIA</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">RAPORTY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">PROTOKOŁY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">OFERTY</span>
-      <span style="font-size:clamp(4rem,10vw,7rem);font-weight:700;color:var(--primary);opacity:0.04;margin:0 3rem;white-space:nowrap;">PODPIS · ZDJĘCIA</span>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ PRICING ═══════════════════════ -->
-<section id="cennik" class="section-pad">
-  <div class="section-narrow">
-    <div class="reveal" style="text-align: center; margin-bottom: 4rem;">
-      <div class="pill"><span class="dot"></span> Cennik</div>
-      <h2 style="margin-top: 1.5rem;">Prosty cennik,<br>bez niespodzianek.</h2>
-      <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300; max-width: 500px; margin-left: auto; margin-right: auto;">
-        Zacznij za darmo, przejdź na Solo gdy potrzebujesz więcej.
-      </p>
-    </div>
-
-    <div class="price-grid reveal" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 800px; margin: 0 auto;">
-      <!-- Free -->
-      <div class="price-card">
-        <h3 style="font-size: 1.3rem;">Free</h3>
-        <div style="margin-top: 0.75rem;">
-          <span style="font-size: 2.5rem; font-weight: 700;">0 zł</span>
-          <span style="color: var(--text-muted); font-size: 0.9rem;"> / miesiąc</span>
-        </div>
-        <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:infinity-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Dokumenty bez limitu</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:check-circle-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Wszystkie szablony</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:check-circle-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Zdjęcia i podpisy</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:check-circle-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Dyktowanie głosowe</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);"><iconify-icon icon="solar:waterdrops-linear" width="18" height="18" style="color:var(--text-muted);flex-shrink:0;"></iconify-icon> Znak wodny „RaportON.pl" na PDF</div>
-        </div>
-        <a href="https://raporton.pl/register" class="btn-glass" style="width: 100%; margin-top: 2rem; padding: 0.85rem;">Zacznij za darmo</a>
-      </div>
-
-      <!-- Solo -->
-      <div class="price-card featured">
-        <h3 style="font-size: 1.3rem;">Solo</h3>
-        <div style="margin-top: 0.75rem;">
-          <span style="font-size: 2.5rem; font-weight: 700;">19 zł</span>
-          <span style="color: var(--text-muted); font-size: 0.9rem;"> / miesiąc</span>
-        </div>
-        <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:waterdrops-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> <strong>Bez znaku wodnego</strong> na PDF</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:infinity-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Dokumenty bez limitu</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:check-circle-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Wszystko z Free</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text);"><iconify-icon icon="solar:check-circle-linear" width="18" height="18" style="color:var(--accent);flex-shrink:0;"></iconify-icon> Priorytetowe wsparcie</div>
-        </div>
-        <a href="https://raporton.pl/register" class="btn-accent" style="width: 100%; margin-top: 2rem; padding: 0.85rem;">Rozpocznij</a>
-      </div>
-    </div>
-    <p style="text-align: center; margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
-      <iconify-icon icon="solar:lock-linear" width="14" height="14" style="color: var(--accent);"></iconify-icon>
-      · Bez zobowiązań · Rezygnuj kiedy chcesz ·
-    </p>
-  </div>
-</section>
-
-<!-- ═══════════════════════ FAQ ═══════════════════════ -->
-<section class="section-pad" style="border-top: 1px solid rgba(226,232,240,0.3);">
-  <div class="section-narrow" style="max-width: 800px;">
-    <div class="reveal" style="text-align: center; margin-bottom: 3rem;">
-      <div class="pill"><span class="dot" style="background: #94a3b8;"></span> FAQ</div>
-      <h2 style="margin-top: 1.5rem;">Najczęstsze pytania</h2>
-    </div>
-
-    <div class="reveal" style="display: flex; flex-direction: column; gap: 0.75rem;">
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden; transition: all 0.3s;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Jakie dokumenty mogę tworzyć?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Raporty serwisowe, protokoły odbioru, oferty i wyceny, zlecenia, dokumenty WZ, karty pracy — wszystko, co regularnie wystawiasz klientom. A jeśli potrzebujesz czegoś nietypowego, zbudujesz własny szablon do dowolnego dokumentu.
-        </div>
-      </details>
-
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Czy potrzebuję internetu?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Aplikacja wymaga połączenia z internetem do logowania, zapisu dokumentów i synchronizacji danych. Sama strona ładuje się błyskawicznie dzięki technologii PWA — możesz ją też zainstalować na telefonie jak zwykłą aplikację.
-        </div>
-      </details>
-
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Czy muszę podawać kartę kredytową?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Nie. Plan Free jest całkowicie darmowy i nie wymaga żadnych danych płatniczych. Rejestrujesz się mailem lub kontem Google i od razu możesz generować dokumenty.
-        </div>
-      </details>
-
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Czy mogę dodać logo swojej firmy do dokumentów?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Tak — w profilu firmy wgrywasz logo, podajesz dane (NIP, adres, telefon) i te informacje automatycznie pojawiają się w nagłówku każdego wygenerowanego PDF-a. Dostępne już w planie Free.
-        </div>
-      </details>
-
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Jakie branże obsługujecie?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Mamy gotowe szablony dla klimatyzacji i wentylacji, pomiarów elektrycznych, instalacji gazowych, zarządzania nieruchomościami i przeglądów PPOŻ. Możesz też tworzyć własne szablony dopasowane do dowolnej branży.
-        </div>
-      </details>
-
-      <details class="faq-item" style="background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 1.25rem; overflow: hidden;">
-        <summary style="padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary);">
-          Czy raporty są zgodne z polskimi przepisami?
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="18" height="18" style="color: var(--text-muted); transition: transform 0.3s; flex-shrink: 0;"></iconify-icon>
-        </summary>
-        <div style="padding: 0 1.5rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;">
-          Szablony są przygotowane z uwzględnieniem wymagań Prawa budowlanego (Art. 62) oraz rozporządzenia F-gaz (UE 2024/573). Każdy protokół zawiera wymagane pola, dane firmy, podpisy i dokumentację fotograficzną.
-        </div>
-      </details>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ FINAL CTA ═══════════════════════ -->
-<section class="section-pad" style="border-top: 1px solid rgba(226,232,240,0.3);">
-  <div class="reveal" style="max-width: 700px; margin: 0 auto; text-align: center;">
-    <h2>Gotowy na profesjonalne<br>dokumenty?</h2>
-    <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-muted); font-weight: 300;">
-      Dołącz do firm, które oszczędzają godziny tygodniowo na dokumentacji.
-    </p>
-    <div style="margin-top: 2.5rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-      <a href="https://raporton.pl/register" class="btn-primary" style="font-size: 1.05rem; padding: 1.1rem 3rem;">Utwórz darmowe konto</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
-<footer style="border-top: 1px solid rgba(226,232,240,0.3); padding: 3rem 1.5rem;">
-  <div class="section-narrow" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem;">
-    <div style="font-size: 0.85rem; color: var(--text-muted);">
-      © 2026 RaportON. Wszystkie prawa zastrzeżone. · Created by <a href="https://akappstudio.pl" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 500;">akApp Studio</a>
-    </div>
-    <div style="display: flex; gap: 2rem; font-size: 0.85rem;">
-      <a href="/regulamin">Regulamin</a>
-      <a href="/prywatnosc">Polityka prywatności</a>
-      <a href="/kontakt">Kontakt</a>
-    </div>
+<footer>
+  <div class="wrap">
+    <span>© 2026 RaportON. Created by <a href="https://akappstudio.pl">akApp Studio</a></span>
+    <nav aria-label="Informacje"><a href="/regulamin">Regulamin</a><a href="/prywatnosc">Polityka prywatności</a><a href="/kontakt">Kontakt</a></nav>
   </div>
 </footer>
 
-<!-- Cookie Banner -->
-<div id="cookieBanner" style="position:fixed; bottom:0; left:0; right:0; z-index:200; background:#0f172a; padding:1rem 2rem; display:none; align-items:center; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
-  <p style="font-size:0.85rem; color:rgba(255,255,255,0.8); margin:0; text-align:center; flex:1; min-width:200px;">
-    Ta strona korzysta z plików cookies wyłącznie w celach technicznych (np. utrzymanie sesji logowania). Nie stosujemy cookies marketingowych ani śledzących.
-    <a href="/prywatnosc" style="color:#10b981; text-decoration:none; margin-left:4px;">Polityka prywatności</a>
-  </p>
-  <button id="cookieAccept" style="padding:0.55rem 1.5rem; font-size:0.85rem; font-weight:600; font-family:inherit; color:#fff; background:#10b981; border:none; border-radius:8px; cursor:pointer; white-space:nowrap; transition:background 0.3s;">Rozumiem</button>
+<div class="cookie" id="cookieBanner" role="region" aria-label="Informacja o cookies">
+  <span>Ta strona korzysta z plików cookies wyłącznie w celach technicznych (np. utrzymanie sesji logowania). Nie stosujemy cookies marketingowych ani śledzących. <a href="/prywatnosc">Polityka prywatności</a></span>
+  <button class="btn btn-primary btn-sm" id="cookieAccept" type="button">Rozumiem</button>
 </div>
 
-<!-- ═══════════════════════ SCRIPTS ═══════════════════════ -->
 <script>
-// ── Mobile menu toggle ──
-(function() {
-  const btn = document.getElementById('menuBtn');
-  const menu = document.getElementById('mobileMenu');
-  const iconOpen = document.getElementById('menuIconOpen');
-  const iconClose = document.getElementById('menuIconClose');
-  if (!btn || !menu) return;
+(function () {
+  // ── Mobile menu ──
+  var btn = document.getElementById('menuBtn'), menu = document.getElementById('mobileMenu'), icon = document.getElementById('menuIcon');
+  function setMenu(open) {
+    menu.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    icon.setAttribute('d', open ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16');
+  }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); setMenu(!menu.classList.contains('open')); });
+  menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+  document.addEventListener('click', function (e) { if (!menu.contains(e.target)) setMenu(false); });
 
-  btn.addEventListener('click', function() {
-    const isOpen = menu.classList.toggle('open');
-    iconOpen.style.display = isOpen ? 'none' : '';
-    iconClose.style.display = isOpen ? '' : 'none';
-  });
-
-  // Close on link click
-  menu.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      menu.classList.remove('open');
-      iconOpen.style.display = '';
-      iconClose.style.display = 'none';
-    });
-  });
-
-  // Close on outside click
-  document.addEventListener('click', function(e) {
-    if (!btn.contains(e.target) && !menu.contains(e.target)) {
-      menu.classList.remove('open');
-      iconOpen.style.display = '';
-      iconClose.style.display = 'none';
-    }
-  });
-})();
-
-// ── Scroll reveal ──
-(function() {
-  const els = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-  els.forEach(function(el) { io.observe(el); });
-})();
-
-// ── Timeline spine animation ──
-(function() {
-  const spine = document.getElementById('tlSpine');
-  if (!spine) return;
-  const io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        spine.classList.add('active');
-        io.unobserve(spine);
-      }
-    });
-  }, { threshold: 0.2 });
-  io.observe(spine);
-})();
-
-// ── Timeline nodes (show on desktop) ──
-(function() {
-  if (window.innerWidth < 768) return;
-  document.querySelectorAll('.tl-node-wrap').forEach(function(el) {
-    el.style.display = 'flex';
-  });
-})();
-
-// ── Header shrink on scroll ──
-(function() {
-  const header = document.querySelector('.header-bar');
-  if (!header) return;
-  let ticking = false;
-  window.addEventListener('scroll', function() {
-    if (!ticking) {
-      requestAnimationFrame(function() {
-        if (window.scrollY > 50) {
-          header.style.boxShadow = '0 12px 40px rgba(0,0,0,0.08)';
-          header.style.background = 'rgba(255,255,255,0.85)';
-        } else {
-          header.style.boxShadow = '0 8px 30px rgba(0,0,0,0.04)';
-          header.style.background = 'rgba(255,255,255,0.7)';
-        }
-        ticking = false;
+  // ── Cookie banner ──
+  try {
+    if (!localStorage.getItem('raporton_cookies')) {
+      var banner = document.getElementById('cookieBanner');
+      banner.style.display = 'flex';
+      document.getElementById('cookieAccept').addEventListener('click', function () {
+        try { localStorage.setItem('raporton_cookies', 'accepted'); } catch (e) {}
+        banner.style.display = 'none';
       });
-      ticking = true;
     }
-  });
-})();
+  } catch (e) {}
 
-// ── Cookie banner ──
-(function() {
-  if (localStorage.getItem('raporton_cookies')) return;
-  var banner = document.getElementById('cookieBanner');
-  if (!banner) return;
-  banner.style.display = 'flex';
-  document.getElementById('cookieAccept').addEventListener('click', function() {
-    localStorage.setItem('raporton_cookies', 'accepted');
-    banner.style.display = 'none';
+  // ── Demo: filling a protocol ──
+  var FINAL = {
+    client: 'Wspólnota Mieszkaniowa Lipowa 14', addr: 'ul. Lipowa 14, Nowy Sącz', date: '29.09.2026',
+    t1: 'TAK', t2: 'TAK', t3: 'TAK',
+    r1a: 'Gniazda kuchnia', r1b: '520', r1c: '480', r1d: 'pozytywna',
+    r2a: 'Oświetlenie klatka', r2b: '>999', r2c: '>999', r2d: 'pozytywna'
+  };
+  var stage = document.getElementById('stage'), wrapEl = document.getElementById('stageWrap');
+  var sheet = document.getElementById('sheet');
+
+  function fillAll(root) {
+    Object.keys(FINAL).forEach(function (k) {
+      root.querySelectorAll('[data-k="' + k + '"]').forEach(function (el) { el.textContent = FINAL[k]; });
+      root.querySelectorAll('[data-choice="' + k + '"] i').forEach(function (i) { i.classList.toggle('on', i.textContent === FINAL[k]); });
+    });
+    root.querySelectorAll('[data-row], [data-show]').forEach(function (el) { el.classList.add('on'); });
+    root.querySelectorAll('.ph-tile .yes').forEach(function (el) { el.classList.add('on'); });
+  }
+
+  // "What the client gets": a filled, annotated copy of the sheet
+  var frame = document.getElementById('docFrame');
+  if (frame && sheet) {
+    var copy = sheet.cloneNode(true);
+    copy.removeAttribute('id');
+    copy.classList.add('sheet--annotated');
+    fillAll(copy);
+    frame.appendChild(copy);
+  }
+
+  // Scale the fixed-size stage to its column
+  function fit() {
+    var narrow = wrapEl.parentElement.clientWidth < 560, base = narrow ? 470 : 600;
+    wrapEl.classList.toggle('narrow', narrow); stage.classList.toggle('narrow', narrow);
+    stage.style.setProperty('--s', Math.min(1, wrapEl.clientWidth / base));
+  }
+  fit();
+  if ('ResizeObserver' in window) new ResizeObserver(fit).observe(wrapEl); else window.addEventListener('resize', fit);
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pauseBtn = document.getElementById('stagePause');
+  if (reduce) { fillAll(stage); document.getElementById('bubble').classList.add('on'); return; }
+
+  var scroller = document.getElementById('phScroll'), screen = document.getElementById('phScreen'), tapEl = document.getElementById('tap');
+  var paused = false, offscreen = false, hidden = false;
+  function wait(ms) {
+    return new Promise(function (resolve) {
+      var left = ms;
+      (function tick() {
+        setTimeout(function () {
+          if (!(paused || offscreen || hidden)) left -= 50;
+          if (left <= 0) resolve(); else tick();
+        }, 50);
+      })();
+    });
+  }
+  function all(sel) { return stage.querySelectorAll(sel); }
+  function setK(k, v) { all('[data-k="' + k + '"]').forEach(function (el) { el.textContent = v; }); }
+  async function type(k, text, speed) {
+    var els = all('[data-k="' + k + '"]');
+    var ph = stage.querySelector('.phone [data-k="' + k + '"]');
+    if (ph) ph.classList.add('typing');
+    for (var i = 1; i <= text.length; i++) {
+      var part = text.slice(0, i);
+      els.forEach(function (el) { el.textContent = part; });
+      await wait(speed || 45);
+    }
+    if (ph) ph.classList.remove('typing');
+  }
+  function scale() { return parseFloat(getComputedStyle(stage).getPropertyValue('--s')) || 1; }
+  async function tap(el) {
+    if (!el) return;
+    var r = el.getBoundingClientRect(), s = screen.getBoundingClientRect(), k = scale();
+    tapEl.style.left = ((r.left + r.width / 2 - s.left) / k) + 'px';
+    tapEl.style.top = ((r.top + r.height / 2 - s.top) / k) + 'px';
+    tapEl.classList.remove('go'); void tapEl.offsetWidth; tapEl.classList.add('go');
+    await wait(260);
+  }
+  function scrollToSec(n) {
+    var sec = stage.querySelector('[data-sec="' + n + '"]');
+    scroller.style.transform = 'translateY(' + (-Math.max(0, sec.offsetTop - 10)) + 'px)';
+  }
+  function show(sel, on) { all(sel).forEach(function (el) { el.classList.toggle('on', on !== false); }); }
+  function choose(k, v) { all('[data-choice="' + k + '"] i').forEach(function (i) { i.classList.toggle('on', i.textContent === v); }); setK(k, v); }
+  function drawSign(svg) {
+    var p = svg.querySelector('path'), len = p.getTotalLength();
+    p.style.transition = 'none'; p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    svg.classList.add('on'); void p.getBoundingClientRect();
+    p.style.transition = 'stroke-dashoffset 1.2s ease-in-out'; p.style.strokeDashoffset = 0;
+  }
+  function reset() {
+    Object.keys(FINAL).forEach(function (k) { setK(k, ''); });
+    all('.on').forEach(function (el) { el.classList.remove('on'); });
+    all('.sig').forEach(function (p) { p.style.transition = 'none'; p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; });
+    scroller.style.transform = 'translateY(0)';
+  }
+
+  async function play() {
+    reset();
+    stage.style.opacity = 1;
+    await wait(700);
+    await tap(stage.querySelector('.phone [data-k="client"]'));
+    await type('client', FINAL.client, 38);
+    await wait(200);
+    await tap(stage.querySelector('.phone [data-k="addr"]'));
+    await type('addr', FINAL.addr, 38);
+    await wait(200);
+    await tap(stage.querySelector('.phone [data-k="date"]'));
+    setK('date', FINAL.date);
+    await wait(650);
+    scrollToSec(2); await wait(800);
+    for (var t = 1; t <= 3; t++) {
+      var yes = stage.querySelector('[data-tile="t' + t + '"] .yes');
+      await tap(yes); yes.classList.add('on'); setK('t' + t, 'TAK');
+      await wait(380);
+    }
+    await wait(300);
+    scrollToSec(3); await wait(800);
+    for (var r = 1; r <= 2; r++) {
+      if (r === 2) { await tap(stage.querySelector('[data-row="1"] .top span:last-child')); }
+      show('[data-row="' + r + '"]'); await wait(350);
+      await type('r' + r + 'a', FINAL['r' + r + 'a'], 42);
+      await type('r' + r + 'b', FINAL['r' + r + 'b'], 90);
+      await type('r' + r + 'c', FINAL['r' + r + 'c'], 90);
+      var opt = stage.querySelector('[data-choice="r' + r + 'd"] i');
+      await tap(opt); choose('r' + r + 'd', FINAL['r' + r + 'd']);
+      await wait(450);
+    }
+    scrollToSec(4); await wait(800);
+    await tap(document.getElementById('phCam'));
+    show('[data-show="photo"]'); await wait(900);
+    await tap(document.getElementById('phPad'));
+    drawSign(stage.querySelector('.phone .ph-pad svg')); await wait(1300);
+    drawSign(sheet.querySelector('.sh-sign svg')); await wait(900);
+    await tap(document.getElementById('phGen'));
+    document.getElementById('phReady').classList.add('on'); await wait(1100);
+    await tap(document.getElementById('phSend'));
+    document.getElementById('bubble').classList.add('on');
+    await wait(4200);
+    stage.style.transition = 'opacity .5s'; stage.style.opacity = 0; await wait(550);
+  }
+  (async function loop() { for (;;) { await play(); } })();
+
+  pauseBtn.addEventListener('click', function () {
+    paused = !paused;
+    pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+    pauseBtn.textContent = paused ? 'Wznów animację' : 'Wstrzymaj animację';
   });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) { offscreen = !e[0].isIntersecting; }, { threshold: 0.05 }).observe(wrapEl);
+  }
+  document.addEventListener('visibilitychange', function () { hidden = document.hidden; });
 })();
 </script>
-
 </body>
 </html>
