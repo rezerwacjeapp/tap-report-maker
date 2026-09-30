@@ -217,3 +217,35 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+/* ── Table rows (report wizard) ── */
+.table-row-card { animation: row-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── "PDF gotowy" sheet ── */
+.rr-backdrop { animation: rr-fade 0.2s ease-out both; }
+.rr-panel { animation: rr-rise 0.38s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+.rr-paper { animation: rr-print 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) 0.15s both; }
+.rr-line { transform-origin: left center; animation: rr-line 0.35s ease-out both; }
+.rr-paper > .rr-line:nth-child(1) { animation-delay: 0.45s; }
+.rr-paper > .rr-line:nth-child(2) { animation-delay: 0.55s; }
+.rr-paper > .rr-line:nth-child(3) { animation-delay: 0.62s; }
+.rr-paper > .rr-line:nth-child(4) { animation-delay: 0.68s; }
+.rr-paper > .rr-line:nth-child(5) { animation-delay: 0.76s; }
+.rr-paper > .rr-line:nth-child(6) { animation-delay: 0.86s; }
+.rr-sign path { stroke-dasharray: 160; stroke-dashoffset: 160; animation: rr-sign 0.7s ease-in-out 0.95s forwards; }
+.rr-check { animation: rr-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) 1.5s both; }
+@keyframes rr-fade { from { opacity: 0; } }
+@keyframes rr-rise { from { transform: translateY(24px); opacity: 0; } }
+@keyframes rr-print { from { transform: translateY(100%); } }
+@keyframes rr-line { from { transform: scaleX(0); opacity: 0; } }
+@keyframes rr-sign { to { stroke-dashoffset: 0; } }
+@keyframes rr-pop { from { transform: scale(0); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .table-row-card, .rr-backdrop, .rr-panel, .rr-paper, .rr-line, .rr-check { animation: none; }
+  .rr-sign path { animation: none; stroke-dashoffset: 0; }
+}
