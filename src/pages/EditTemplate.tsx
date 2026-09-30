@@ -35,6 +35,45 @@ const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
 };
 
 
+/**
+ * Whatever is still typed into an "add" panel when the user taps "Zapisz szablon".
+ * Saving must not silently drop e.g. a table that was built but never "added".
+ */
+export function pendingStagedFields(p: {
+  order: number;
+  openType: CustomFieldType | null;
+  tableName: string; grid: GridDef;
+  tilesName: string; tiles: { id: string; label: string }[]; tileInput: string;
+  label: string; infoContent: string;
+}): { fields: CustomFieldDef[]; error?: string } {
+  const out: CustomFieldDef[] = [];
+  let order = p.order;
+  const id = () => `cf_${Date.now()}_${out.length}`;
+
+  const grid = cleanGrid(p.grid);
+  const cols = dataColumnCount(grid);
+  if (p.tableName.trim() || cols > 0) {
+    if (cols === 0) return { fields: [], error: `Tabela „${p.tableName.trim()}" nie ma nazwanej kolumny` };
+    out.push({
+      id: id(), label: p.tableName.trim() || "Tabela", type: "table", remember: false, order: order++,
+      tableColumns: grid.tableColumns, ...(grid.tableRows.length ? { tableRows: grid.tableRows } : {}),
+    });
+  }
+
+  const tiles = [...p.tiles, ...(p.tileInput.trim() ? [{ id: `to_${Date.now()}`, label: p.tileInput.trim() }] : [])];
+  if (p.tilesName.trim() || tiles.length) {
+    out.push({ id: id(), label: p.tilesName.trim() || "Czynności", type: "tiles", remember: false, order: order++, tileOptions: tiles });
+  }
+
+  // the simple / info / signature panels share one text input — only the open one counts
+  if (p.openType === "info" && (p.label.trim() || p.infoContent.trim())) {
+    out.push({ id: id(), label: p.label.trim(), type: "info", remember: false, order: order++, content: p.infoContent.trim() });
+  } else if (p.openType && !["info", "tiles", "table"].includes(p.openType) && p.label.trim()) {
+    out.push({ id: id(), label: p.label.trim(), type: p.openType, remember: false, order: order++ });
+  }
+  return { fields: out };
+}
+
 export default function EditTemplate() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -274,14 +313,23 @@ export default function EditTemplate() {
 
   const handleSave = async () => {
     if (!template.name.trim()) { toast.error("Podaj nazwę szablonu"); return; }
+    const pending = pendingStagedFields({
+      order: template.fields.length, openType: expandedAddType,
+      tableName: stagingTableName, grid: stagingGrid,
+      tilesName: stagingTilesName, tiles: stagingTiles, tileInput: stagingTileInput,
+      label: newFieldLabel, infoContent: stagingInfoContent,
+    });
+    if (pending.error) { toast.error(pending.error); return; }
     // tables: drop unnamed columns and rows; a table needs at least one named column
-    const fields = template.fields.map((f) =>
+    const fields = [...template.fields, ...pending.fields].map((f) =>
       f.type === "table" ? { ...f, ...cleanGrid({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) } : f,
     );
     const emptyTable = fields.find((f) => f.type === "table" && dataColumnCount({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) === 0);
     if (emptyTable) { toast.error(`Tabela „${emptyTable.label || "bez nazwy"}" nie ma nazwanej kolumny`); return; }
     await saveUserTemplate({ ...template, fields });
-    toast.success("Szablon zapisany!");
+    toast.success(pending.fields.length
+      ? `Szablon zapisany — dodano też: ${pending.fields.map((f) => f.label || FIELD_TYPE_LABELS[f.type]).join(", ")}`
+      : "Szablon zapisany!");
     navigate("/select-template");
   };
 
