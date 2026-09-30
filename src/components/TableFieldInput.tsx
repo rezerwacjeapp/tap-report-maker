@@ -111,7 +111,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                 const inputId = `${field.id}-${row._k}-${c.id}`;
                 return (
                   <div key={c.id} className={`${spanOf(c, ci)} min-w-0`}>
-                    <label htmlFor={inputId} className="block text-[11px] font-medium text-muted-foreground mb-1 truncate">{c.label}</label>
+                    <label htmlFor={inputId} className="block text-[11px] font-medium text-muted-foreground mb-1 truncate">{c.label || (ci === 0 && field.tableRows?.length ? "Pozycja" : `Kolumna ${ci + 1}`)}</label>
                     {c.kind === "choice" && c.options?.length ? (
                       <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={c.label}>
                         {c.options.map((opt) => {
