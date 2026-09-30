@@ -152,6 +152,9 @@ export default function ReportWizard() {
   const [initialized, setInitialized] = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setInterval>>();
   const didCheckDraft = useRef(false);
+  // set once the PDF is generated: the report is closed, nothing may write it back as a draft
+  const finishedRef = useRef(false);
+  const [resumeHasSignatures, setResumeHasSignatures] = useState(false);
 
   useEffect(() => {
     if (didCheckDraft.current) return;
@@ -200,7 +203,6 @@ export default function ReportWizard() {
       const fieldById = new Map(allFields.map((f) => [f.id, f] as [string, CustomFieldDef]));
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
         Object.values(saved.photosByField || {}).some((arr) => arr.length > 0) ||
-        Object.values(saved.signatures || {}).some((v) => !!v) ||
         Object.values(saved.tileStates || {}).some((v) => v !== "na") ||
         Object.values(saved.tileNotes || {}).some((v) => v?.trim()) ||
         Object.entries(saved.customFields).some(([id, v]) => {
@@ -208,14 +210,20 @@ export default function ReportWizard() {
           return !!v?.trim() && v !== (empty.customFields[id] ?? "") && v !== new Date().toISOString().split("T")[0];
         });
       if (saved.templateId === templateId && hasContent) {
+        setResumeHasSignatures(Object.values(saved.signatures || {}).some((v) => !!v));
         setShowResume(true);
       } else { clearDraft(); setDraft(buildEmptyDraft()); setInitialized(true); }
     } else { setDraft(buildEmptyDraft()); setInitialized(true); }
   }, [templateId, buildEmptyDraft, draftParam, reuseParam, allFields]);
 
+  // Interrupted report (call, closed browser…): data comes back, signatures don't —
+  // the client signs again, so nobody can edit what was already signed.
   const handleResume = () => {
-    const d = getDraft();
+    const saved = getDraft();
+    const d: ReportDraft = { ...saved, signatures: {} };
+    saveDraft(d);
     setDraft(d);
+    if (resumeHasSignatures) toast("Podpisy z przerwanego raportu zostały usunięte — zbierz je ponownie.");
     if (d.additionalNotes?.trim()) setShowNotes(true);
     // Expand tile notes that have content
     const notesWithContent = Object.entries(d.tileNotes || {}).filter(([, v]) => v?.trim()).map(([k]) => k);
@@ -236,13 +244,13 @@ export default function ReportWizard() {
   }, [initialized]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!initialized) return;
-    autoSaveRef.current = setInterval(() => { saveDraft(draft); }, 10_000);
+    if (!initialized || finishedRef.current) return;
+    autoSaveRef.current = setInterval(() => { if (!finishedRef.current) saveDraft(draft); }, 10_000);
     return () => clearInterval(autoSaveRef.current);
   }, [draft, initialized]);
 
   const update = useCallback((partial: Partial<ReportDraft>) => {
-    setDraft((d) => { const next = { ...d, ...partial }; saveDraft(next); return next; });
+    setDraft((d) => { const next = { ...d, ...partial }; if (!finishedRef.current) saveDraft(next); return next; });
   }, []);
 
   const setTileState = (tileId: string, state: "done" | "fail" | "na") => {
@@ -317,6 +325,9 @@ export default function ReportWizard() {
       // "Zapamiętaj" fields (company data, certificates, instruments) prefill the next report
       rememberTemplateValues(allFields, draft.customFields);
 
+      // the report is done: stop autosave for good and drop the local draft
+      finishedRef.current = true;
+      clearInterval(autoSaveRef.current);
       clearDraft();
       setReady({
         blob,
@@ -349,6 +360,9 @@ export default function ReportWizard() {
       });
 
       setCloudDraftId(savedId);
+      // the cloud draft ("Dokończ później") is now the only copy — keep autosave from writing a local one back
+      finishedRef.current = true;
+      clearInterval(autoSaveRef.current);
       clearDraft();
       toast.success("Raport zapisany — dokończysz później");
       navigate("/");
@@ -375,7 +389,10 @@ export default function ReportWizard() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Niedokończony raport</AlertDialogTitle>
-            <AlertDialogDescription>Masz niedokończony raport ({templateName}). Kontynuować?</AlertDialogDescription>
+            <AlertDialogDescription>
+              Masz niedokończony raport ({templateName}). Kontynuować?
+              {resumeHasSignatures && " Dane wrócą, ale podpisy trzeba będzie zebrać ponownie."}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleNewDraft}>Zacznij od nowa</AlertDialogCancel>
@@ -731,7 +748,7 @@ export default function ReportWizard() {
         filename={ready?.filename ?? ""}
         subtitle={ready?.subtitle}
         closeLabel="Wróć na pulpit"
-        onClose={() => { setReady(null); navigate("/"); }}
+        onClose={() => { clearDraft(); setReady(null); navigate("/"); }}
       />
     </div>
   );
