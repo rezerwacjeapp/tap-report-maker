@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Copy, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { CustomFieldDef, TableColumnDef } from "@/lib/storage";
+import type { CustomFieldDef } from "@/lib/storage";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   parseTable, serializeTable, initialTableValue, tableColumns, colsSnapshot, newRowKey, filledRows,
   type TableRow,
@@ -16,47 +19,53 @@ interface Props {
 const rowsWord = (n: number) =>
   n === 1 ? "wiersz" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "wiersze" : "wierszy";
 
+const FIRST_COL = 156; // px — sticky first column (row number + name)
+
 /**
- * "Tabela" on the phone: every row is a small card with all its columns visible,
- * so reading, typing and correcting happen in one place — no switching between
- * a grid view and an edit view. Numbers get the numeric keypad, choice columns
- * are tap buttons.
+ * "Tabela" in the report: the same grid the template author built. Scroll sideways,
+ * tap a cell and type. "Dalej" on the keyboard jumps to the next cell, so a whole
+ * row goes in without closing the keyboard. Row number → Powiel / Usuń.
  */
 export function TableFieldInput({ field, value, onChange }: Props) {
   const parsed = useMemo(() => parseTable(value) ?? parseTable(initialTableValue(field)), [value, field]);
   const cols = tableColumns(field, parsed);
   const rows: TableRow[] = parsed?.rows ?? [];
   const filledCount = filledRows(parsed, field).length;
-  const [focusKey, setFocusKey] = useState<string | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const hasFixedRows = !!field.tableRows?.length;
+  const gridRef = useRef<HTMLDivElement>(null);
+  // the one cell being edited; every other cell shows its full (wrapped) text
+  const [active, setActive] = useState<string | null>(null);
+  const setFocusCell = setActive;
 
   useEffect(() => {
-    if (!focusKey || !listRef.current) return;
-    const el = listRef.current.querySelector<HTMLElement>(`[data-row="${focusKey}"] input`);
-    el?.focus();
-    el?.scrollIntoView({ block: "center", behavior: "smooth" });
-    setFocusKey(null);
-  }, [focusKey, rows.length]);
+    if (!active || !gridRef.current) return;
+    const el = gridRef.current.querySelector<HTMLElement>(`[data-cell="${active}"]`);
+    el?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }, [active]);
 
   const commit = (next: TableRow[]) => onChange(serializeTable({ cols: colsSnapshot(cols), rows: next }));
-
   const setCell = (rowKey: string, colId: string, v: string) =>
     commit(rows.map((r) => (r._k === rowKey ? { ...r, [colId]: v } : r)));
+
+  // where typing starts in a row: skip the name column when the name is already there
+  const startCol = (row: TableRow) => (hasFixedRows && cols.length > 1 && row[cols[0].id]?.trim() ? 1 : 0);
+
+  const moveNext = (ri: number, ci: number) => {
+    if (ci + 1 < cols.length) { setFocusCell(`${rows[ri]._k}:${ci + 1}`); return; }
+    if (ri + 1 < rows.length) { setFocusCell(`${rows[ri + 1]._k}:${startCol(rows[ri + 1])}`); return; }
+    (document.activeElement as HTMLElement | null)?.blur();
+  };
 
   const addRow = () => {
     const k = newRowKey();
     commit([...rows, { _k: k }]);
-    setFocusKey(k);
+    setFocusCell(`${k}:0`);
   };
-
   const duplicateRow = (index: number) => {
     const k = newRowKey();
-    const copy = { ...rows[index], _k: k };
-    const next = [...rows.slice(0, index + 1), copy, ...rows.slice(index + 1)];
-    commit(next);
-    setFocusKey(k);
+    commit([...rows.slice(0, index + 1), { ...rows[index], _k: k }, ...rows.slice(index + 1)]);
+    setFocusCell(`${k}:${Math.min(1, cols.length - 1)}`);
   };
-
   const removeRow = (index: number) => {
     const removed = rows[index];
     const next = rows.filter((_, i) => i !== index);
@@ -70,93 +79,121 @@ export function TableFieldInput({ field, value, onChange }: Props) {
     return <p className="text-xs text-muted-foreground">Ta tabela nie ma jeszcze kolumn — dodaj je w edytorze szablonu.</p>;
   }
 
-  const spanOf = (c: TableColumnDef, i: number) => (i === 0 || c.kind !== "number" ? "col-span-2" : "col-span-1");
+  const cellBase = "block w-full min-h-11 bg-transparent px-2.5 text-[15px] focus:outline-none focus:bg-accent/5 focus:ring-2 focus:ring-inset focus:ring-accent rounded-none";
 
   return (
-    <div ref={listRef} className="space-y-2">
-      <div className="flex items-baseline justify-between gap-3 pr-7">
-        <span className="text-xs text-muted-foreground">
-          {filledCount > 0 ? `${filledCount} ${rowsWord(filledCount)} w PDF` : "Puste wiersze nie trafią do PDF"}
-        </span>
-      </div>
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground pr-7">
+        {filledCount > 0 ? `${filledCount} ${rowsWord(filledCount)} w PDF` : "Dotknij komórki, żeby wpisać. Puste wiersze nie trafią do PDF."}
+      </p>
 
-      {rows.map((row, index) => {
-        const title = row[cols[0].id]?.trim();
-        return (
-          <div key={row._k || index} data-row={row._k} className="table-row-card rounded-2xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-3 pt-2.5">
-              <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">{index + 1}.</span>
-              <span className="flex-1 min-w-0 truncate text-xs text-muted-foreground">{title || "Nowy wiersz"}</span>
-              <button
-                type="button"
-                onClick={() => duplicateRow(index)}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label={`Powiel wiersz ${index + 1}`}
-              >
-                <Copy className="h-3.5 w-3.5" /> Powiel
-              </button>
-              <button
-                type="button"
-                onClick={() => removeRow(index)}
-                className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
-                aria-label={`Usuń wiersz ${index + 1}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
+      <div ref={gridRef} className="overflow-x-auto rounded-xl border border-border bg-card" style={{ scrollPaddingLeft: FIRST_COL }}>
+        <table className="border-collapse text-sm">
+          <thead>
+            <tr className="bg-muted/60">
+              {cols.map((c, ci) => (
+                <th
+                  key={c.id}
+                  scope="col"
+                  className={`px-2.5 py-2 text-[11px] font-semibold text-muted-foreground align-bottom border-b border-border ${ci === 0 ? "sticky left-0 z-10 bg-muted text-left border-r" : `min-w-[112px] ${c.kind === "number" ? "text-right" : "text-left"} border-r last:border-r-0`}`}
+                  style={ci === 0 ? { width: FIRST_COL, minWidth: FIRST_COL } : undefined}
+                >
+                  {ci === 0 ? <span className="pl-8 block">{c.label || (hasFixedRows ? "" : "Kolumna 1")}</span> : c.label || `Kolumna ${ci + 1}`}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, ri) => (
+              <tr key={row._k || ri} className="table-row-card border-b border-border last:border-b-0">
+                {cols.map((c, ci) => {
+                  const v = row[c.id] ?? "";
+                  const cellKey = `${row._k}:${ci}`;
+                  const label = `${c.label || `Kolumna ${ci + 1}`}, wiersz ${ri + 1}`;
+                  const isLast = ri === rows.length - 1 && ci === cols.length - 1;
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-2.5 px-3 pb-3 pt-2">
-              {cols.map((c, ci) => {
-                const v = row[c.id] ?? "";
-                const inputId = `${field.id}-${row._k}-${c.id}`;
-                return (
-                  <div key={c.id} className={`${spanOf(c, ci)} min-w-0`}>
-                    <label htmlFor={inputId} className="block text-[11px] font-medium text-muted-foreground mb-1 truncate">{c.label || (ci === 0 && field.tableRows?.length ? "Pozycja" : `Kolumna ${ci + 1}`)}</label>
-                    {c.kind === "choice" && c.options?.length ? (
-                      <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={c.label}>
-                        {c.options.map((opt) => {
-                          const on = v === opt;
-                          return (
+                  const input = c.kind === "choice" && c.options?.length ? (
+                    <select
+                      data-cell={cellKey}
+                      aria-label={label}
+                      className={`${cellBase} font-semibold ${v ? "text-foreground" : "text-muted-foreground/50"}`}
+                      value={v}
+                      onChange={(e) => setCell(row._k, c.id, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {c.options.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  ) : active === cellKey ? (
+                    <input
+                      data-cell={cellKey}
+                      aria-label={label}
+                      type="text"
+                      autoFocus
+                      inputMode={c.kind === "number" ? "decimal" : "text"}
+                      enterKeyHint={isLast ? "done" : "next"}
+                      autoComplete="off"
+                      className={`${cellBase} h-full py-2.5 bg-accent/5 ring-2 ring-inset ring-accent ${c.kind === "number" ? "text-right tabular-nums" : ""} ${ci === 0 ? "font-semibold pl-1" : ""}`}
+                      value={v}
+                      onChange={(e) => setCell(row._k, c.id, e.target.value)}
+                      onBlur={() => setActive((a) => (a === cellKey ? null : a))}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); moveNext(ri, ci); } }}
+                    />
+                  ) : (
+                    <div
+                      data-cell={cellKey}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={v ? `${label}: ${v}` : `${label}: puste`}
+                      onClick={() => setActive(cellKey)}
+                      onFocus={() => setActive(cellKey)}
+                      className={`${cellBase} py-2.5 leading-snug whitespace-pre-wrap break-words cursor-text ${c.kind === "number" ? "text-right tabular-nums" : ""} ${ci === 0 ? "font-semibold pl-1" : ""}`}
+                    >
+                      {v}
+                    </div>
+                  );
+
+                  if (ci > 0) {
+                    return <td key={c.id} className="p-0 min-w-[112px] border-r border-border last:border-r-0">{input}</td>;
+                  }
+                  return (
+                    <td key={c.id} className="p-0 sticky left-0 z-10 bg-card border-r border-border" style={{ width: FIRST_COL, minWidth: FIRST_COL }}>
+                      <div className="flex items-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
                             <button
-                              key={opt}
                               type="button"
-                              role="radio"
-                              aria-checked={on}
-                              onClick={() => setCell(row._k, c.id, on ? "" : opt)}
-                              className={`h-9 rounded-lg px-3 text-sm font-medium border transition-colors ${on ? "bg-accent text-white border-accent" : "bg-background text-muted-foreground border-border hover:text-foreground"}`}
+                              className="ml-1.5 shrink-0 h-7 min-w-[1.75rem] px-1 rounded-md bg-muted text-[11px] font-bold text-muted-foreground hover:text-foreground"
+                              aria-label={`Wiersz ${ri + 1} — opcje`}
                             >
-                              {opt}
+                              {ri + 1}
                             </button>
-                          );
-                        })}
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            <DropdownMenuItem onSelect={() => duplicateRow(ri)}><Copy className="h-4 w-4 mr-2" /> Powiel wiersz</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => removeRow(ri)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Usuń wiersz</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <div className="flex-1 min-w-0">{input}</div>
                       </div>
-                    ) : (
-                      <input
-                        id={inputId}
-                        type="text"
-                        inputMode={c.kind === "number" ? "decimal" : "text"}
-                        enterKeyHint="next"
-                        autoComplete="off"
-                        className={`w-full h-10 rounded-lg border border-border bg-background px-3 text-[15px] focus:outline-none focus:border-accent transition-colors ${c.kind === "number" ? "tabular-nums" : ""}`}
-                        value={v}
-                        onChange={(e) => setCell(row._k, c.id, e.target.value)}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <button
         type="button"
         onClick={addRow}
-        className="w-full h-11 rounded-2xl border border-dashed border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent/50 flex items-center justify-center gap-2 transition-colors"
+        className="w-full h-11 rounded-xl border border-dashed border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent/50 flex items-center justify-center gap-2 transition-colors"
       >
         <Plus className="h-4 w-4" /> Dodaj wiersz
       </button>
+      {rows.length > 0 && cols.length > 2 && (
+        <p className="text-[11px] text-muted-foreground">Przesuń tabelę w bok, żeby zobaczyć kolejne kolumny. Numer wiersza → powiel albo usuń.</p>
+      )}
     </div>
   );
 }
