@@ -20,6 +20,7 @@ const rowsWord = (n: number) =>
   n === 1 ? "wiersz" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "wiersze" : "wierszy";
 
 const FIRST_COL = 156; // px — sticky first column (row number + name)
+const COL = 124; // px — other columns
 
 /**
  * "Tabela" in the report: the same grid the template author built. Scroll sideways,
@@ -88,15 +89,17 @@ export function TableFieldInput({ field, value, onChange }: Props) {
       </p>
 
       <div ref={gridRef} className="overflow-x-auto rounded-xl border border-border bg-card" style={{ scrollPaddingLeft: FIRST_COL }}>
-        <table className="border-collapse text-sm">
+        <table className="border-separate border-spacing-0 text-sm table-fixed" style={{ width: FIRST_COL + (cols.length - 1) * COL }}>
+          <colgroup>
+            {cols.map((c, ci) => <col key={c.id} style={{ width: ci === 0 ? FIRST_COL : COL }} />)}
+          </colgroup>
           <thead>
             <tr className="bg-muted/60">
               {cols.map((c, ci) => (
                 <th
                   key={c.id}
                   scope="col"
-                  className={`px-2.5 py-2 text-[11px] font-semibold text-muted-foreground align-bottom border-b border-border ${ci === 0 ? "sticky left-0 z-10 bg-muted text-left border-r" : `min-w-[112px] ${c.kind === "number" ? "text-right" : "text-left"} border-r last:border-r-0`}`}
-                  style={ci === 0 ? { width: FIRST_COL, minWidth: FIRST_COL } : undefined}
+                  className={`px-2.5 py-2 text-[11px] font-semibold text-muted-foreground align-bottom border-b border-border break-words ${ci === 0 ? "sticky left-0 z-10 bg-muted text-left border-r" : `${c.kind === "number" ? "text-right" : "text-left"} border-r last:border-r-0`}`}
                 >
                   {ci === 0 ? <span className="pl-8 block">{c.label || (hasFixedRows ? "" : "Kolumna 1")}</span> : c.label || `Kolumna ${ci + 1}`}
                 </th>
@@ -105,7 +108,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
           </thead>
           <tbody>
             {rows.map((row, ri) => (
-              <tr key={row._k || ri} className="table-row-card border-b border-border last:border-b-0">
+              <tr key={row._k || ri} className="table-row-card">
                 {cols.map((c, ci) => {
                   const v = row[c.id] ?? "";
                   const cellKey = `${row._k}:${ci}`;
@@ -153,10 +156,10 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                   );
 
                   if (ci > 0) {
-                    return <td key={c.id} className="p-0 min-w-[112px] border-r border-border last:border-r-0">{input}</td>;
+                    return <td key={c.id} className={`p-0 border-border ${ci < cols.length - 1 ? "border-r" : ""} ${ri < rows.length - 1 ? "border-b" : ""}`}>{input}</td>;
                   }
                   return (
-                    <td key={c.id} className="p-0 sticky left-0 z-10 bg-card border-r border-border" style={{ width: FIRST_COL, minWidth: FIRST_COL }}>
+                    <td key={c.id} className={`p-0 sticky left-0 z-10 bg-card border-r border-border ${ri < rows.length - 1 ? "border-b" : ""}`}>
                       <div className="flex items-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

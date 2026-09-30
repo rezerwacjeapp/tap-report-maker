@@ -104,7 +104,7 @@ export function TableGridBuilder({ columns, rows, onChange }: { columns: TableCo
   return (
     <div className="space-y-2">
       <div ref={boxRef} className="overflow-x-auto rounded-lg border border-border bg-card">
-        <table className="border-collapse text-xs">
+        <table className="border-separate border-spacing-0 text-xs">
           <thead>
             <tr className="bg-muted/40">
               {rowNames.length > 0 && (
@@ -155,8 +155,8 @@ export function TableGridBuilder({ columns, rows, onChange }: { columns: TableCo
           </thead>
           <tbody>
             {rowNames.map((r, i) => (
-              <tr key={i} className="border-t border-border">
-                <td className="sticky left-0 z-10 bg-card p-1.5 w-[176px] min-w-[176px] border-r border-border">
+              <tr key={i}>
+                <td className="sticky left-0 z-10 bg-card p-1.5 w-[176px] min-w-[176px] border-r border-t border-border">
                   <div className="flex items-center gap-1">
                     <span className="inline-flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-md bg-primary/10 text-foreground text-[11px] font-bold">{rowLetter(i)}</span>
                     <input
@@ -171,14 +171,14 @@ export function TableGridBuilder({ columns, rows, onChange }: { columns: TableCo
                   </div>
                 </td>
                 {data.map((c) => (
-                  <td key={c.id} className="p-1.5 border-r border-border last:border-r-0 text-center text-[10px] italic text-muted-foreground/60">w terenie</td>
+                  <td key={c.id} className="p-1.5 border-t border-r border-border last:border-r-0 text-center text-[10px] italic text-muted-foreground/60">w terenie</td>
                 ))}
               </tr>
             ))}
             {rowNames.length === 0 && (
-              <tr className="border-t border-border">
+              <tr>
                 {data.map((c) => (
-                  <td key={c.id} className="p-1.5 h-9 border-r border-border last:border-r-0 text-center text-[10px] italic text-muted-foreground/60">w terenie</td>
+                  <td key={c.id} className="p-1.5 h-9 border-t border-r border-border last:border-r-0 text-center text-[10px] italic text-muted-foreground/60">w terenie</td>
                 ))}
               </tr>
             )}
