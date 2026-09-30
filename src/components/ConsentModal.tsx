@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { saveConsent } from "@/lib/supabase-storage";
 import { Loader2 } from "lucide-react";
+import { BrandLockup } from "@/components/BrandLogo";
 
 interface Props {
   onAccepted: () => void;
@@ -33,8 +34,8 @@ export function ConsentModal({ onAccepted }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-5">
       <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-xl p-6 space-y-5">
         <div className="text-center space-y-1">
-          <h2 className="text-xl font-bold">
-            Raport<span className="text-accent">ON</span>
+          <h2 className="flex justify-center">
+            <BrandLockup markClassName="h-7 w-auto" textClassName="text-xl" />
           </h2>
           <p className="text-sm text-muted-foreground">Jeszcze tylko krok — potwierdź poniżej</p>
         </div>

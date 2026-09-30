@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, Fragment } from "react";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import type { CustomFieldDef, CompanyProfile, TextStyle } from "@/lib/storage";
+import { parseTable, tableColumns, filledRows } from "@/lib/table-field";
 
 /**
  * Live HTML mirror of the generated PDF.
@@ -170,6 +171,64 @@ export function TemplatePreview({
         <div key={field.id} {...rowProps} style={{ display: "flex", gap: 12, padding: "5px 0", borderBottom: "1px solid #e5e7eb", ...(rowProps as any).style }}>
           <div style={{ flex: "0 0 42%", fontSize: 12, fontWeight: 700, color: COLORS.gray, ...labelCss }}>{field.label}</div>
           <div style={{ flex: 1 }}>{valueNode}</div>
+        </div>
+      );
+    }
+
+    // table
+    if (field.type === "table") {
+      const tv = isFill ? parseTable(values[field.id]) : null;
+      const cols = tableColumns(field, tv);
+      if (!cols.length) {
+        return mode === "edit" ? (
+          <div key={field.id} style={{ margin: "10px 0 12px", fontSize: 13, color: "#cbd5e1", fontStyle: "italic" }}>
+            {field.label || "Tabela"} — dodaj kolumny
+          </div>
+        ) : null;
+      }
+      let rows: Record<string, string>[];
+      if (isFill) {
+        rows = filledRows(tv, field);
+        if (rows.length === 0) return null; // PDF skips empty tables
+      } else {
+        const first = cols[0].id;
+        const starts = (field.tableRows || []).filter((r) => r.trim());
+        rows = starts.length ? starts.slice(0, 6).map((r) => ({ [first]: r })) : [{}, {}];
+      }
+      const clickProps = clickable ? { onClick: () => onFieldClick!(field.id), style: { cursor: "pointer" as const } } : {};
+      return (
+        <div key={field.id} {...clickProps} style={{ margin: "10px 0 12px", ...(clickProps as any).style }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>{field.label}</div>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: cols.length > 5 ? 11 : 12, border: "0.5px solid #d1d5db" }}>
+            <thead>
+              <tr style={{ background: COLORS.primary, color: COLORS.white }}>
+                <th style={{ width: 28, padding: "5px 4px", fontWeight: 700 }}>Lp.</th>
+                {cols.map((c) => (
+                  <th key={c.id} style={{ padding: "5px 4px", fontWeight: 700, textAlign: c.kind === "number" ? "right" : "left" }}>{c.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? COLORS.lightBg : COLORS.white, borderTop: "0.5px solid #d1d5db" }}>
+                  <td style={{ textAlign: "center", padding: "5px 4px", color: COLORS.primary }}>{i + 1}</td>
+                  {cols.map((c) => {
+                    const v = row[c.id];
+                    return (
+                      <td key={c.id} style={{
+                        padding: "5px 4px", borderLeft: "0.5px solid #d1d5db",
+                        textAlign: c.kind === "number" ? "right" : "left",
+                        fontWeight: c.kind === "choice" ? 700 : 400,
+                        color: v ? COLORS.primary : "#cbd5e1", fontStyle: v ? "normal" : "italic",
+                      }}>
+                        {v || (isFill ? "" : "…")}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       );
     }
