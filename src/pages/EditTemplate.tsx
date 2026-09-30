@@ -8,7 +8,8 @@ import {
   getFieldCategories, STARTER_TEMPLATES, countTileOptions,
   type ReportTemplate,
 } from "@/lib/templates";
-import type { CustomFieldDef, CustomFieldType, TextStyle, CompanyProfile, TableColumnDef } from "@/lib/storage";
+import type { CustomFieldDef, CustomFieldType, TextStyle, CompanyProfile } from "@/lib/storage";
+import { TableGridBuilder, cleanGrid, dataColumnCount, emptyGrid, type GridDef } from "@/components/TableGridBuilder";
 import { STYLE_COLORS } from "@/lib/storage";
 import { getCloudProfile } from "@/lib/supabase-storage";
 import { TemplatePreview } from "@/components/TemplatePreview";
@@ -33,85 +34,6 @@ const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
   table: "Tabela z kolumnami — np. wyniki pomiarów per obwód, lista gaśnic, stany liczników.",
 };
 
-const newColId = () => `c_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
-const parseOptions = (raw: string) => raw.split(",").map((o) => o.trim()).filter(Boolean);
-const parseStartRows = (raw: string) => raw.split("\n").map((r) => r.trim()).filter(Boolean);
-
-/** Keeps the typed text (commas, spaces) while passing parsed options up. */
-function OptionsInput({ options, onChange }: { options: string[]; onChange: (o: string[]) => void }) {
-  const [raw, setRaw] = useState(options.join(", "));
-  return (
-    <input
-      className="w-full h-8 rounded-md border border-border bg-background px-2.5 text-xs focus:outline-none focus:border-accent"
-      value={raw}
-      onChange={(e) => { setRaw(e.target.value); onChange(parseOptions(e.target.value)); }}
-      placeholder="Opcje po przecinku — np. pozytywna, negatywna"
-    />
-  );
-}
-
-/** Column list for a "Tabela" field: name, kind (tekst / liczba / wybór), options, order. */
-function TableColumnsEditor({ columns, onChange }: { columns: TableColumnDef[]; onChange: (cols: TableColumnDef[]) => void }) {
-  const [newLabel, setNewLabel] = useState("");
-  const update = (id: string, patch: Partial<TableColumnDef>) => onChange(columns.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-  const move = (i: number, d: -1 | 1) => {
-    const t = i + d;
-    if (t < 0 || t >= columns.length) return;
-    const next = [...columns];
-    [next[i], next[t]] = [next[t], next[i]];
-    onChange(next);
-  };
-  const add = () => {
-    if (!newLabel.trim()) return;
-    onChange([...columns, { id: newColId(), label: newLabel.trim(), kind: "text" }]);
-    setNewLabel("");
-  };
-  return (
-    <div className="space-y-1.5">
-      {columns.map((c, i) => (
-        <div key={c.id} className="rounded-lg border border-border bg-card p-2 space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <div className="flex flex-col shrink-0">
-              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Kolumna wyżej"><ArrowUp className="h-3 w-3" /></button>
-              <button type="button" onClick={() => move(i, 1)} disabled={i === columns.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Kolumna niżej"><ArrowDown className="h-3 w-3" /></button>
-            </div>
-            <input
-              className="flex-1 min-w-0 h-8 rounded-md border border-border bg-background px-2.5 text-xs focus:outline-none focus:border-accent"
-              value={c.label}
-              onChange={(e) => update(c.id, { label: e.target.value })}
-              placeholder="Nazwa kolumny"
-            />
-            <select
-              className="h-8 rounded-md border border-border bg-background px-1.5 text-xs focus:outline-none focus:border-accent"
-              value={c.kind || "text"}
-              onChange={(e) => {
-                const kind = e.target.value as TableColumnDef["kind"];
-                update(c.id, kind === "choice" ? { kind, options: c.options?.length ? c.options : ["pozytywna", "negatywna"] } : { kind, options: undefined });
-              }}
-              aria-label="Rodzaj kolumny"
-            >
-              <option value="text">Tekst</option>
-              <option value="number">Liczba</option>
-              <option value="choice">Wybór</option>
-            </select>
-            <button type="button" onClick={() => onChange(columns.filter((x) => x.id !== c.id))} className="text-muted-foreground hover:text-destructive shrink-0" aria-label="Usuń kolumnę"><X className="h-3.5 w-3.5" /></button>
-          </div>
-          {c.kind === "choice" && <OptionsInput options={c.options || []} onChange={(options) => update(c.id, { options })} />}
-        </div>
-      ))}
-      <div className="flex gap-1.5">
-        <input
-          className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
-          placeholder={columns.length ? "Kolejna kolumna — np. Ocena" : "Pierwsza kolumna — np. Obwód, Nr gaśnicy"}
-          value={newLabel}
-          onChange={(e) => setNewLabel(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-        />
-        <Button type="button" variant="outline" size="icon" onClick={add} className="h-9 w-9 shrink-0" aria-label="Dodaj kolumnę"><Plus className="h-4 w-4" /></Button>
-      </div>
-    </div>
-  );
-}
 
 export default function EditTemplate() {
   const navigate = useNavigate();
@@ -134,8 +56,7 @@ export default function EditTemplate() {
   const [stagingTileInput, setStagingTileInput] = useState("");
   const [stagingInfoContent, setStagingInfoContent] = useState("");
   const [stagingTableName, setStagingTableName] = useState("");
-  const [stagingTableCols, setStagingTableCols] = useState<TableColumnDef[]>([]);
-  const [stagingTableRows, setStagingTableRows] = useState("");
+  const [stagingGrid, setStagingGrid] = useState<GridDef>(emptyGrid);
 
   const addStagingTile = () => {
     if (!stagingTileInput.trim()) return;
@@ -161,23 +82,22 @@ export default function EditTemplate() {
     setStagingTileInput("");
   };
 
+  const stagingClean = cleanGrid(stagingGrid);
+  const canAddTable = !!stagingTableName.trim() && dataColumnCount(stagingClean) > 0;
   const commitTableSection = () => {
-    const cols = stagingTableCols.filter((c) => c.label.trim());
-    if (!stagingTableName.trim() || cols.length === 0) return;
-    const starts = parseStartRows(stagingTableRows);
+    if (!canAddTable) return;
     const f: CustomFieldDef = {
       id: `cf_${Date.now()}`,
       label: stagingTableName.trim(),
       type: "table",
       remember: false,
       order: template!.fields.length,
-      tableColumns: cols,
-      ...(starts.length ? { tableRows: starts } : {}),
+      tableColumns: stagingClean.tableColumns,
+      ...(stagingClean.tableRows.length ? { tableRows: stagingClean.tableRows } : {}),
     };
     setTemplate({ ...template!, fields: [...template!.fields, f] });
     setStagingTableName("");
-    setStagingTableCols([]);
-    setStagingTableRows("");
+    setStagingGrid(emptyGrid());
     setExpandedAddType(null);
   };
 
@@ -354,7 +274,13 @@ export default function EditTemplate() {
 
   const handleSave = async () => {
     if (!template.name.trim()) { toast.error("Podaj nazwę szablonu"); return; }
-    await saveUserTemplate(template);
+    // tables: drop unnamed columns and rows; a table needs at least one named column
+    const fields = template.fields.map((f) =>
+      f.type === "table" ? { ...f, ...cleanGrid({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) } : f,
+    );
+    const emptyTable = fields.find((f) => f.type === "table" && dataColumnCount({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) === 0);
+    if (emptyTable) { toast.error(`Tabela „${emptyTable.label || "bez nazwy"}" nie ma nazwanej kolumny`); return; }
+    await saveUserTemplate({ ...template, fields });
     toast.success("Szablon zapisany!");
     navigate("/select-template");
   };
@@ -612,16 +538,16 @@ export default function EditTemplate() {
           {/* === Expanded panel for TABLE === */}
           {expandedAddType === "table" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2.5">
-              <p className="text-xs text-muted-foreground">Nazwij tabelę i dodaj kolumny. W terenie wypełniasz ją wiersz po wierszu, a w PDF wychodzi zwykła tabela z nagłówkiem.</p>
-              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa tabeli — np. Wyniki pomiarów" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
-              <TableColumnsEditor columns={stagingTableCols} onChange={setStagingTableCols} />
-              <div>
-                <label className="text-[11px] text-muted-foreground mb-1 block">Wiersze startowe (opcjonalnie) — jeden w linii, trafią do pierwszej kolumny</label>
-                <textarea className="w-full min-h-[64px] rounded-md border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-accent resize-y" placeholder={"np.\nGaz [m³]\nWoda zimna [m³]"} value={stagingTableRows} onChange={(e) => setStagingTableRows(e.target.value)} />
-              </div>
-              <Button variant="accent" size="sm" onClick={commitTableSection} className="w-full" disabled={!stagingTableName.trim() || stagingTableCols.filter((c) => c.label.trim()).length === 0}>
-                <Plus className="h-4 w-4 mr-1" /> Dodaj tabelę {stagingTableCols.length > 0 && `(${stagingTableCols.length} kol.)`}
+              <input className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:border-accent" placeholder="Nazwa tabeli — np. Stany liczników" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
+              <TableGridBuilder columns={stagingGrid.tableColumns} rows={stagingGrid.tableRows} onChange={setStagingGrid} />
+              <Button variant="accent" size="sm" onClick={commitTableSection} className="w-full" disabled={!canAddTable}>
+                <Plus className="h-4 w-4 mr-1" /> Dodaj tabelę
               </Button>
+              {!canAddTable && (
+                <p className="text-[11px] text-muted-foreground text-center -mt-1">
+                  {!stagingTableName.trim() ? "Wpisz nazwę tabeli" : "Nazwij przynajmniej jedną kolumnę"}
+                </p>
+              )}
             </div>
           )}
 
@@ -731,12 +657,10 @@ export default function EditTemplate() {
                       onChange={(e) => updateFieldLabel(field.id, e.target.value)}
                       placeholder="Nazwa tabeli"
                     />
-                    <TableColumnsEditor columns={field.tableColumns || []} onChange={(cols) => updateTableField(field.id, { tableColumns: cols })} />
-                    <textarea
-                      className="w-full min-h-[52px] rounded-md border border-border bg-card px-2.5 py-2 text-xs focus:outline-none focus:border-accent resize-y"
-                      defaultValue={(field.tableRows || []).join("\n")}
-                      onBlur={(e) => updateTableField(field.id, { tableRows: parseStartRows(e.target.value) })}
-                      placeholder="Wiersze startowe — jeden w linii (opcjonalnie)"
+                    <TableGridBuilder
+                      columns={field.tableColumns || []}
+                      rows={field.tableRows || []}
+                      onChange={(g) => updateTableField(field.id, { tableColumns: g.tableColumns, tableRows: g.tableRows })}
                     />
                   </div>
                 )}
