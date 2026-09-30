@@ -1,7 +1,8 @@
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-import type { CompanyProfile, ReportDraft, TextStyle } from "./storage";
+import type { CompanyProfile, ReportDraft, TextStyle, CustomFieldDef } from "./storage";
 import { getTiles, getCustomFields } from "./storage";
+import { parseTable, tableColumns, filledRows, serializeTable, colsSnapshot } from "./table-field";
 
 // Register Roboto font (includes Polish: ą, ę, ś, ź, ć, ł, ó, ż, ń)
 try {
@@ -18,6 +19,41 @@ const COLORS = {
   white: "#ffffff",
   gray: "#6b7280",
 };
+
+/** Roboto in pdfmake has no "→" — swap it for a glyph it has, so the PDF shows no empty boxes. */
+const pdfSafe = (t: string) => (t || "").replace(/\u2192/g, "›");
+
+/**
+ * Column widths for a table field: sized to the longest content (header words
+ * may wrap), then stretched or squeezed to the page width — text columns take
+ * the slack, so short codes like "B16" don't get as much room as circuit names.
+ */
+function tableWidths(cols: import("./storage").TableColumnDef[], rows: Record<string, string>[], fontSize: number, avail: number): number[] {
+  const charW = fontSize * 0.5;
+  const isText = (c: import("./storage").TableColumnDef) => !c.kind || c.kind === "text";
+  const natural = cols.map((c) => {
+    const cellMax = Math.max(0, ...rows.map((r) => (r[c.id] || "").length));
+    const words = c.label.split(/\s+/).map((w) => w.length);
+    const header = isText(c) ? Math.max(...words) : Math.min(c.label.length, Math.max(...words, 8));
+    return Math.min(Math.max(Math.max(cellMax, header) * charW + 10, 26), 230);
+  });
+  const total = natural.reduce((a, b) => a + b, 0);
+  const textIdx = cols.map((c, i) => (isText(c) ? i : -1)).filter((i) => i >= 0);
+  const grow = textIdx.length ? textIdx : cols.map((_, i) => i);
+  const w = [...natural];
+  if (total < avail) {
+    const growTotal = grow.reduce((a, i) => a + natural[i], 0);
+    grow.forEach((i) => { w[i] += (avail - total) * (natural[i] / growTotal); });
+  } else if (total > avail) {
+    const fixed = cols.reduce((a, _, i) => a + (grow.includes(i) ? 0 : natural[i]), 0);
+    const room = Math.max(avail - fixed, grow.length * 30);
+    const growTotal = grow.reduce((a, i) => a + natural[i], 0);
+    grow.forEach((i) => { w[i] = room * (natural[i] / growTotal); });
+    const sum = w.reduce((a, b) => a + b, 0);
+    if (sum > avail) w.forEach((_, i) => { w[i] *= avail / sum; });
+  }
+  return w.map((x) => Math.floor(x));
+}
 
 /** Build a pdfmake label object with optional TextStyle overrides.
  *  When labelStyle is provided, we skip the named style to avoid conflicts
@@ -70,11 +106,12 @@ export interface TemplateOptions {
   watermark?: boolean;
 }
 
-export function generateReport(
+/** Builds the pdfmake document + history metadata. No side effects. */
+export function buildReportDocument(
   profile: CompanyProfile,
   draft: ReportDraft,
   options?: TemplateOptions,
-): GeneratedReport {
+): { docDefinition: any; meta: GeneratedReport } {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
   const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
@@ -219,7 +256,7 @@ export function generateReport(
       if (field.content) {
         const cs = field.contentStyle;
         infoStack.push({
-          text: field.content,
+          text: pdfSafe(field.content),
           bold: cs?.bold || false,
           italics: cs?.italic || false,
           alignment: cs?.align || undefined,
@@ -245,14 +282,77 @@ export function generateReport(
           buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
         ]);
         pendingDataRows.push([
-          { text: value, style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
+          { text: pdfSafe(value), style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
         ]);
       } else {
         pendingDataRows.push([
           buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
-          { text: value, style: "fieldValue", border: [false, false, false, true] },
+          { text: pdfSafe(value), style: "fieldValue", border: [false, false, false, true] },
         ]);
       }
+      return;
+    }
+
+    // --- TABLE FIELD: rows filled in the field, header repeated on every page ---
+    if (field.type === "table") {
+      const tv = parseTable(draft.customFields[field.id]);
+      const cols = tableColumns(field, tv);
+      const rows = filledRows(tv, field);
+      if (!cols.length || !rows.length) return;
+      flushDataRows();
+
+      const many = cols.length > 5;
+      const cellSize = many ? 8 : 9;
+      const span = cols.length + 1;
+      const titleRow: any[] = [
+        {
+          ...buildStyledLabel(field.label, "sectionHeader", field.labelStyle),
+          colSpan: span,
+          border: [false, false, false, false],
+          margin: [-4, 4, 0, 6] as [number, number, number, number],
+        },
+        // spanned cells need explicit "no border" too, otherwise pdfmake draws their top edge
+        ...Array.from({ length: span - 1 }, () => ({ text: "", border: [false, false, false, false] })),
+      ];
+      const headerRow: any[] = [
+        { text: "Lp.", style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary, alignment: "center" as const },
+        ...cols.map((c) => ({
+          text: c.label, style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
+          alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
+        })),
+      ];
+      const body: any[][] = [titleRow, headerRow];
+      rows.forEach((row, i) => {
+        const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
+        body.push([
+          { text: `${i + 1}`, style: "tableCell", fontSize: cellSize, fillColor: bg, alignment: "center" as const },
+          ...cols.map((c) => ({
+            text: pdfSafe((row[c.id] ?? "").toString()), style: "tableCell", fontSize: cellSize, fillColor: bg,
+            alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
+            bold: c.kind === "choice",
+          })),
+        ]);
+      });
+
+      content.push({
+        table: {
+          headerRows: 2,
+          keepWithHeaderRows: 1,
+          dontBreakRows: true,
+          // 515pt content width − 20pt "Lp." − cell paddings (4pt each side) and borders
+          widths: [20, ...tableWidths(cols, rows, cellSize, 515 - 20 - (cols.length + 1) * 8 - 2)],
+          body,
+        },
+        layout: {
+          hLineWidth: (i: number) => (i === 0 ? 0 : 0.5), // no line above the title row
+          vLineWidth: () => 0.5,
+          hLineColor: () => "#d1d5db",
+          vLineColor: () => "#d1d5db",
+          paddingTop: () => 3,
+          paddingBottom: () => 3,
+        },
+        margin: [0, 0, 0, 12] as [number, number, number, number],
+      });
       return;
     }
 
@@ -468,6 +568,16 @@ export function generateReport(
   const draftSignatures: Record<string, string | null> = (draft as any).signatures ?? {};
   signatureFields.forEach((sf) => { signatureLabels[sf.id] = sf.label; });
 
+  // History keeps exactly what went into the PDF: tables without empty / untouched starting rows
+  const historyValues: Record<string, string> = { ...draft.customFields };
+  customFields.forEach((f) => {
+    if (f.type !== "table") return;
+    const tv = parseTable(historyValues[f.id]);
+    if (!tv) return;
+    const rows = filledRows(tv, f).map(({ _k, ...r }) => r);
+    historyValues[f.id] = rows.length ? serializeTable({ cols: colsSnapshot(tableColumns(f, tv)), rows }) : "";
+  });
+
   const meta: GeneratedReport = {
     id: Date.now().toString(),
     filename,
@@ -479,7 +589,7 @@ export function generateReport(
     reportNumber: reportNum,
     selectedTiles: [...effectiveSelectedTiles],
     tileLabels: selectedLabels,
-    customFields: { ...draft.customFields },
+    customFields: historyValues,
     fieldLabels,
     signatures: { ...draftSignatures },
     signatureLabels,
@@ -487,24 +597,45 @@ export function generateReport(
     hasPhotos: Object.values(draft.photosByField || {}).some((arr) => arr.length > 0) || draft.photos.length > 0,
   };
 
-  // Download PDF
-  pdfMake.createPdf(docDefinition).download(filename);
+  return { docDefinition, meta };
+}
 
+/** Builds and downloads the PDF (legacy flow). */
+export function generateReport(
+  profile: CompanyProfile,
+  draft: ReportDraft,
+  options?: TemplateOptions,
+): GeneratedReport {
+  const { docDefinition, meta } = buildReportDocument(profile, draft, options);
+  pdfMake.createPdf(docDefinition).download(meta.filename);
   return meta;
+}
+
+/** Builds the PDF in memory — for the "Wyślij / Pobierz" sheet. */
+export async function generateReportFile(
+  profile: CompanyProfile,
+  draft: ReportDraft,
+  options?: TemplateOptions,
+): Promise<{ meta: GeneratedReport; blob: Blob }> {
+  const { docDefinition, meta } = buildReportDocument(profile, draft, options);
+  const blob: Blob = await (pdfMake.createPdf(docDefinition) as any).getBlob();
+  return { meta, blob };
 }
 
 /**
  * Regenerate PDF from history item (without photos)
  */
-export function regenerateFromHistory(
-  profile: CompanyProfile,
+export function historyTemplateOptions(
   item: import("./storage").ReportHistoryItem,
-  watermark?: boolean
-) {
-  // Build fields from fieldLabels
-  const fields = Object.entries(item.fieldLabels || {}).map(([id, label], i) => ({
-    id, label, type: "text" as const, remember: false, order: i,
-  }));
+  watermark?: boolean,
+): { draft: ReportDraft; options: TemplateOptions } {
+  // Build fields from fieldLabels — table values carry their own column labels
+  const fields: CustomFieldDef[] = Object.entries(item.fieldLabels || {}).map(([id, label], i) => {
+    const tv = parseTable(item.customFields?.[id]);
+    return tv
+      ? { id, label, type: "table" as const, remember: false, order: i, tableColumns: tableColumns(undefined, tv) }
+      : { id, label, type: "text" as const, remember: false, order: i };
+  });
 
   // Build tiles from tileLabels
   const tiles = (item.tileLabels || []).map((label, i) => ({
@@ -525,12 +656,24 @@ export function regenerateFromHistory(
     templateId: item.templateId,
   };
 
-  generateReport(profile, draft, {
-    pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
-    templateName: item.templateName,
-    fields,
-    tiles,
-    signatureFields,
-    watermark,
-  });
+  return {
+    draft,
+    options: {
+      pdfTitle: item.pdfTitle || item.templateName.toUpperCase(),
+      templateName: item.templateName,
+      fields,
+      tiles,
+      signatureFields,
+      watermark,
+    },
+  };
+}
+
+export function regenerateFromHistory(
+  profile: CompanyProfile,
+  item: import("./storage").ReportHistoryItem,
+  watermark?: boolean
+) {
+  const { draft, options } = historyTemplateOptions(item, watermark);
+  generateReport(profile, draft, options);
 }

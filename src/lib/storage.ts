@@ -20,7 +20,16 @@ export interface TileItem {
   label: string;
 }
 
-export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles" | "photos" | "signature" | "heading" | "info";
+export type CustomFieldType = "text" | "textarea" | "date" | "number" | "tiles" | "photos" | "signature" | "heading" | "info" | "table";
+
+/** Column of a "table" field. kind decides the input on the phone:
+ *  text — keyboard, number — numeric keypad (comma allowed), choice — tap buttons from `options`. */
+export interface TableColumnDef {
+  id: string;
+  label: string;
+  kind?: "text" | "number" | "choice";
+  options?: string[];
+}
 
 export interface TextStyle {
   bold?: boolean;
@@ -47,6 +56,8 @@ export interface CustomFieldDef {
   content?: string; // for "info" type — the full text block
   labelStyle?: TextStyle;
   contentStyle?: TextStyle; // for "info" type — style of content text
+  tableColumns?: TableColumnDef[]; // for "table" type
+  tableRows?: string[]; // for "table" type — starting rows, value of the first column (e.g. meter names)
 }
 
 export interface ReportDraft {
@@ -156,6 +167,21 @@ export function getRememberedValues(): Record<string, string> {
   return get<Record<string, string>>(KEYS.REMEMBERED_VALUES, {});
 }
 export function saveRememberedValues(v: Record<string, string>) { set(KEYS.REMEMBERED_VALUES, v); }
+
+/** Template era: store values of fields marked "remember" (company data, certificate numbers, instruments…)
+ *  so the next report starts with them filled in. Kept per device, keyed by field id. */
+export function rememberTemplateValues(fields: CustomFieldDef[], values: Record<string, string>) {
+  const remembered = getRememberedValues();
+  let changed = false;
+  fields.forEach((f) => {
+    const v = values[f.id];
+    if (f.remember && typeof v === "string" && v.trim()) {
+      remembered[f.id] = v;
+      changed = true;
+    }
+  });
+  if (changed) saveRememberedValues(remembered);
+}
 
 // Build default custom field values from remembered
 function buildDefaultCustomFields(): Record<string, string> {
