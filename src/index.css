@@ -115,7 +115,8 @@
   }
 }
 
-/* ── Animated mesh background ── */
+/* ── Mesh background (static: an endless animation of 80px-blurred shapes keeps
+      the phone's GPU busy the whole time the app is open) ── */
 .mesh-bg {
   position: fixed;
   inset: 0;
@@ -133,7 +134,6 @@
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.45;
-  animation: drift 20s ease-in-out infinite alternate;
 }
 
 .dark .mesh-bg .blob {
@@ -144,7 +144,6 @@
   width: 500px; height: 500px;
   background: #dbeafe;
   top: -10%; left: -10%;
-  animation-duration: 22s;
 }
 .dark .mesh-bg .blob:nth-child(1) { background: #1e3a5f; }
 
@@ -152,8 +151,6 @@
   width: 450px; height: 450px;
   background: #d1fae5;
   top: 35%; right: -15%;
-  animation-duration: 26s;
-  animation-delay: -5s;
 }
 .dark .mesh-bg .blob:nth-child(2) { background: #064e3b; }
 
@@ -161,17 +158,8 @@
   width: 600px; height: 600px;
   background: #e0e7ff;
   bottom: -15%; left: 20%;
-  animation-duration: 30s;
-  animation-delay: -10s;
 }
 .dark .mesh-bg .blob:nth-child(3) { background: #1e1b4b; }
-
-@keyframes drift {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.97); }
-  100% { transform: translate(30px, -10px) scale(1.02); }
-}
 
 /* ── Glass panels ── */
 @layer utilities {

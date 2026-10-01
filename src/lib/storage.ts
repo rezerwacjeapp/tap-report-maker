@@ -70,6 +70,8 @@ export interface ReportDraft {
   customFields: Record<string, string>; // fieldId -> value
   additionalNotes?: string;
   reportNumber?: string;
+  /** Number the app assigned itself — if still unchanged at generation time it may be moved to the next free one. */
+  autoNumber?: string;
   templateId?: string;
   _lastSaved?: number;
 }
@@ -89,6 +91,8 @@ export interface ReportHistoryItem {
   fieldLabels: Record<string, string>;
   signatures: Record<string, string | null>;
   signatureLabels: Record<string, string>;
+  /** Signed fields, counted in the database — the list doesn't download signature images. */
+  signedCount?: number;
   photosCount: number;
   hasPhotos: boolean;
   createdAt: number;

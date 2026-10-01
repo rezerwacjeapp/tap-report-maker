@@ -145,8 +145,8 @@ export function buildReportDocument(
     : new Date().toISOString().split("T")[0];
   const filename = `raport_${namepart}_${datepart}.pdf`;
 
-  // Report number
-  const reportNum = draft.reportNumber || `${new Date().getFullYear()}`;
+  // Report number — empty (hidden or cleared in the form) means no number on the PDF
+  const reportNum = (draft.reportNumber || "").trim();
 
   // Generation date for footer (frozen at generation time)
   const generationDate = new Date().toLocaleDateString("pl-PL");
@@ -200,7 +200,7 @@ export function buildReportDocument(
   content.push({
     columns: [
       { text: pdfTitle, style: "title", width: "*" },
-      { text: reportNum, style: "reportNumber", width: "auto", alignment: "right" as const },
+      ...(reportNum ? [{ text: reportNum, style: "reportNumber", width: "auto", alignment: "right" as const }] : []),
     ],
     margin: [0, 0, 0, 16] as [number, number, number, number],
   });

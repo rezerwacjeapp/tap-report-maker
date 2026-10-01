@@ -11,7 +11,8 @@ import {
   type ReportDraft, type TextStyle, type CustomFieldDef,
 } from "@/lib/storage";
 import { getTemplateById, getAllTileOptions } from "@/lib/templates";
-import { generateReportFile, type TemplateOptions } from "@/lib/pdf-generator";
+// PDF engine (pdfmake + fonts, ~1.8 MB) loads only when needed — prefetched when the wizard opens
+const loadPdf = () => import("@/lib/pdf-generator");
 import { TableFieldInput } from "@/components/TableFieldInput";
 import { ReportReadySheet } from "@/components/ReportReadySheet";
 import { initialTableValue, isTableValue, tableHasContent } from "@/lib/table-field";
@@ -20,7 +21,7 @@ import {
 } from "@/lib/report-utils";
 import {
   getCloudProfile, addCloudReport, saveCloudSnapshot,
-  checkReportLimit, incrementReportCount, getCloudNextReportNumber,
+  checkReportLimit, incrementReportCount, getCloudNextReportNumber, findReportByNumber,
   saveCloudDraft, deleteCloudDraft, getCloudDraft,
 } from "@/lib/supabase-storage";
 import { uploadSnapshotImages } from "@/lib/image-storage";
@@ -119,6 +120,7 @@ export default function ReportWizard() {
   useEffect(() => {
     getCloudProfile().then(setCloudProfile).catch(() => {});
     checkReportLimit().then((l) => setIsFreePlan(l.plan === "free")).catch(() => {});
+    loadPdf().catch(() => {}); // warm up the PDF engine while the form is being filled
   }, []);
 
   // Draft
@@ -236,9 +238,9 @@ export default function ReportWizard() {
   // Load report number from Supabase for new drafts
   useEffect(() => {
     if (!initialized) return;
-    if (!draft.reportNumber) {
+    if (!draft.reportNumber && !draft.autoNumber) {
       getCloudNextReportNumber().then((num) => {
-        setDraft((d) => ({ ...d, reportNumber: num }));
+        setDraft((d) => ({ ...d, reportNumber: num, autoNumber: num }));
       }).catch(() => {});
     }
   }, [initialized]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -283,7 +285,39 @@ export default function ReportWizard() {
     : null;
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
-  const handleGenerate = async () => {
+  // A typed-in number that already exists in history → ask before generating
+  const [numberConflict, setNumberConflict] = useState<{ current: string; next: string; takenDate: string; takenClient: string } | null>(null);
+
+  /**
+   * Final report number. Hidden → none. An automatic number that was taken in the
+   * meantime (another report generated, a "Dokończ później" draft) moves to the next
+   * free one; a number typed by hand that already exists opens a question instead.
+   */
+  const resolveReportNumber = async (): Promise<string | null> => {
+    if (hiddenFieldIds.has("__reportNumber")) return "";
+    let num = (draft.reportNumber || "").trim();
+    if (!num && !draft.autoNumber) num = await getCloudNextReportNumber().catch(() => "");
+    if (!num) return "";
+
+    const taken = await findReportByNumber(num).catch(() => null);
+    if (!taken) return num;
+
+    const next = await getCloudNextReportNumber().catch(() => "");
+    if (num === draft.autoNumber && next) {
+      update({ reportNumber: next, autoNumber: next });
+      toast(`Numer ${num} był już zajęty, raport dostał numer ${next}.`);
+      return next;
+    }
+    setNumberConflict({
+      current: num,
+      next,
+      takenDate: isISODate(taken.date) ? formatDatePL(taken.date) : taken.date || "",
+      takenClient: taken.clientName && taken.clientName !== "—" ? taken.clientName : "",
+    });
+    return null;
+  };
+
+  const handleGenerate = async (chosenNumber?: string) => {
     if (generating) return;
     setGenerating(true);
 
@@ -297,13 +331,18 @@ export default function ReportWizard() {
         return;
       }
 
+      const reportNumber = chosenNumber ?? (await resolveReportNumber());
+      if (reportNumber === null) { setGenerating(false); return; } // waiting for the answer in the dialog
+      const finalDraft: ReportDraft = { ...draft, reportNumber };
+
       // Load profile from Supabase (use cached if available)
       const profile = cloudProfile || await getCloudProfile();
 
       // Watermark only on free plan (not trial, not solo)
       const watermark = limit.plan === "free";
 
-      const { meta, blob } = await generateReportFile(profile, draft, {
+      const { generateReportFile } = await loadPdf();
+      const { meta, blob } = await generateReportFile(profile, finalDraft, {
         pdfTitle, templateName, fields: visibleFields, tiles: visibleTiles, signatureFields: visibleSignatureFields, showCompanyHeader, watermark,
       });
 
@@ -312,7 +351,7 @@ export default function ReportWizard() {
 
       // Save snapshot — upload images to Storage, save lightweight data to DB
       const snapshotOptions = { pdfTitle, templateName, fields: visibleFields, tiles: visibleTiles, signatureFields: visibleSignatureFields, showCompanyHeader };
-      uploadSnapshotImages(user!.id, cloudId, draft, profile, snapshotOptions)
+      uploadSnapshotImages(user!.id, cloudId, finalDraft, profile, snapshotOptions)
         .then((lightSnapshot) => saveCloudSnapshot(cloudId, lightSnapshot))
         .catch((e) => console.warn("Snapshot save failed:", e));
 
@@ -336,7 +375,7 @@ export default function ReportWizard() {
       });
     } catch (err) {
       console.error("PDF generation error:", err);
-      toast.error("Błąd generowania PDF");
+      toast.error("Błąd generowania PDF. Sprawdź internet i spróbuj ponownie.");
     } finally {
       setGenerating(false);
     }
@@ -386,7 +425,7 @@ export default function ReportWizard() {
     <div className="flex flex-col min-h-[100dvh] lg:h-[100dvh] bg-background">
       {/* Resume draft dialog */}
       <AlertDialog open={showResume} onOpenChange={setShowResume}>
-        <AlertDialogContent>
+        <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Niedokończony raport</AlertDialogTitle>
             <AlertDialogDescription>
@@ -397,6 +436,38 @@ export default function ReportWizard() {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleNewDraft}>Zacznij od nowa</AlertDialogCancel>
             <AlertDialogAction onClick={handleResume}>Kontynuuj</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Typed-in report number already used */}
+      <AlertDialog open={!!numberConflict} onOpenChange={(o) => { if (!o) setNumberConflict(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Numer {numberConflict?.current} już jest w historii</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ma go raport{numberConflict?.takenDate ? ` z ${numberConflict.takenDate}` : ""}{numberConflict?.takenClient ? ` (${numberConflict.takenClient})` : ""}.
+              {numberConflict?.next ? ` Następny wolny numer to ${numberConflict.next}.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => { const n = numberConflict?.current || ""; setNumberConflict(null); handleGenerate(n); }}
+            >
+              Zostaw {numberConflict?.current}
+            </AlertDialogCancel>
+            {numberConflict?.next && (
+              <AlertDialogAction
+                onClick={() => {
+                  const n = numberConflict.next;
+                  setNumberConflict(null);
+                  update({ reportNumber: n, autoNumber: n });
+                  handleGenerate(n);
+                }}
+              >
+                Użyj {numberConflict.next}
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -710,7 +781,7 @@ export default function ReportWizard() {
       </main>
 
           <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4 space-y-2 lg:static">
-            <button onClick={handleGenerate} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
+            <button onClick={() => handleGenerate()} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
               {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
             </button>
             <button onClick={handleSaveLater} disabled={savingDraft || generating} className="w-full h-10 rounded-xl border border-border text-muted-foreground font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-muted disabled:opacity-50">

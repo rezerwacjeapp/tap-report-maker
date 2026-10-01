@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense, type ComponentType } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,21 +9,42 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
-import Profile from "./pages/Profile";
-import SelectTemplate from "./pages/SelectTemplate";
-import EditTemplate from "./pages/EditTemplate";
-import ReportWizard from "./pages/ReportWizard";
-import Reports from "./pages/Reports";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Landing from "./pages/Landing";
-import Upgrade from "./pages/Upgrade";
 import SetNewPassword from "./pages/SetNewPassword";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { ConsentModal } from "./components/ConsentModal";
 import { hasAcceptedTerms, saveConsent } from "./lib/supabase-storage";
-import ImportTemplate from "./pages/ImportTemplate";
-import NotFound from "./pages/NotFound";
+
+/**
+ * Screens other than the start ones load when first opened. After a new deploy an
+ * open tab may ask for a file that no longer exists; then reload once (at most
+ * every 30 s) so the tab picks up the new version instead of showing a blank screen.
+ */
+function lazyPage<T extends ComponentType<any>>(load: () => Promise<{ default: T }>) {
+  return lazy(() =>
+    load().catch((err) => {
+      const KEY = "raporton_chunk_reload";
+      const last = Number(sessionStorage.getItem(KEY) || 0);
+      if (Date.now() - last > 30_000) {
+        sessionStorage.setItem(KEY, String(Date.now()));
+        window.location.reload();
+        return new Promise<{ default: T }>(() => {});
+      }
+      throw err;
+    })
+  );
+}
+
+const Profile = lazyPage(() => import("./pages/Profile"));
+const SelectTemplate = lazyPage(() => import("./pages/SelectTemplate"));
+const EditTemplate = lazyPage(() => import("./pages/EditTemplate"));
+const ReportWizard = lazyPage(() => import("./pages/ReportWizard"));
+const Reports = lazyPage(() => import("./pages/Reports"));
+const Upgrade = lazyPage(() => import("./pages/Upgrade"));
+const ImportTemplate = lazyPage(() => import("./pages/ImportTemplate"));
+const NotFound = lazyPage(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -93,13 +114,15 @@ function AppShell() {
   // Not logged in — show landing, login, register
   if (!user) {
     return (
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/t/:code" element={<ImportTemplate />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/t/:code" element={<ImportTemplate />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -119,6 +142,7 @@ function AppShell() {
         <div className="blob" />
       </div>
       <div className="flex-1 flex flex-col">
+        <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/profile" element={<Profile />} />
@@ -132,6 +156,7 @@ function AppShell() {
           <Route path="/register" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </div>
       {!hideNav && <BottomNav />}
     </div>
@@ -143,8 +168,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PwaUpdatePrompt />
       <BrowserRouter>
+        <PwaUpdatePrompt />
         <AuthProvider>
           <AppShell />
         </AuthProvider>

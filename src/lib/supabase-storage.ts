@@ -83,20 +83,57 @@ export async function saveConsent(marketing: boolean): Promise<void> {
 
 // ─── REPORTS ────────────────────────────────────────────────
 
+// Everything the lists need — without `signatures` (PNG images, the heaviest column).
+const HISTORY_COLUMNS =
+  "id, filename, date, client_name, template_name, template_id, pdf_title, report_number, " +
+  "selected_tiles, tile_labels, custom_fields, field_labels, signature_labels, photos_count, has_photos, created_at";
+const HISTORY_PAGE = 500; // Supabase returns at most 1000 rows per request
+
+let historyCache: { userId: string; at: number; items: ReportHistoryItem[] } | null = null;
+const HISTORY_TTL = 60_000;
+
+/** Call after adding or removing a report. */
+export function invalidateReportHistory() {
+  historyCache = null;
+}
+
+async function fetchHistoryRows(userId: string, columns: string): Promise<any[]> {
+  const rows: any[] = [];
+  for (let from = 0; ; from += HISTORY_PAGE) {
+    const { data, error } = await supabase
+      .from("reports")
+      .select(columns)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, from + HISTORY_PAGE - 1);
+    if (error) throw error;
+    rows.push(...(data || []));
+    if (!data || data.length < HISTORY_PAGE) return rows;
+  }
+}
+
+/** All of the user's reports, newest first (no 100-report cap). */
 export async function getCloudReportHistory(): Promise<ReportHistoryItem[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
+  if (historyCache && historyCache.userId === user.id && Date.now() - historyCache.at < HISTORY_TTL) {
+    return historyCache.items;
+  }
 
-  const { data, error } = await supabase
-    .from("reports")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  let data: any[];
+  try {
+    // signed_count = small SQL function in Supabase that counts filled signatures
+    data = await fetchHistoryRows(user.id, `${HISTORY_COLUMNS}, signed_count`);
+  } catch {
+    try {
+      data = await fetchHistoryRows(user.id, HISTORY_COLUMNS);
+    } catch {
+      return [];
+    }
+  }
 
-  if (error || !data) return [];
-
-  return data.map((r: any) => ({
+  const items: ReportHistoryItem[] = data.map((r: any) => ({
     id: r.id,
     filename: r.filename,
     date: r.date,
@@ -109,12 +146,22 @@ export async function getCloudReportHistory(): Promise<ReportHistoryItem[]> {
     tileLabels: r.tile_labels || [],
     customFields: r.custom_fields || {},
     fieldLabels: r.field_labels || {},
-    signatures: r.signatures || {},
+    signatures: {},
     signatureLabels: r.signature_labels || {},
+    signedCount: typeof r.signed_count === "number" ? r.signed_count : undefined,
     photosCount: r.photos_count || 0,
     hasPhotos: r.has_photos || false,
     createdAt: new Date(r.created_at).getTime(),
   }));
+  historyCache = { userId: user.id, at: Date.now(), items };
+  return items;
+}
+
+/** Signature images of one report (history view, PDF rebuilt without a snapshot). */
+export async function getCloudReportSignatures(id: string): Promise<Record<string, string | null>> {
+  const { data, error } = await supabase.from("reports").select("signatures").eq("id", id).maybeSingle();
+  if (error || !data) return {};
+  return (data.signatures as Record<string, string | null>) || {};
 }
 
 export async function addCloudReport(report: GeneratedReport): Promise<string> {
@@ -146,6 +193,7 @@ export async function addCloudReport(report: GeneratedReport): Promise<string> {
     .single();
 
   if (error) throw error;
+  invalidateReportHistory();
   return data.id;
 }
 
@@ -154,6 +202,7 @@ export async function removeCloudReport(id: string): Promise<void> {
   if (!user) return;
 
   await supabase.from("reports").delete().eq("id", id).eq("user_id", user.id);
+  invalidateReportHistory();
 }
 
 // ─── SNAPSHOTS ──────────────────────────────────────────────
@@ -393,24 +442,53 @@ export async function incrementReportCount(): Promise<void> {
 
 // ─── REPORT NUMBER ──────────────────────────────────────────
 
+const REPORT_NUMBER_RE = /^\s*(\d+)\s*\/\s*(\d{4})\s*$/;
+
+/**
+ * Next free number "NNN/YYYY": the highest number used this year + 1.
+ * (Counting reports gave duplicates after a report was deleted.)
+ */
 export async function getCloudNextReportNumber(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    const year = new Date().getFullYear();
-    return `001/${year}`;
-  }
-
   const year = new Date().getFullYear();
-  const startOfYear = `${year}-01-01`;
+  const format = (n: number) => `${String(n).padStart(3, "0")}/${year}`;
 
-  const { count, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return format(1);
+
+  let max = 0;
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("reports")
+      .select("report_number")
+      .eq("user_id", user.id)
+      .like("report_number", `%/${year}`)
+      .range(from, from + 999);
+    if (error) throw error;
+    for (const row of data || []) {
+      const m = REPORT_NUMBER_RE.exec(row.report_number || "");
+      if (m && Number(m[2]) === year) max = Math.max(max, Number(m[1]));
+    }
+    if (!data || data.length < 1000) break;
+  }
+  return format(max + 1);
+}
+
+/** A saved report that already has this number, if any. */
+export async function findReportByNumber(reportNumber: string): Promise<{ id: string; date: string; clientName: string } | null> {
+  const num = reportNumber.trim();
+  if (!num) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
     .from("reports")
-    .select("*", { count: "exact", head: true })
+    .select("id, date, client_name")
     .eq("user_id", user.id)
-    .gte("date", startOfYear);
-
-  const num = (error ? 0 : (count || 0)) + 1;
-  return `${String(num).padStart(3, "0")}/${year}`;
+    .eq("report_number", num)
+    .limit(1);
+  if (error) throw error;
+  const row = data?.[0];
+  return row ? { id: row.id, date: row.date, clientName: row.client_name } : null;
 }
 // ─── USER TEMPLATES ─────────────────────────────────────────
 

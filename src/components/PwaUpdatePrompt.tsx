@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
+
+/** Reloading here would interrupt the form (in the wizard: signatures must be collected again). */
+const BUSY_PATHS = /^\/(report|edit-template)(\/|$)/;
 
 /**
  * Listens for service worker updates and shows a toast
@@ -11,6 +15,7 @@ import { RefreshCw } from "lucide-react";
  */
 export function PwaUpdatePrompt() {
   const [showUpdate, setShowUpdate] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -50,7 +55,8 @@ export function PwaUpdatePrompt() {
     };
   }, []);
 
-  if (!showUpdate) return null;
+  // Shown again once the user leaves the report / template form
+  if (!showUpdate || BUSY_PATHS.test(pathname)) return null;
 
   return (
     <div className="fixed top-4 left-4 right-4 z-[999] flex justify-center animate-in slide-in-from-top-2 duration-300">
@@ -59,7 +65,7 @@ export function PwaUpdatePrompt() {
         className="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-accent text-white shadow-lg shadow-accent/25 active:scale-[0.97] transition-transform text-sm font-medium"
       >
         <RefreshCw className="h-4 w-4" />
-        Nowa wersja dostępna — kliknij aby zaktualizować
+        Nowa wersja dostępna. Dotknij, aby odświeżyć
       </button>
     </div>
   );

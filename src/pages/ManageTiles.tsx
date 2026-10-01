@@ -7,7 +7,7 @@ import {
   getCustomFields, saveCustomFields, type CustomFieldDef, type CustomFieldType,
 } from "@/lib/storage";
 
-const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
+const FIELD_TYPE_LABELS: Partial<Record<CustomFieldType, string>> = {
   text: "Tekst krótki",
   textarea: "Tekst długi",
   date: "Data",

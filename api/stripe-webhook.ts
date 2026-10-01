@@ -22,6 +22,28 @@ async function readRawBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+/**
+ * Billing period of a subscription. Since API version 2025-03-31 (basil) Stripe
+ * keeps current_period_start/end on the subscription items, not on the
+ * subscription itself — the older top-level fields are only a fallback.
+ */
+function periodOf(sub: Stripe.Subscription): { current_period_start: string | null; current_period_end: string | null } {
+  const item = sub.items?.data?.[0];
+  const legacy = sub as unknown as { current_period_start?: number; current_period_end?: number };
+  const toISO = (t: unknown) => (typeof t === "number" && Number.isFinite(t) ? new Date(t * 1000).toISOString() : null);
+  return {
+    current_period_start: toISO(item?.current_period_start ?? legacy.current_period_start),
+    current_period_end: toISO(item?.current_period_end ?? legacy.current_period_end),
+  };
+}
+
+/** Stripe status → our status. past_due keeps access during Stripe's retry period. */
+function statusOf(sub: Stripe.Subscription): "active" | "cancelled" | "expired" {
+  if (sub.status === "active" || sub.status === "trialing" || sub.status === "past_due") return "active";
+  if (sub.status === "canceled") return "cancelled";
+  return "expired";
+}
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (req.method !== "POST") {
     res.writeHead(405, { Allow: "POST" });
@@ -59,7 +81,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.client_reference_id;
-        const subscriptionId = session.subscription as string;
+        const subscriptionId =
+          typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
         if (!userId || !subscriptionId) {
           console.warn("checkout.session.completed: missing userId or subscriptionId");
@@ -77,68 +100,58 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
         // Check if user already has a subscription row
-        const { data: existing } = await supabase
+        const { data: existing, error: findError } = await supabase
           .from("subscriptions")
           .select("id")
           .eq("user_id", userId)
           .maybeSingle();
+        if (findError) throw findError;
 
         const subData = {
           user_id: userId,
           plan: "solo",
-          status: "active",
-          current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
-          current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+          status: statusOf(subscription),
+          ...periodOf(subscription),
           autopay_subscription_id: subscriptionId, // stores Stripe subscription ID
           updated_at: new Date().toISOString(),
         };
 
-        if (existing) {
-          await supabase
-            .from("subscriptions")
-            .update(subData)
-            .eq("id", existing.id);
-        } else {
-          await supabase.from("subscriptions").insert(subData);
-        }
+        const { error: saveError } = existing
+          ? await supabase.from("subscriptions").update(subData).eq("id", existing.id)
+          : await supabase.from("subscriptions").insert(subData);
+        if (saveError) throw saveError;
 
         console.log(`Subscription activated for user ${userId}`);
         break;
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const stripeSubId = subscription.id;
+        // Events can arrive out of order — read the current state from Stripe
+        const fromEvent = event.data.object as Stripe.Subscription;
+        const subscription = await stripe.subscriptions.retrieve(fromEvent.id);
+        const status = statusOf(subscription);
 
-        const status =
-          subscription.status === "active" ? "active" :
-          subscription.status === "past_due" ? "active" : // still allow during grace period
-          "expired";
-
-        await supabase
+        const { error } = await supabase
           .from("subscriptions")
-          .update({
-            status,
-            current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
-            current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("autopay_subscription_id", stripeSubId);
+          .update({ status, ...periodOf(subscription), updated_at: new Date().toISOString() })
+          .eq("autopay_subscription_id", subscription.id);
+        if (error) throw error;
 
-        console.log(`Subscription ${stripeSubId} updated: ${status}`);
+        console.log(`Subscription ${subscription.id} updated: ${status}`);
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
 
-        await supabase
+        const { error } = await supabase
           .from("subscriptions")
           .update({
             status: "cancelled",
             updated_at: new Date().toISOString(),
           })
           .eq("autopay_subscription_id", subscription.id);
+        if (error) throw error;
 
         console.log(`Subscription ${subscription.id} cancelled`);
         break;
@@ -148,8 +161,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         console.log(`Unhandled event type: ${event.type}`);
     }
   } catch (err: any) {
-    console.error("Error processing webhook event:", err);
-    // Still return 200 to avoid Stripe retries for processing errors
+    // 500 → Stripe retries the event and marks the delivery as failed in the Dashboard,
+    // so a broken activation is visible instead of silently lost.
+    console.error("Error processing webhook event:", event.type, event.id, err);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ received: false }));
+    return;
   }
 
   res.writeHead(200, { "Content-Type": "application/json" });

@@ -6,13 +6,14 @@ import {
   PenTool, ChevronDown, ChevronUp, CheckCircle2, FileDown, Loader2, CopyPlus,
 } from "lucide-react";
 import { type ReportHistoryItem } from "@/lib/storage";
-import { generateReportFile, historyTemplateOptions } from "@/lib/pdf-generator";
+// PDF engine (pdfmake + fonts) loads on demand, warmed up when the history opens
+const loadPdf = () => import("@/lib/pdf-generator");
 import { ReportReadySheet } from "@/components/ReportReadySheet";
 import { parseTable, tableColumns, filledRows, tableSearchText, type TableValue } from "@/lib/table-field";
 import { prepareReuse } from "@/lib/reuse-report";
 import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
-  getCloudSnapshot, getCloudProfile, checkReportLimit,
+  getCloudSnapshot, getCloudProfile, checkReportLimit, getCloudReportSignatures,
 } from "@/lib/supabase-storage";
 import { downloadSnapshotImages, deleteReportImages } from "@/lib/image-storage";
 import { useAuth } from "@/hooks/use-auth";
@@ -63,7 +64,18 @@ export default function Reports() {
       .then(setReports)
       .catch(() => toast.error("Nie udało się załadować historii"))
       .finally(() => setLoading(false));
+    loadPdf().catch(() => {});
   }, []);
+
+  // The list comes without signature images — fetch them only for the report being opened
+  const [signaturesById, setSignaturesById] = useState<Record<string, Record<string, string | null>>>({});
+  useEffect(() => {
+    if (!expandedId || signaturesById[expandedId]) return;
+    const id = expandedId;
+    getCloudReportSignatures(id)
+      .then((sigs) => setSignaturesById((prev) => ({ ...prev, [id]: sigs })))
+      .catch(() => {});
+  }, [expandedId, signaturesById]);
 
   const filtered = reports.filter((r) => {
     const q = search.toLowerCase();
@@ -120,14 +132,18 @@ export default function Reports() {
     try {
       const limit = await checkReportLimit();
       const watermark = limit.plan === "free";
+      const { generateReportFile, historyTemplateOptions } = await loadPdf();
       const snapshot = await getCloudSnapshot(report.id);
       let result: { blob: Blob; meta: { filename: string } };
       if (snapshot) {
         const restored = await downloadSnapshotImages(snapshot);
         result = await generateReportFile(restored.profile, restored.draft, { ...restored.options, watermark });
       } else {
-        const profile = await getCloudProfile();
-        const { draft, options } = historyTemplateOptions(report, watermark);
+        const [profile, signatures] = await Promise.all([
+          getCloudProfile(),
+          signaturesById[report.id] ? Promise.resolve(signaturesById[report.id]) : getCloudReportSignatures(report.id),
+        ]);
+        const { draft, options } = historyTemplateOptions({ ...report, signatures }, watermark);
         result = await generateReportFile(profile, draft, options);
         toast("Ten raport nie ma zapisanej kopii zdjęć i podpisów — PDF odtworzony z samych danych.");
       }
@@ -245,11 +261,13 @@ export default function Reports() {
                           <span className="flex items-center gap-1"><Camera className="h-3 w-3" />{report.photosCount}</span>
                         )}
                         {report.signatureLabels && Object.keys(report.signatureLabels).length > 0 ? (
-                          <span className="flex items-center gap-1">
-                            <PenTool className="h-3 w-3" />
-                            {Object.values(report.signatures || {}).filter(Boolean).length}/{Object.keys(report.signatureLabels).length} podp.
-                          </span>
-                        ) : (report.hasSignature || (report.signatures && Object.values(report.signatures).some(Boolean))) ? (
+                          typeof report.signedCount === "number" ? (
+                            <span className="flex items-center gap-1">
+                              <PenTool className="h-3 w-3" />
+                              {report.signedCount}/{Object.keys(report.signatureLabels).length} podp.
+                            </span>
+                          ) : null
+                        ) : report.signedCount ? (
                           <span className="flex items-center gap-1"><PenTool className="h-3 w-3" />Podpis</span>
                         ) : null}
                       </div>
@@ -320,7 +338,7 @@ export default function Reports() {
                         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
                         <div className="flex flex-wrap gap-4">
                           {Object.entries(report.signatureLabels).map(([sigId, sigLabel]) => {
-                            const sigData = report.signatures?.[sigId];
+                            const sigData = signaturesById[report.id]?.[sigId];
                             return (
                               <div key={sigId} className="flex flex-col items-start gap-1">
                                 <span className="text-[11px] text-muted-foreground">{sigLabel || "Podpis"}</span>
@@ -334,11 +352,11 @@ export default function Reports() {
                           })}
                         </div>
                       </div>
-                    ) : report.signatures && Object.entries(report.signatures).some(([, v]) => !!v) ? (
+                    ) : Object.values(signaturesById[report.id] || {}).some((v) => !!v) ? (
                       <div className="space-y-2">
                         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
                         <div className="flex flex-wrap gap-4">
-                          {Object.entries(report.signatures).filter(([, v]) => !!v).map(([sigId, sigData]) => (
+                          {Object.entries(signaturesById[report.id] || {}).filter(([, v]) => !!v).map(([sigId, sigData]) => (
                             <div key={sigId} className="flex flex-col items-start gap-1">
                               <span className="text-[11px] text-muted-foreground">Podpis</span>
                               <img src={sigData!} alt="Podpis" className="h-14 w-auto border border-border rounded bg-white" />

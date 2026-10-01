@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Check, Zap, Infinity, Loader2, Droplet } from "lucide-react";
+import { ArrowLeft, Check, Zap, Infinity as InfinityIcon, Loader2, Droplet, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
 
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/9B600cb74csO1yW9x7es000";
+// Stripe customer portal login link (Stripe → Settings → Billing → Customer portal → "Activate link").
+// Set in Vercel as VITE_STRIPE_PORTAL_URL; without it the "Zarządzaj subskrypcją" button is hidden.
+const STRIPE_PORTAL_URL = (import.meta.env.VITE_STRIPE_PORTAL_URL as string | undefined)?.trim() || "";
 
 export default function Upgrade() {
   const navigate = useNavigate();
@@ -89,6 +92,21 @@ export default function Upgrade() {
           <h2 className="text-2xl font-bold">Plan Solo aktywny!</h2>
           <p className="text-muted-foreground mt-2">Generuj raporty bez limitu.</p>
           <Button className="mt-6" onClick={() => navigate("/")}>Wróć do aplikacji</Button>
+          {STRIPE_PORTAL_URL && (
+            <div className="mt-8 max-w-xs">
+              <a
+                href={`${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+              >
+                <Settings2 className="h-4 w-4" /> Zarządzaj subskrypcją
+              </a>
+              <p className="text-xs text-muted-foreground mt-2">
+                Faktury, karta płatnicza i anulowanie. Po anulowaniu plan działa do końca opłaconego okresu.
+              </p>
+            </div>
+          )}
         </main>
       </div>
     );
@@ -154,7 +172,7 @@ export default function Upgrade() {
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Infinity className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
+                <InfinityIcon className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Check className="h-4 w-4 text-accent shrink-0" /> Wszystkie szablony
@@ -187,7 +205,7 @@ export default function Upgrade() {
                 <Droplet className="h-4 w-4 text-accent shrink-0" /> <strong>Bez znaku wodnego</strong> na PDF
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Infinity className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
+                <InfinityIcon className="h-4 w-4 text-accent shrink-0" /> Raporty bez limitu
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Check className="h-4 w-4 text-accent shrink-0" /> Wszystko z planu Free

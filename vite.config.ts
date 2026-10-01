@@ -41,13 +41,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          pdfmake: ["pdfmake"],
-        },
-      },
-    },
-  },
+  // pdfmake is not split with manualChunks any more: that chunk also received shared
+  // helpers and was therefore loaded at start. The PDF engine is a dynamic import now.
 }));
