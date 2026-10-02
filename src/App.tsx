@@ -16,6 +16,7 @@ import SetNewPassword from "./pages/SetNewPassword";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { ConsentModal } from "./components/ConsentModal";
 import { hasAcceptedTerms, saveConsent } from "./lib/supabase-storage";
+import { wantsSolo, rememberSoloIntent, takeSoloIntent } from "./lib/plan-intent";
 
 /**
  * Screens other than the start ones load when first opened. After a new deploy an
@@ -94,15 +95,25 @@ function AppShell() {
       .catch(() => setConsentChecked(true));
   }, [user]);
 
-  // Redirect to pending import after login + consent
+  // "Wybierz Solo" from the landing page (/register?plan=solo): remember it until the user logs in
+  useEffect(() => {
+    if (!loading && !user && wantsSolo(location.search)) rememberSoloIntent();
+  }, [loading, user, location.search]);
+
+  // Redirect to pending import (or the Solo purchase page) after login + consent
   useEffect(() => {
     if (!user || !consentChecked || needsConsent) return;
     const pendingImport = localStorage.getItem("raporton_pending_import");
     if (pendingImport) {
       localStorage.removeItem("raporton_pending_import");
       navigate(`/t/${pendingImport}`, { replace: true });
+      return;
     }
+    if (takeSoloIntent()) navigate("/upgrade", { replace: true });
   }, [user, consentChecked, needsConsent, navigate]);
+
+  // Logged-in user opening /login or /register (e.g. "Wybierz Solo" on the landing page)
+  const afterAuthPath = wantsSolo(location.search) ? "/upgrade" : "/";
 
   if (loading) return <LoadingScreen />;
 
@@ -152,8 +163,8 @@ function AppShell() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/upgrade" element={<Upgrade />} />
           <Route path="/t/:code" element={<ImportTemplate />} />
-          <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/register" element={<Navigate to="/" replace />} />
+          <Route path="/login" element={<Navigate to={afterAuthPath} replace />} />
+          <Route path="/register" element={<Navigate to={afterAuthPath} replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
