@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, Check, Plus, X, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
+import { Upload, Check, Plus, X, ArrowUp, ArrowDown, Loader2, Zap } from "lucide-react";
 import { type CompanyProfile, type ProfileField } from "@/lib/storage";
-import { getCloudProfile, saveCloudProfile } from "@/lib/supabase-storage";
+import { getCloudProfile, saveCloudProfile, checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
@@ -16,6 +16,14 @@ const FIELD_SUGGESTIONS = [
   { label: "Osoba kontaktowa", placeholder: "np. Jan Kowalski" },
 ];
 
+/** "Został 1 dzień" / "Zostały 3 dni" / "Zostało 5 dni" */
+function trialLeftText(n: number): string {
+  if (n === 1) return "Został 1 dzień";
+  const lastTwo = n % 100;
+  const few = n % 10 >= 2 && n % 10 <= 4 && (lastTwo < 12 || lastTwo > 14);
+  return `${few ? "Zostały" : "Zostało"} ${n} dni`;
+}
+
 export default function Profile() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -24,11 +32,16 @@ export default function Profile() {
   const fileRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
+  const [planInfo, setPlanInfo] = useState<{ plan: string; trialDaysLeft?: number } | null>(null);
+
   useEffect(() => {
     getCloudProfile()
       .then((p) => setProfile(p))
       .catch(() => toast.error("Nie udało się załadować profilu"))
       .finally(() => setLoading(false));
+    checkReportLimit()
+      .then((info) => setPlanInfo({ plan: info.plan, trialDaysLeft: info.trialDaysLeft }))
+      .catch(() => {});
   }, []);
 
   const update = (next: CompanyProfile) => {
@@ -223,6 +236,39 @@ export default function Profile() {
           className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
           <Check className="h-5 w-5" /> Zapisano automatycznie
         </button>
+
+        {/* Plan */}
+        {planInfo && (
+          <div className="space-y-2 pt-2">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Plan</p>
+            <div className="rounded-2xl glass-card p-4 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">
+                  {planInfo.plan === "solo" ? "Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Free"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {planInfo.plan === "solo"
+                    ? "Raporty bez znaku wodnego"
+                    : planInfo.plan === "trial"
+                      ? `${trialLeftText(planInfo.trialDaysLeft ?? 0)}, potem PDF ze znakiem wodnym`
+                      : "Każdy PDF ma znak wodny „RaportON.pl”"}
+                </p>
+              </div>
+              {planInfo.plan === "solo" ? (
+                <button onClick={() => navigate("/upgrade")} className="shrink-0 text-sm font-medium text-accent hover:underline">
+                  Szczegóły planu
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate("/upgrade")}
+                  className="shrink-0 h-10 px-4 rounded-xl bg-accent text-white text-sm font-medium flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+                >
+                  <Zap className="h-4 w-4" /> Przejdź na Solo
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Account */}
         <div className="space-y-3 pt-2">

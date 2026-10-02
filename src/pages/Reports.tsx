@@ -145,7 +145,7 @@ export default function Reports() {
         ]);
         const { draft, options } = historyTemplateOptions({ ...report, signatures }, watermark);
         result = await generateReportFile(profile, draft, options);
-        toast("Ten raport nie ma zapisanej kopii zdjęć i podpisów — PDF odtworzony z samych danych.");
+        toast("Ten raport nie ma zapisanej kopii zdjęć i podpisów - PDF odtworzony z samych danych.");
       }
       setReady({
         blob: result.blob,
@@ -166,7 +166,7 @@ export default function Reports() {
     try {
       const url = await prepareReuse(report);
       if (url) navigate(url);
-      else toast.error("Szablon tego raportu już nie istnieje — nie da się skopiować danych.");
+      else toast.error("Szablon tego raportu już nie istnieje - nie da się skopiować danych.");
     } catch {
       toast.error("Nie udało się wczytać raportu");
     } finally {
@@ -380,7 +380,7 @@ export default function Reports() {
                         size="sm"
                         disabled={busyId === report.id}
                         onClick={(e) => { e.stopPropagation(); startFrom(report); }}
-                        title="Kolejny przegląd u tego klienta — dane klienta i urządzenia będą już wpisane"
+                        title="Kolejny przegląd u tego klienta - dane klienta i urządzenia będą już wpisane"
                       >
                         <CopyPlus className="h-3.5 w-3.5 mr-1.5" /> Nowy na podstawie
                       </Button>

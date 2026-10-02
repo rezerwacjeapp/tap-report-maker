@@ -22,16 +22,16 @@ const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
 };
 
 const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
-  text: "Krótkie pole tekstowe — np. nazwa klienta, adres, numer seryjny.",
-  textarea: "Długie pole na opis — np. uwagi, zalecenia, stan techniczny.",
-  date: "Pole daty — np. data wykonania, data następnego przeglądu.",
-  number: "Pole liczbowe — np. powierzchnia, ilość, rok produkcji.",
-  tiles: "Sekcja z checkboxami do odhaczania — np. lista czynności serwisowych.",
-  photos: "Dokumentacja fotograficzna — osobne zdjęcia dla tej sekcji raportu.",
-  signature: "Pole na podpis palcem — np. podpis klienta, serwisanta, inspektora.",
-  heading: "Nagłówek sekcji — pogrubiony tekst dzielący raport na części.",
-  info: "Blok tekstu informacyjnego — np. podstawa prawna, uwagi, instrukcje.",
-  table: "Tabela z kolumnami — np. wyniki pomiarów per obwód, lista gaśnic, stany liczników.",
+  text: "Krótkie pole tekstowe - np. nazwa klienta, adres, numer seryjny.",
+  textarea: "Długie pole na opis - np. uwagi, zalecenia, stan techniczny.",
+  date: "Pole daty - np. data wykonania, data następnego przeglądu.",
+  number: "Pole liczbowe - np. powierzchnia, ilość, rok produkcji.",
+  tiles: "Sekcja z checkboxami do odhaczania - np. lista czynności serwisowych.",
+  photos: "Dokumentacja fotograficzna - osobne zdjęcia dla tej sekcji raportu.",
+  signature: "Pole na podpis palcem - np. podpis klienta, serwisanta, inspektora.",
+  heading: "Nagłówek sekcji - pogrubiony tekst dzielący raport na części.",
+  info: "Blok tekstu informacyjnego - np. podstawa prawna, uwagi, instrukcje.",
+  table: "Tabela z kolumnami - np. wyniki pomiarów per obwód, lista gaśnic, stany liczników.",
 };
 
 
@@ -328,7 +328,7 @@ export default function EditTemplate() {
     if (emptyTable) { toast.error(`Tabela „${emptyTable.label || "bez nazwy"}" nie ma nazwanej kolumny`); return; }
     await saveUserTemplate({ ...template, fields });
     toast.success(pending.fields.length
-      ? `Szablon zapisany — dodano też: ${pending.fields.map((f) => f.label || FIELD_TYPE_LABELS[f.type]).join(", ")}`
+      ? `Szablon zapisany - dodano też: ${pending.fields.map((f) => f.label || FIELD_TYPE_LABELS[f.type]).join(", ")}`
       : "Szablon zapisany!");
     navigate("/select-template");
   };
@@ -400,7 +400,7 @@ export default function EditTemplate() {
           </div>
 
           <main className="flex-1 px-5 pb-6 overflow-y-auto space-y-4 min-h-0">
-        <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Strzałkami ↑↓ zmień kolejność — ta sama kolejność będzie w raporcie i PDF.</p>
+        <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Strzałkami ↑↓ zmień kolejność - ta sama kolejność będzie w raporcie i PDF.</p>
 
         {getFieldCategories().map((cat) => {
           const blocks = FIELD_CATALOG.filter((b) => b.category === cat);
@@ -493,7 +493,7 @@ export default function EditTemplate() {
             <Table2 className={`h-5 w-5 shrink-0 ${expandedAddType === "table" ? "text-accent" : "text-muted-foreground"}`} />
             <div>
               <span className="text-xs font-medium">Tabela</span>
-              <span className="text-[10px] text-muted-foreground block">Kolumny ustalasz tu, wiersze dodajesz w terenie — np. pomiary per obwód</span>
+              <span className="text-[10px] text-muted-foreground block">Kolumny ustalasz tu, wiersze dodajesz w terenie - np. pomiary per obwód</span>
             </div>
           </button>
 
@@ -532,7 +532,7 @@ export default function EditTemplate() {
                 className="w-full min-h-[100px] rounded-xl border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:border-accent resize-y"
                 value={stagingInfoContent}
                 onChange={(e) => setStagingInfoContent(e.target.value)}
-                placeholder="Treść tekstu — np. Kontrolę należy wykonywać w porze wiosennej..."
+                placeholder="Treść tekstu - np. Kontrolę należy wykonywać w porze wiosennej..."
               />
               <Button variant="accent" onClick={() => {
                 if (!newFieldLabel.trim() && !stagingInfoContent.trim()) return;
@@ -573,7 +573,7 @@ export default function EditTemplate() {
                 <input
                   ref={addFieldInputRef}
                   className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
-                  placeholder="Inna nazwa — np. Podpis świadka"
+                  placeholder="Inna nazwa - np. Podpis świadka"
                   value={newFieldLabel}
                   onChange={(e) => setNewFieldLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField("signature"); }}
@@ -586,7 +586,7 @@ export default function EditTemplate() {
           {/* === Expanded panel for TABLE === */}
           {expandedAddType === "table" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2.5">
-              <input className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:border-accent" placeholder="Nazwa tabeli — np. Stany liczników" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
+              <input className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:border-accent" placeholder="Nazwa tabeli - np. Stany liczników" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
               <TableGridBuilder columns={stagingGrid.tableColumns} rows={stagingGrid.tableRows} onChange={setStagingGrid} />
               <Button variant="accent" size="sm" onClick={commitTableSection} className="w-full" disabled={!canAddTable}>
                 <Plus className="h-4 w-4 mr-1" /> Dodaj tabelę
@@ -603,7 +603,7 @@ export default function EditTemplate() {
           {expandedAddType === "tiles" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
               <p className="text-xs text-muted-foreground">Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
-              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji — np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
+              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji - np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
 
               {stagingTiles.length > 0 && (
                 <div className="space-y-1 border-l-2 border-accent/30 pl-3 ml-1">
@@ -618,7 +618,7 @@ export default function EditTemplate() {
               )}
 
               <div className="flex gap-1.5">
-                <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności — np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
+                <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności - np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") addStagingTile(); }} />
                 <Button variant="outline" size="icon" onClick={addStagingTile} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
               </div>
@@ -674,7 +674,7 @@ export default function EditTemplate() {
                 {field.type === "tiles" && (
                   <div className="ml-6 mt-1 mb-2 space-y-1.5 border-l-2 border-accent/30 pl-3">
                     {(field.tileOptions || []).length === 0 && (
-                      <p className="text-xs text-muted-foreground py-1">Brak czynności — dodaj poniżej.</p>
+                      <p className="text-xs text-muted-foreground py-1">Brak czynności - dodaj poniżej.</p>
                     )}
                     {(field.tileOptions || []).map((tile) => (
                       <div key={tile.id} className="flex items-center gap-2 text-sm">

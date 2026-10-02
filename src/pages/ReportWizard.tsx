@@ -225,7 +225,7 @@ export default function ReportWizard() {
     const d: ReportDraft = { ...saved, signatures: {} };
     saveDraft(d);
     setDraft(d);
-    if (resumeHasSignatures) toast("Podpisy z przerwanego raportu zostały usunięte — zbierz je ponownie.");
+    if (resumeHasSignatures) toast("Podpisy z przerwanego raportu zostały usunięte - zbierz je ponownie.");
     if (d.additionalNotes?.trim()) setShowNotes(true);
     // Expand tile notes that have content
     const notesWithContent = Object.entries(d.tileNotes || {}).filter(([, v]) => v?.trim()).map(([k]) => k);
@@ -403,7 +403,7 @@ export default function ReportWizard() {
       finishedRef.current = true;
       clearInterval(autoSaveRef.current);
       clearDraft();
-      toast.success("Raport zapisany — dokończysz później");
+      toast.success("Raport zapisany - dokończysz później");
       navigate("/");
     } catch (err) {
       console.error("Draft save error:", err);
@@ -538,7 +538,7 @@ export default function ReportWizard() {
           <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
             <History className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-sm flex-1">
-              Dane klienta i urządzenia skopiowane z {reuseInfo}. Pola oznaczone <strong>„z poprzedniego"</strong> sprawdź przed wygenerowaniem — pomiary, oceny, czynności i podpisy zaczynają się od zera.
+              Dane klienta i urządzenia skopiowane z {reuseInfo}. Pola oznaczone <strong>„z poprzedniego"</strong> sprawdź przed wygenerowaniem - pomiary, oceny, czynności i podpisy zaczynają się od zera.
             </p>
             <button onClick={() => setReuseInfo(null)} className="p-1 -m-1 text-muted-foreground hover:text-foreground" aria-label="Zamknij informację">
               <X className="h-4 w-4" />

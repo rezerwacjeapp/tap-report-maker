@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { BrandLockup } from "@/components/BrandLogo";
+import { hasSoloIntent } from "@/lib/plan-intent";
 
 function GoogleIcon() {
   return (
@@ -67,7 +68,7 @@ export default function Login() {
       }
     } else {
       failCountRef.current = 0;
-      navigate("/");
+      navigate(hasSoloIntent() ? "/upgrade" : "/");
     }
   };
 
@@ -122,7 +123,7 @@ export default function Login() {
       <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center space-y-2">
-            <a href="https://raporton.pl" className="inline-block" aria-label="RaportON — strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+            <a href="https://raporton.pl" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
             <p className="text-sm text-muted-foreground">Resetowanie hasła</p>
           </div>
 
@@ -175,7 +176,7 @@ export default function Login() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
-          <a href="https://raporton.pl" className="inline-block" aria-label="RaportON — strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <a href="https://raporton.pl" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
           <p className="text-sm text-muted-foreground">Protokoły serwisowe w 60 sekund</p>
         </div>
 

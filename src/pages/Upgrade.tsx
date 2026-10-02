@@ -138,7 +138,7 @@ export default function Upgrade() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Pełny dostęp — raporty bez znaku wodnego. Po zakończeniu raporty będą miały znak wodny, chyba że przejdziesz na Solo.
+                  Pełny dostęp - raporty bez znaku wodnego. Po zakończeniu raporty będą miały znak wodny, chyba że przejdziesz na Solo.
                 </p>
               </>
             ) : (
@@ -220,7 +220,7 @@ export default function Upgrade() {
               className="w-full mt-6 h-12 rounded-xl bg-accent text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg"
             >
               <Zap className="h-5 w-5" />
-              Przejdź na Solo — 19 zł/mc
+              Przejdź na Solo - 19 zł/mc
             </button>
           </div>
         </div>

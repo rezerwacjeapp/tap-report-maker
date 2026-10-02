@@ -101,7 +101,7 @@ export default function Register() {
       <div className="w-full max-w-sm space-y-8">
         {/* Brand */}
         <div className="text-center space-y-2">
-          <a href="https://raporton.pl" className="inline-block" aria-label="RaportON — strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <a href="https://raporton.pl" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
           <p className="text-sm text-muted-foreground">Utwórz darmowe konto</p>
         </div>
 

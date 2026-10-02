@@ -99,7 +99,7 @@ const Index = () => {
   };
 
   const smsHref = (r: InspectionReminder) => {
-    const body = `Dzień dobry, zbliża się termin przeglądu (${r.templateName.toLowerCase()}) — ${formatDatePL(r.dueDate)}. Kiedy mogę przyjechać?${companyName ? ` ${companyName}` : ""}`;
+    const body = `Dzień dobry, zbliża się termin przeglądu (${r.templateName.toLowerCase()}) - ${formatDatePL(r.dueDate)}. Kiedy mogę przyjechać?${companyName ? ` ${companyName}` : ""}`;
     return `sms:${r.phone}?&body=${encodeURIComponent(body)}`;
   };
 
@@ -154,6 +154,53 @@ const Index = () => {
     } catch { return ""; }
   };
 
+  // Plan bar: free / trial users see it right under "Nowy raport" (with "Przejdź na Solo"),
+  // Solo users keep it lower on the page.
+  const planBar = planInfo && (
+    <div className="rounded-2xl glass-card p-4">
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+            {planInfo.plan === "solo" ? "Plan Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Plan Free"}
+          </span>
+          {planInfo.plan === "trial" && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-semibold whitespace-nowrap">
+              {planInfo.trialDaysLeft} {planInfo.trialDaysLeft === 1 ? "dzień" : "dni"} pozostało
+            </span>
+          )}
+          {planInfo.plan === "free" && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold whitespace-nowrap">
+              ze znakiem wodnym
+            </span>
+          )}
+        </div>
+        {(planInfo.plan === "free" || planInfo.plan === "trial") && (
+          <button
+            onClick={() => navigate("/upgrade")}
+            className="shrink-0 flex items-center gap-1 text-xs font-medium text-accent hover:underline whitespace-nowrap"
+          >
+            <Zap className="h-3 w-3" />
+            Przejdź na Solo
+          </button>
+        )}
+      </div>
+
+      {planInfo.plan === "trial" ? (
+        <p className="text-[11px] text-muted-foreground">
+          Pełny dostęp przez 7 dni - raporty bez znaku wodnego. Potem: nielimitowane raporty ze znakiem lub Solo bez znaku.
+        </p>
+      ) : planInfo.plan === "free" ? (
+        <p className="text-[11px] text-muted-foreground">
+          Generujesz raporty bez limitu. Każdy PDF ma znak wodny „RaportON.pl". Przejdź na Solo, aby go usunąć.
+        </p>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Raporty bez limitu i bez znaku wodnego
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
@@ -202,6 +249,9 @@ const Index = () => {
             <ChevronRight className="h-5 w-5 text-white/60" />
           </div>
         </button>
+
+        {/* Plan bar (Free / trial) - "Przejdź na Solo" right under "Nowy raport" */}
+        {planInfo && planInfo.plan !== "solo" && planBar}
 
         {/* Saved drafts */}
         {cloudDrafts.length > 0 && (
@@ -312,57 +362,14 @@ const Index = () => {
           </div>
           <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">
-              {reports.length > 0 ? formatDate(reports[0].date) : "—"}
+              {reports.length > 0 ? formatDate(reports[0].date) : "-"}
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Ostatni</p>
           </div>
         </div>
 
-        {/* Plan limit bar */}
-        {planInfo && (
-          <div className="rounded-2xl glass-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {planInfo.plan === "solo" ? "Plan Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Plan Free"}
-                </span>
-                {planInfo.plan === "trial" && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-semibold">
-                    {planInfo.trialDaysLeft} {planInfo.trialDaysLeft === 1 ? "dzień" : "dni"} pozostało
-                  </span>
-                )}
-                {planInfo.plan === "free" && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold">
-                    ze znakiem wodnym
-                  </span>
-                )}
-              </div>
-              {(planInfo.plan === "free" || planInfo.plan === "trial") && (
-                <button
-                  onClick={() => navigate("/upgrade")}
-                  className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
-                >
-                  <Zap className="h-3 w-3" />
-                  Przejdź na Solo
-                </button>
-              )}
-            </div>
-
-            {planInfo.plan === "trial" ? (
-              <p className="text-[11px] text-muted-foreground">
-                Pełny dostęp przez 7 dni — raporty bez znaku wodnego. Potem: nielimitowane raporty ze znakiem lub Solo bez znaku.
-              </p>
-            ) : planInfo.plan === "free" ? (
-              <p className="text-[11px] text-muted-foreground">
-                Generujesz raporty bez limitu. Każdy PDF ma znak wodny „RaportON.pl". Przejdź na Solo, aby go usunąć.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Raporty bez limitu i bez znaku wodnego
-              </p>
-            )}
-          </div>
-        )}
+        {/* Plan bar (Solo) */}
+        {planInfo?.plan === "solo" && planBar}
 
         {/* Recent reports */}
         {recentReports.length > 0 && (
@@ -449,7 +456,7 @@ const Index = () => {
           <p className="text-sm">
             <strong>Potrzebujesz szablonu?</strong> Wyślij swój raport na{" "}
             <span className="text-accent font-semibold">kontakt.raporton@gmail.com</span>{" "}
-            — przygotujemy szablon za Ciebie.
+            - przygotujemy szablon za Ciebie.
           </p>
         </div>
       </main>

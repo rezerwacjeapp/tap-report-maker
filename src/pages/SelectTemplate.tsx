@@ -178,7 +178,7 @@ export default function SelectTemplate() {
           <p className="text-sm">
             <strong>Potrzebujesz szablonu?</strong> Wyślij swój raport na{" "}
             <span className="text-accent font-semibold">kontakt.raporton@gmail.com</span>{" "}
-            — przygotujemy szablon za Ciebie.
+            - przygotujemy szablon za Ciebie.
           </p>
         </div>
 
