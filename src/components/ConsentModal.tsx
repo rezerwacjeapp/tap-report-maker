@@ -37,7 +37,7 @@ export function ConsentModal({ onAccepted }: Props) {
           <h2 className="flex justify-center">
             <BrandLockup markClassName="h-7 w-auto" textClassName="text-xl" />
           </h2>
-          <p className="text-sm text-muted-foreground">Jeszcze tylko krok — potwierdź poniżej</p>
+          <p className="text-sm text-muted-foreground">Jeszcze tylko krok - potwierdź poniżej</p>
         </div>
 
         <div className="space-y-3">

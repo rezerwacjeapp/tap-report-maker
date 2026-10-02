@@ -77,7 +77,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
   };
 
   if (!cols.length) {
-    return <p className="text-xs text-muted-foreground">Ta tabela nie ma jeszcze kolumn — dodaj je w edytorze szablonu.</p>;
+    return <p className="text-xs text-muted-foreground">Ta tabela nie ma jeszcze kolumn - dodaj je w edytorze szablonu.</p>;
   }
 
   const cellBase = "block w-full min-h-11 bg-transparent px-2.5 text-[15px] focus:outline-none focus:bg-accent/5 focus:ring-2 focus:ring-inset focus:ring-accent rounded-none";
@@ -123,7 +123,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                       value={v}
                       onChange={(e) => setCell(row._k, c.id, e.target.value)}
                     >
-                      <option value="">—</option>
+                      <option value="">-</option>
                       {c.options.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   ) : active === cellKey ? (
@@ -166,7 +166,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                             <button
                               type="button"
                               className="ml-1.5 shrink-0 h-7 min-w-[1.75rem] px-1 rounded-md bg-muted text-[11px] font-bold text-muted-foreground hover:text-foreground"
-                              aria-label={`Wiersz ${ri + 1} — opcje`}
+                              aria-label={`Wiersz ${ri + 1} - opcje`}
                             >
                               {ri + 1}
                             </button>

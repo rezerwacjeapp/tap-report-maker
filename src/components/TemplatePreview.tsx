@@ -182,7 +182,7 @@ export function TemplatePreview({
       if (!cols.length) {
         return mode === "edit" ? (
           <div key={field.id} style={{ margin: "10px 0 12px", fontSize: 13, color: "#cbd5e1", fontStyle: "italic" }}>
-            {field.label || "Tabela"} — dodaj kolumny
+            {field.label || "Tabela"} - dodaj kolumny
           </div>
         ) : null;
       }
@@ -407,7 +407,7 @@ export function TemplatePreview({
           {/* fields */}
           {fields.length === 0 ? (
             <div style={{ fontSize: 13, color: "#cbd5e1", fontStyle: "italic", padding: "24px 0" }}>
-              Dodaj pola — pojawią się tutaj na podglądzie.
+              Dodaj pola - pojawią się tutaj na podglądzie.
             </div>
           ) : (
             fields.map((f, i) => renderField(f, i))

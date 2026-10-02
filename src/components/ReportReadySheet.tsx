@@ -56,7 +56,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
       await navigator.share({ files: [file], title: filename.replace(/\.pdf$/i, "") });
     } catch (err: any) {
       if (err?.name !== "AbortError") {
-        toast.error("Telefon nie pozwolił udostępnić pliku — pobierz PDF i wyślij go ręcznie.");
+        toast.error("Telefon nie pozwolił udostępnić pliku - pobierz PDF i wyślij go ręcznie.");
       }
     } finally {
       setSharing(false);
@@ -116,7 +116,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
               >
                 <Send className="h-5 w-5" /> Wyślij klientowi
               </button>
-              <p className="text-[11px] text-muted-foreground text-center -mt-0.5">WhatsApp, e-mail, SMS — wybierasz w telefonie</p>
+              <p className="text-[11px] text-muted-foreground text-center -mt-0.5">WhatsApp, e-mail, SMS - wybierasz w telefonie</p>
               <button
                 onClick={handleDownload}
                 className="w-full h-11 rounded-xl border border-border font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors"
