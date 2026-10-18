@@ -20,6 +20,13 @@ const COLORS = {
   gray: "#6b7280",
 };
 
+/**
+ * Watermark colors: COLORS.primary and COLORS.accent at 13% on white, as solid colors.
+ * SVG opacity becomes a PDF transparency group, which some phone PDF viewers skip,
+ * so the watermark vanished there. Drawn behind the content it looks the same.
+ */
+const WATERMARK_COLORS = { primary: "#e2e3e5", accent: "#e4f2ec" };
+
 /** Roboto in pdfmake has no "→" — swap it for a glyph it has, so the PDF shows no empty boxes. */
 const pdfSafe = (t: string) => (t || "").replace(/\u2192/g, "›");
 
@@ -517,11 +524,11 @@ export function buildReportDocument(
         const cy = h / 2;
         const svg =
           `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">` +
-          `<g transform="rotate(-35 ${cx} ${cy})" opacity="0.13">` +
+          `<g transform="rotate(-35 ${cx} ${cy})">` +
           `<text x="${cx}" y="${cy}" font-size="64" font-weight="bold" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" dominant-baseline="middle">` +
-          `<tspan fill="${COLORS.primary}">Raport</tspan>` +
-          `<tspan dx="0" fill="${COLORS.accent}">ON</tspan>` +
-          `<tspan dx="0" fill="${COLORS.primary}">.pl</tspan>` +
+          `<tspan fill="${WATERMARK_COLORS.primary}">Raport</tspan>` +
+          `<tspan dx="0" fill="${WATERMARK_COLORS.accent}">ON</tspan>` +
+          `<tspan dx="0" fill="${WATERMARK_COLORS.primary}">.pl</tspan>` +
           `</text></g></svg>`;
         return { svg, width: w, height: h, absolutePosition: { x: 0, y: 0 } };
       }
