@@ -45,6 +45,10 @@
     ul li { margin-bottom: 0.4rem; }
     p { margin-bottom: 1rem; }
     a { color: var(--accent); }
+    ol[type="a"] { list-style: lower-alpha; margin-top: 0.5rem; }
+    .annex { border: 1px dashed #cbd5e1; border-radius: 1rem; padding: 1.25rem 1.5rem; margin-top: 0.5rem; background: rgba(255,255,255,0.5); }
+    .annex p { margin-bottom: 0.6rem; }
+    .annex p:last-child { margin-bottom: 0; }
 
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
     footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
@@ -64,26 +68,29 @@
 <main>
   <div class="content-card">
     <h1>Regulamin serwisu RaportON</h1>
-    <p class="subtitle">Ostatnia aktualizacja: 18 października 2026</p>
+    <p class="subtitle">Ostatnia aktualizacja: 19 października 2026</p>
 
     <h2>§ 1. Postanowienia ogólne</h2>
     <ol>
-      <li>Niniejszy Regulamin określa zasady korzystania z serwisu internetowego RaportON dostępnego pod adresem <strong>raporton.pl</strong> (dalej: „Serwis") oraz aplikacji webowej (PWA) udostępnianej za jego pośrednictwem (dalej: „Aplikacja").</li>
-      <li>Właścicielem i operatorem Serwisu jest <strong>Andrzej Król</strong>, zamieszkały/a pod adresem: ul. Słoneczna 10a 33-383 Tylicz, adres e-mail: <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a> (dalej: „Usługodawca"). Usługodawca prowadzi działalność nierejestrowaną w rozumieniu art. 5 ust. 1 ustawy z dnia 6 marca 2018 r. - Prawo przedsiębiorców.</li>
-      <li>Korzystanie z Serwisu i Aplikacji oznacza akceptację niniejszego Regulaminu. Jeżeli nie zgadzasz się z jego postanowieniami, prosimy o niekorzystanie z Serwisu.</li>
-      <li>Regulamin jest udostępniany nieodpłatnie na stronie raporton.pl/regulamin w sposób umożliwiający jego pozyskanie, odtwarzanie i utrwalanie.</li>
+      <li>Niniejszy Regulamin określa zasady korzystania z serwisu internetowego <strong>RaportON</strong> dostępnego pod adresem <strong>raporton.pl</strong> (dalej: „Serwis”) oraz aplikacji webowej (PWA) udostępnianej za jego pośrednictwem (dalej: „Aplikacja”).</li>
+      <li>Właścicielem i operatorem Serwisu jest <strong>Andrzej Król</strong>, zamieszkały pod adresem: ul. Słoneczna 10a, 33-383 Tylicz, adres e-mail: <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a> (dalej: „Usługodawca”). Usługodawca prowadzi działalność nierejestrowaną w rozumieniu art. 5 ust. 1 ustawy z dnia 6 marca 2018 r. - Prawo przedsiębiorców.</li>
+      <li>Regulamin jest regulaminem, o którym mowa w art. 8 ustawy z dnia 18 lipca 2002 r. o świadczeniu usług drogą elektroniczną. Umowa o świadczenie Usługi zostaje zawarta z chwilą rejestracji Konta, po zaakceptowaniu Regulaminu.</li>
+      <li>Regulamin jest udostępniany nieodpłatnie na stronie raporton.pl/regulamin w sposób umożliwiający jego pozyskanie, odtwarzanie i utrwalanie, np. przez zapisanie lub wydrukowanie strony w przeglądarce.</li>
     </ol>
 
     <h2>§ 2. Definicje</h2>
-    <ol>
+    <ul>
       <li><strong>Użytkownik</strong> - osoba fizyczna, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, która korzysta z Serwisu po utworzeniu Konta.</li>
+      <li><strong>Konsument</strong> - Użytkownik będący osobą fizyczną, który zawiera umowę z Usługodawcą w celu niezwiązanym bezpośrednio z jego działalnością gospodarczą lub zawodową (art. 22<sup>1</sup> Kodeksu cywilnego).</li>
+      <li><strong>Przedsiębiorca na prawach konsumenta</strong> - Użytkownik będący osobą fizyczną, który zawiera umowę bezpośrednio związaną ze swoją działalnością gospodarczą, gdy z treści tej umowy wynika, że nie ma ona dla niego charakteru zawodowego, wynikającego w szczególności z przedmiotu wykonywanej działalności gospodarczej, udostępnionego na podstawie przepisów o Centralnej Ewidencji i Informacji o Działalności Gospodarczej.</li>
+      <li><strong>Usługa</strong> - usługa świadczona przez Usługodawcę drogą elektroniczną za pośrednictwem Serwisu i Aplikacji, w tym prowadzenie Konta i Plan Solo.</li>
       <li><strong>Konto</strong> - indywidualne konto Użytkownika w Serwisie, utworzone w procesie rejestracji, umożliwiające korzystanie z Aplikacji.</li>
       <li><strong>Raport</strong> - dokument serwisowy (protokół, sprawozdanie, przegląd) wygenerowany przez Użytkownika za pomocą Aplikacji w formacie PDF.</li>
       <li><strong>Szablon</strong> - predefiniowany wzór Raportu dostępny w Aplikacji, dostosowany do określonego rodzaju usług serwisowych.</li>
       <li><strong>Plan</strong> - wybrany przez Użytkownika wariant dostępu do Aplikacji (Okres próbny, Plan Darmowy, Plan Solo), określający zakres dostępnych funkcji.</li>
       <li><strong>Okres próbny</strong> - 7-dniowy okres od daty rejestracji Konta, w którym Użytkownik ma nieograniczony dostęp do wszystkich funkcji Aplikacji bez opłat.</li>
-      <li><strong>Subskrypcja</strong> - odpłatny dostęp do Planu Solo, rozliczany w cyklu miesięcznym.</li>
-    </ol>
+      <li><strong>Subskrypcja</strong> - odpłatny dostęp do Planu Solo, rozliczany w cyklu miesięcznym i odnawiany automatycznie do czasu anulowania.</li>
+    </ul>
 
     <h2>§ 3. Warunki techniczne</h2>
     <ol>
@@ -100,11 +107,11 @@
 
     <h2>§ 4. Rejestracja i Konto</h2>
     <ol>
-      <li>Rejestracja Konta wymaga podania adresu e-mail oraz ustalenia hasła.</li>
+      <li>Rejestracja Konta wymaga podania adresu e-mail i ustalenia hasła albo zalogowania się kontem Google, a także zaakceptowania Regulaminu.</li>
       <li>Użytkownik zobowiązany jest do podania prawdziwych danych oraz do zachowania poufności danych logowania do Konta.</li>
       <li>Użytkownik ponosi odpowiedzialność za wszelkie działania wykonane za pośrednictwem swojego Konta.</li>
       <li>Jedno Konto jest przypisane do jednego Użytkownika. Udostępnianie Konta osobom trzecim jest zabronione.</li>
-      <li>Usługodawca zastrzega sobie prawo do zawieszenia lub usunięcia Konta w przypadku naruszenia postanowień Regulaminu.</li>
+      <li>Usługodawca może zawiesić lub usunąć Konto, jeżeli Użytkownik rażąco lub uporczywie narusza Regulamin, w szczególności dostarcza treści o charakterze bezprawnym, po bezskutecznym wezwaniu do zaprzestania naruszeń, o ile takie wezwanie jest możliwe. Usunięcie Konta z tej przyczyny oznacza rozwiązanie umowy.</li>
     </ol>
 
     <h2>§ 5. Plany i cennik</h2>
@@ -112,21 +119,23 @@
       <li>Po rejestracji Konta Użytkownik otrzymuje <strong>Okres próbny</strong> trwający 7 dni kalendarzowych, w trakcie którego ma nieograniczony dostęp do wszystkich funkcji Aplikacji.</li>
       <li>Po zakończeniu Okresu próbnego Użytkownik może korzystać z Aplikacji w ramach jednego z następujących Planów:
         <ul>
-          <li><strong>Plan Darmowy</strong> - umożliwia generowanie nieograniczonej liczby Raportów bez opłat, przy czym każdy wygenerowany Raport PDF zawiera znak wodny z oznaczeniem „RaportON.pl";</li>
-          <li><strong>Plan Solo</strong> - umożliwia generowanie nieograniczonej liczby Raportów bez znaku wodnego, w cenie 19 PLN brutto miesięcznie.</li>
+          <li><strong>Plan Darmowy</strong> - umożliwia generowanie nieograniczonej liczby Raportów bez opłat, przy czym każdy wygenerowany Raport PDF zawiera znak wodny z oznaczeniem „RaportON.pl”;</li>
+          <li><strong>Plan Solo</strong> - umożliwia generowanie nieograniczonej liczby Raportów bez znaku wodnego, w cenie <strong>19 zł miesięcznie</strong>.</li>
         </ul>
       </li>
-      <li>Usługodawca zastrzega sobie prawo do zmiany cennika. O zmianach Użytkownik zostanie poinformowany z co najmniej 14-dniowym wyprzedzeniem drogą e-mailową. Zmiana cennika nie wpływa na już opłacone okresy Subskrypcji.</li>
+      <li>Ceny podane w Serwisie są cenami końcowymi. Usługodawca korzysta ze zwolnienia z podatku VAT na podstawie art. 113 ust. 1 ustawy z dnia 11 marca 2004 r. o podatku od towarów i usług.</li>
+      <li>Usługodawca może zmienić cenę Planu Solo z ważnych przyczyn, takich jak wzrost kosztów utrzymania Serwisu (hosting, infrastruktura, obsługa płatności), zmiana przepisów prawa lub podatków albo istotne rozszerzenie funkcji Aplikacji. O zmianie Użytkownik zostanie poinformowany e-mailem co najmniej 14 dni przed jej wejściem w życie. Nowa cena obowiązuje od pierwszego okresu rozliczeniowego rozpoczynającego się po tym terminie. Użytkownik, który nie akceptuje nowej ceny, może przed jej wejściem w życie anulować Subskrypcję - Subskrypcja wygasa wtedy z końcem opłaconego okresu, bez dodatkowych kosztów.</li>
       <li>Znak wodny w Planie Darmowym jest usuwany z generowanych Raportów po wykupieniu Planu Solo i przez cały okres jego aktywności. Po zakończeniu lub anulowaniu Subskrypcji Raporty ponownie generowane są ze znakiem wodnym.</li>
     </ol>
 
     <h2>§ 6. Płatności i Subskrypcja</h2>
     <ol>
-      <li>Płatności za Plan Solo obsługiwane są przez zewnętrznego operatora płatności <strong>Stripe</strong> (Stripe, Inc.). Usługodawca nie przechowuje danych kart płatniczych Użytkowników.</li>
-      <li>Subskrypcja Planu Solo jest odnawiana automatycznie co miesiąc, aż do momentu jej anulowania przez Użytkownika.</li>
+      <li>Płatności za Plan Solo obsługuje zewnętrzny operator płatności <strong>Stripe</strong> (Stripe Payments Europe, Limited z siedzibą w Irlandii). Usługodawca nie przechowuje danych kart płatniczych Użytkowników.</li>
+      <li>Przed zakupem Użytkownik widzi cenę Planu Solo, informację o automatycznym odnawianiu Subskrypcji i sposobie jej anulowania oraz link do Regulaminu. Zakup następuje na stronie płatności Stripe. Umowa o Plan Solo zostaje zawarta z chwilą opłacenia pierwszego okresu Subskrypcji. Potwierdzenie płatności Użytkownik otrzymuje e-mailem.</li>
+      <li>Subskrypcja Planu Solo jest odnawiana automatycznie co miesiąc, aż do momentu jej anulowania przez Użytkownika. Opłata za kolejny okres jest pobierana na jego początku.</li>
       <li>Użytkownik może anulować Subskrypcję w dowolnym momencie. Anulowanie oznacza, że Subskrypcja nie zostanie odnowiona na kolejny okres rozliczeniowy. Dostęp do Planu Solo pozostaje aktywny do końca bieżącego opłaconego okresu.</li>
       <li>Zakup Planu Solo i zarządzanie Subskrypcją odbywają się w Aplikacji, w zakładce „Profil”, w sekcji „Plan” na dole strony. Bez aktywnej Subskrypcji znajduje się tam przycisk „Przejdź na Solo”. Przy aktywnej Subskrypcji przycisk „Szczegóły planu” prowadzi do opcji „Zarządzaj subskrypcją”, która otwiera panel operatora płatności Stripe. W panelu Użytkownik może przejrzeć historię płatności, zmienić kartę płatniczą lub anulować Subskrypcję.</li>
-      <li>Usługodawca nie dokonuje zwrotów za niewykorzystane dni w ramach opłaconego okresu Subskrypcji, chyba że obowiązujące przepisy prawa stanowią inaczej.</li>
+      <li>Poza przypadkiem odstąpienia od umowy (§ 13) Usługodawca nie zwraca opłat za niewykorzystane dni opłaconego okresu Subskrypcji, chyba że przepisy prawa stanowią inaczej.</li>
       <li>W przypadku problemów z płatnością Użytkownik powinien skontaktować się z Usługodawcą pod adresem <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
     </ol>
 
@@ -152,20 +161,41 @@
     <h2>§ 8. Dane wprowadzane przez Użytkownika</h2>
     <ol>
       <li>Użytkownik jest wyłącznym administratorem danych osobowych, które wprowadza do Aplikacji w treści Raportów (w tym danych klientów końcowych, adresów obiektów, opisów usterek, zdjęć, podpisów).</li>
-      <li>Usługodawca przetwarza dane, o których mowa w ust. 1, wyłącznie w celu świadczenia usług na rzecz Użytkownika, działając jako podmiot przetwarzający w rozumieniu art. 28 Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).</li>
-      <li>Szczegółowe zasady przetwarzania danych osobowych określa <a href="/prywatnosc">Polityka Prywatności</a>.</li>
+      <li>Usługodawca przetwarza dane, o których mowa w ust. 1, wyłącznie w celu świadczenia Usługi na rzecz Użytkownika, jako podmiot przetwarzający, na zasadach określonych w § 9.</li>
+      <li>Zasady przetwarzania danych osobowych Użytkowników określa <a href="/prywatnosc">Polityka prywatności</a>.</li>
       <li>Użytkownik odpowiada za legalność wprowadzania danych do Aplikacji, w tym za posiadanie odpowiedniej podstawy prawnej do przetwarzania danych klientów końcowych.</li>
       <li>Użytkownik zobowiązuje się nie wprowadzać do Aplikacji treści bezprawnych.</li>
     </ol>
 
-    <h2>§ 9. Własność intelektualna</h2>
+    <h2>§ 9. Powierzenie przetwarzania danych osobowych</h2>
+    <ol>
+      <li>W zakresie danych osobowych wprowadzanych przez Użytkownika do Aplikacji Użytkownik, jako administrator, powierza Usługodawcy ich przetwarzanie, a Usługodawca przetwarza je jako podmiot przetwarzający. Niniejszy paragraf stanowi umowę powierzenia przetwarzania danych osobowych w rozumieniu art. 28 ust. 3 Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).</li>
+      <li>Przedmiotem przetwarzania są dane wprowadzane przez Użytkownika do Raportów, wersji roboczych i Szablonów. Dane są przetwarzane przez czas korzystania z Usługi i wyłącznie w celu jej świadczenia, w szczególności przez ich przechowywanie, wyświetlanie, tworzenie kopii i generowanie Raportów PDF.</li>
+      <li>Powierzone dane obejmują w szczególności imiona i nazwiska, adresy, numery telefonów, adresy e-mail, dane dotyczące obiektów, urządzeń i wykonanych usług, zdjęcia i podpisy oraz inne dane wpisane przez Użytkownika. Dotyczą one klientów Użytkownika i ich przedstawicieli, pracowników i współpracowników Użytkownika oraz innych osób wskazanych w Raportach.</li>
+      <li>Usługodawca:
+        <ol type="a">
+          <li>przetwarza dane wyłącznie na udokumentowane polecenie Użytkownika, także w odniesieniu do przekazywania danych do państwa trzeciego; poleceniem jest Regulamin oraz korzystanie przez Użytkownika z funkcji Aplikacji; jeżeli obowiązek przetwarzania wynika z przepisów prawa, Usługodawca informuje o nim Użytkownika przed rozpoczęciem przetwarzania, o ile prawo nie zabrania takiej informacji;</li>
+          <li>niezwłocznie informuje Użytkownika, jeżeli jego zdaniem wydane polecenie narusza RODO lub inne przepisy o ochronie danych;</li>
+          <li>zapewnia, że osoby upoważnione do przetwarzania danych zobowiązały się do zachowania tajemnicy;</li>
+          <li>stosuje środki bezpieczeństwa wymagane przez art. 32 RODO, opisane w Polityce prywatności;</li>
+          <li>korzysta z dalszych podmiotów przetwarzających wymienionych w Polityce prywatności, na co Użytkownik wyraża ogólną zgodę; o zamiarze dodania lub zmiany takiego podmiotu Usługodawca informuje Użytkownika e-mailem co najmniej 14 dni wcześniej; Użytkownik może w tym czasie zgłosić sprzeciw, a jeżeli nie zostanie on uwzględniony - rozwiązać umowę przez usunięcie Konta; na dalsze podmioty przetwarzające Usługodawca nakłada te same obowiązki ochrony danych;</li>
+          <li>w miarę możliwości pomaga Użytkownikowi odpowiadać na żądania osób, których dane dotyczą, oraz wywiązywać się z obowiązków określonych w art. 32-36 RODO;</li>
+          <li>zgłasza Użytkownikowi naruszenie ochrony danych osobowych bez zbędnej zwłoki, nie później niż w ciągu 48 godzin od jego stwierdzenia;</li>
+          <li>po zakończeniu świadczenia Usługi usuwa powierzone dane, chyba że przepisy prawa nakazują ich dalsze przechowywanie; przed usunięciem Konta Użytkownik może pobrać swoje Raporty w formacie PDF;</li>
+          <li>udostępnia Użytkownikowi informacje niezbędne do wykazania spełnienia obowiązków określonych w art. 28 RODO i umożliwia przeprowadzanie audytów - w pierwszej kolejności w formie odpowiedzi na pytania przesłane e-mailem; audyt w innej formie wymaga uzgodnienia terminu co najmniej 14 dni wcześniej.</li>
+        </ol>
+      </li>
+      <li>Usługodawca nie wykorzystuje powierzonych danych do własnych celów.</li>
+    </ol>
+
+    <h2>§ 10. Własność intelektualna</h2>
     <ol>
       <li>Serwis, Aplikacja, ich kod źródłowy, projekt graficzny, Szablony oraz wszelkie materiały udostępniane w ramach Serwisu stanowią własność Usługodawcy i podlegają ochronie prawnej.</li>
       <li>Użytkownik nie nabywa żadnych praw własności intelektualnej do Serwisu ani Aplikacji poza prawem do korzystania z nich na zasadach określonych w niniejszym Regulaminie.</li>
       <li>Treść wygenerowanych Raportów stanowi własność Użytkownika.</li>
     </ol>
 
-    <h2>§ 10. Odpowiedzialność</h2>
+    <h2>§ 11. Odpowiedzialność</h2>
     <ol>
       <li>Usługodawca dokłada starań, aby Aplikacja działała prawidłowo i bez przerw, jednakże nie gwarantuje nieprzerwanej dostępności Serwisu.</li>
       <li>Usługodawca nie ponosi odpowiedzialności za:
@@ -178,43 +208,63 @@
         </ul>
       </li>
       <li>Szablony Raportów dostępne w Aplikacji mają charakter pomocniczy i nie stanowią porady prawnej ani technicznej. Użytkownik jest odpowiedzialny za weryfikację zgodności generowanych Raportów z obowiązującymi przepisami (w tym m.in. Prawo budowlane, Rozporządzenie (UE) 2024/573 ws. F-gazów, normy branżowe).</li>
-      <li>Całkowita odpowiedzialność Usługodawcy wobec Użytkownika z tytułu korzystania z Serwisu jest ograniczona do kwoty opłat uiszczonych przez Użytkownika w okresie 12 miesięcy poprzedzających zdarzenie będące podstawą roszczenia.</li>
+      <li>Całkowita odpowiedzialność Usługodawcy wobec Użytkownika, który nie jest Konsumentem ani Przedsiębiorcą na prawach konsumenta, jest ograniczona do kwoty opłat uiszczonych przez tego Użytkownika w okresie 12 miesięcy poprzedzających zdarzenie będące podstawą roszczenia. Ograniczenie nie dotyczy szkód wyrządzonych umyślnie.</li>
+      <li>Postanowienia ust. 2 i 4 nie ograniczają praw Konsumentów i Przedsiębiorców na prawach konsumenta wynikających z bezwzględnie obowiązujących przepisów prawa, w szczególności odpowiedzialności Usługodawcy za zgodność Usługi z umową.</li>
     </ol>
 
-    <h2>§ 11. Reklamacje</h2>
+    <h2>§ 12. Reklamacje</h2>
     <ol>
-      <li>Użytkownik może złożyć reklamację dotyczącą funkcjonowania Serwisu drogą e-mailową na adres <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
+      <li>Usługodawca ma obowiązek świadczyć Usługę zgodnie z umową. Wobec Konsumentów i Przedsiębiorców na prawach konsumenta Usługodawca odpowiada za brak zgodności Usługi z umową na zasadach określonych w rozdziale 5b ustawy z dnia 30 maja 2014 r. o prawach konsumenta.</li>
+      <li>Reklamację można złożyć e-mailem na adres <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
       <li>Reklamacja powinna zawierać: dane identyfikujące Użytkownika (adres e-mail przypisany do Konta), opis problemu oraz oczekiwany sposób rozwiązania.</li>
-      <li>Usługodawca rozpatrzy reklamację w terminie 14 dni roboczych od dnia jej otrzymania i poinformuje Użytkownika o wyniku drogą e-mailową.</li>
+      <li>Usługodawca odpowiada na reklamację w terminie <strong>14 dni</strong> od dnia jej otrzymania, e-mailem na adres, z którego reklamacja została wysłana. Jeżeli Usługodawca nie odpowie w tym terminie, uważa się, że uznał reklamację.</li>
     </ol>
 
-    <h2>§ 12. Odstąpienie od umowy (konsumenci)</h2>
+    <h2>§ 13. Odstąpienie od umowy</h2>
     <ol>
-      <li>Użytkownik będący konsumentem w rozumieniu art. 22¹ Kodeksu cywilnego ma prawo odstąpienia od umowy o świadczenie usług drogą elektroniczną w terminie 14 dni od dnia zawarcia umowy (rejestracji Konta), bez podania przyczyny.</li>
-      <li>Prawo do odstąpienia nie przysługuje, jeżeli Usługodawca w pełni wykonał usługę za wyraźną zgodą konsumenta, który został poinformowany przed rozpoczęciem świadczenia, że po jego spełnieniu utraci prawo do odstąpienia.</li>
-      <li>Aby skorzystać z prawa odstąpienia, Użytkownik powinien wysłać oświadczenie na adres <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
+      <li>Konsument i Przedsiębiorca na prawach konsumenta mogą odstąpić od umowy bez podania przyczyny w terminie <strong>14 dni od dnia jej zawarcia</strong>. Umowa o Plan Solo zostaje zawarta z chwilą opłacenia pierwszego okresu Subskrypcji, a umowa o prowadzenie bezpłatnego Konta - z chwilą rejestracji.</li>
+      <li>Usługodawca przyznaje takie samo uprawnienie wszystkim Użytkownikom w odniesieniu do Planu Solo: każdy Użytkownik może w terminie 14 dni od zakupu Planu Solo odstąpić od umowy i otrzymać zwrot całej zapłaconej kwoty.</li>
+      <li>Aby odstąpić od umowy, wystarczy przed upływem terminu wysłać oświadczenie e-mailem na adres <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>. Można skorzystać ze wzoru formularza stanowiącego <a href="#zalacznik-1">Załącznik nr 1</a> do Regulaminu, ale nie jest to obowiązkowe.</li>
+      <li>Usługodawca niezwłocznie potwierdza e-mailem otrzymanie oświadczenia, anuluje Subskrypcję i zwraca całą zapłaconą kwotę niezwłocznie, nie później niż w terminie 14 dni od dnia otrzymania oświadczenia. Zwrot następuje przy użyciu takiego samego sposobu płatności, jakiego użył Użytkownik, chyba że Użytkownik zgodzi się na inny sposób, który nie wiąże się dla niego z żadnymi kosztami. Konto przechodzi wówczas na Plan Darmowy.</li>
+      <li>Odstąpienie od umowy o prowadzenie bezpłatnego Konta nie wiąże się z żadnymi kosztami, a jego skutkiem jest usunięcie Konta (§ 14).</li>
     </ol>
 
-    <h2>§ 13. Usunięcie Konta</h2>
+    <h2>§ 14. Usunięcie Konta i rozwiązanie umowy</h2>
     <ol>
-      <li>Użytkownik może w każdej chwili zażądać usunięcia swojego Konta, kontaktując się z Usługodawcą pod adresem <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
+      <li>Użytkownik może w każdej chwili rozwiązać umowę, żądając usunięcia Konta e-mailem na adres <a href="mailto:kontakt.raporton@gmail.com">kontakt.raporton@gmail.com</a>.</li>
       <li>Usunięcie Konta skutkuje trwałym usunięciem danych Użytkownika z systemów Usługodawcy, z zastrzeżeniem danych, które Usługodawca jest zobowiązany przechowywać na podstawie obowiązujących przepisów prawa.</li>
-      <li>Aktywna Subskrypcja zostanie anulowana z dniem usunięcia Konta. Usługodawca nie dokonuje zwrotu za niewykorzystaną część okresu rozliczeniowego, chyba że obowiązujące przepisy stanowią inaczej.</li>
+      <li>Aktywna Subskrypcja zostaje anulowana z dniem usunięcia Konta. Poza przypadkiem odstąpienia od umowy (§ 13) Usługodawca nie zwraca opłaty za niewykorzystaną część okresu rozliczeniowego, chyba że przepisy prawa stanowią inaczej.</li>
+      <li>Usługodawca może wypowiedzieć umowę z ważnych przyczyn, takich jak zakończenie świadczenia Usługi lub działalności, z zachowaniem 30-dniowego okresu wypowiedzenia, informując Użytkownika e-mailem. W takim przypadku Usługodawca zwraca proporcjonalną część opłaty za opłacony, a niewykorzystany okres Subskrypcji, a Użytkownik może przed rozwiązaniem umowy pobrać swoje Raporty.</li>
     </ol>
 
-    <h2>§ 14. Zmiany Regulaminu</h2>
+    <h2>§ 15. Zmiany Regulaminu</h2>
     <ol>
       <li>Usługodawca zastrzega sobie prawo do zmiany Regulaminu z ważnych przyczyn, takich jak: zmiana przepisów prawa, zmiana zakresu świadczonych usług, zmiana warunków technicznych.</li>
       <li>O zmianach Regulaminu Użytkownik zostanie poinformowany drogą e-mailową z co najmniej 14-dniowym wyprzedzeniem.</li>
       <li>Dalsze korzystanie z Serwisu po wejściu w życie zmian oznacza akceptację nowej treści Regulaminu. Użytkownik, który nie akceptuje zmian, ma prawo usunąć Konto.</li>
     </ol>
 
-    <h2>§ 15. Postanowienia końcowe</h2>
+    <h2>§ 16. Postanowienia końcowe</h2>
     <ol>
-      <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego, w szczególności Kodeksu cywilnego, ustawy o świadczeniu usług drogą elektroniczną oraz RODO.</li>
-      <li>Wszelkie spory wynikające z korzystania z Serwisu będą rozstrzygane przez sąd właściwy dla miejsca zamieszkania Usługodawcy, z zastrzeżeniem praw konsumenta do wytoczenia powództwa przed sądem właściwym dla swojego miejsca zamieszkania.</li>
-      <li>Regulamin wchodzi w życie z dniem 29 marca 2026 r.</li>
+      <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego, w szczególności Kodeksu cywilnego, ustawy o prawach konsumenta, ustawy o świadczeniu usług drogą elektroniczną oraz RODO.</li>
+      <li>Spory z Użytkownikami, którzy nie są Konsumentami ani Przedsiębiorcami na prawach konsumenta, rozstrzyga sąd właściwy dla miejsca zamieszkania Usługodawcy. Spory z Konsumentami i Przedsiębiorcami na prawach konsumenta rozstrzyga sąd właściwy według przepisów ogólnych.</li>
+      <li>Konsument może skorzystać z pozasądowych sposobów rozpatrywania reklamacji i dochodzenia roszczeń, np. zwrócić się o pomoc do miejskiego lub powiatowego rzecznika konsumentów albo do wojewódzkiego inspektoratu Inspekcji Handlowej. Informacje o tych procedurach są dostępne na stronie <a href="https://uokik.gov.pl" target="_blank" rel="noopener">uokik.gov.pl</a>. Udział Usługodawcy w takim postępowaniu jest dobrowolny.</li>
+      <li>Regulamin w niniejszym brzmieniu obowiązuje od 19 października 2026 r. wobec Użytkowników, którzy zarejestrowali Konto od tego dnia. Wobec Użytkowników zarejestrowanych wcześniej zmiany wchodzą w życie po upływie 14 dni od wysłania im powiadomienia e-mailem, zgodnie z § 15. Pierwsza wersja Regulaminu obowiązywała od 29 marca 2026 r.</li>
     </ol>
+
+    <h2 id="zalacznik-1">Załącznik nr 1 - Wzór formularza odstąpienia od umowy</h2>
+    <p>(formularz ten należy wypełnić i odesłać tylko w przypadku chęci odstąpienia od umowy)</p>
+    <div class="annex">
+      <p><strong>Adresat:</strong> Andrzej Król, RaportON, ul. Słoneczna 10a, 33-383 Tylicz, e-mail: kontakt.raporton@gmail.com</p>
+      <p>Ja/My(*) niniejszym informuję/informujemy(*) o moim/naszym odstąpieniu od umowy o świadczenie następującej usługi: Plan Solo w serwisie RaportON(*) / prowadzenie Konta w serwisie RaportON(*)</p>
+      <p>Data zawarcia umowy: ..............................</p>
+      <p>Imię i nazwisko konsumenta(-ów): ..............................</p>
+      <p>Adres konsumenta(-ów): ..............................</p>
+      <p>Adres e-mail przypisany do Konta: ..............................</p>
+      <p>Podpis konsumenta(-ów) (tylko jeżeli formularz jest przesyłany w wersji papierowej): ..............................</p>
+      <p>Data: ..............................</p>
+      <p>(*) Niepotrzebne skreślić.</p>
+    </div>
   </div>
 </main>
 

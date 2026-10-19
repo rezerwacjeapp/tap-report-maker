@@ -222,6 +222,13 @@ export default function Upgrade() {
               <Zap className="h-5 w-5" />
               Przejdź na Solo - 19 zł/mc
             </button>
+            <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
+              Subskrypcja odnawia się automatycznie co miesiąc (19 zł), dopóki jej nie anulujesz.
+              Anulujesz ją w Profilu: Szczegóły planu → Zarządzaj subskrypcją. Solo działa wtedy do końca
+              opłaconego okresu. W ciągu 14 dni od zakupu możesz odstąpić od umowy i dostać pełny zwrot.
+              Przechodząc do płatności, akceptujesz{" "}
+              <a href="/regulamin" target="_blank" rel="noopener noreferrer" className="text-accent underline">Regulamin</a>.
+            </p>
           </div>
         </div>
 
