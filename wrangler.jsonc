@@ -1,0 +1,17 @@
+// Cloudflare Worker for raporton.pl: serves the built app from ./dist
+// and runs worker/index.ts only for /api/* (the Stripe webhook).
+{
+  "name": "raporton",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // Secrets (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_SERVICE_ROLE_KEY)
+  // are set in the dashboard; keep anything set there on each deploy.
+  "keep_vars": true,
+  "observability": { "enabled": true }
+}
