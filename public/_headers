@@ -1,0 +1,12 @@
+# Cloudflare Pages response headers (the same as "headers" in vercel.json).
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(self)
+  X-DNS-Prefetch-Control: on
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
