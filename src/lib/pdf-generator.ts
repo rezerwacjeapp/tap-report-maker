@@ -27,6 +27,18 @@ const COLORS = {
  */
 const WATERMARK_COLORS = { primary: "#e2e3e5", accent: "#e4f2ec" };
 
+/**
+ * Watermark text in parts, so "ON" can have its own color. x (offset) and w (width)
+ * are advances in em of Roboto Medium, the font pdfmake uses for bold SVG text.
+ * textLength keeps the parts touching even if the font metrics ever differ.
+ */
+const WATERMARK_PARTS = [
+  { text: "Raport", color: WATERMARK_COLORS.primary, x: 0, w: 2.9844 },
+  { text: "ON", color: WATERMARK_COLORS.accent, x: 2.9844, w: 1.3984 },
+  { text: ".pl", color: WATERMARK_COLORS.primary, x: 4.3828, w: 1.0947 },
+];
+const WATERMARK_EM = 5.4775;
+
 /** A4 (595 × 842 pt) minus 40 pt side margins. */
 const CONTENT_W = 515;
 
@@ -776,20 +788,22 @@ export function buildReportDocument(
   // === DOCUMENT DEFINITION ===
   // Diagonal watermark for free plan — multi-color "RaportON.pl" (ON in accent
   // green), centered and rotated, drawn behind content on every page.
+  // Each part is its own <text>: pdfmake re-serializes the SVG with line breaks
+  // between sibling elements, so <tspan>s inside one <text> got a space between them.
   const watermarkBackground = watermark
     ? (currentPage: number, pageSize: { width: number; height: number }) => {
         const w = pageSize.width;
         const h = pageSize.height;
         const cx = w / 2;
         const cy = h / 2;
+        const size = 64;
+        const startX = cx - (WATERMARK_EM * size) / 2;
+        const parts = WATERMARK_PARTS.map((p) =>
+          `<text x="${startX + p.x * size}" y="${cy}" textLength="${p.w * size}" font-size="${size}" font-weight="bold" font-family="Helvetica, Arial, sans-serif" dominant-baseline="middle" fill="${p.color}">${p.text}</text>`
+        ).join("");
         const svg =
           `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">` +
-          `<g transform="rotate(-35 ${cx} ${cy})">` +
-          `<text x="${cx}" y="${cy}" font-size="64" font-weight="bold" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" dominant-baseline="middle">` +
-          `<tspan fill="${WATERMARK_COLORS.primary}">Raport</tspan>` +
-          `<tspan dx="0" fill="${WATERMARK_COLORS.accent}">ON</tspan>` +
-          `<tspan dx="0" fill="${WATERMARK_COLORS.primary}">.pl</tspan>` +
-          `</text></g></svg>`;
+          `<g transform="rotate(-35 ${cx} ${cy})">${parts}</g></svg>`;
         return { svg, width: w, height: h, absolutePosition: { x: 0, y: 0 } };
       }
     : undefined;

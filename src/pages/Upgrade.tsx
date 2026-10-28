@@ -4,10 +4,16 @@ import { ArrowLeft, Check, Zap, Infinity as InfinityIcon, Loader2, Droplet, Sett
 import { Button } from "@/components/ui/button";
 import { checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabase";
+
+/** Kontakt z regulaminu - gdy panelu subskrypcji nie da się otworzyć. */
+const CONTACT_EMAIL = "kontakt.raporton@gmail.com";
 
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/9B600cb74csO1yW9x7es000";
 // Stripe customer portal login link (Stripe → Settings → Billing → Customer portal → "Activate link").
-// Set in Vercel as VITE_STRIPE_PORTAL_URL; without it the "Zarządzaj subskrypcją" button is hidden.
+// Set in Cloudflare (raporton → Settings → Build → Variables and secrets) as VITE_STRIPE_PORTAL_URL.
+// Only a fallback now: "Zarządzaj subskrypcją" opens the portal through /api/billing-portal,
+// which doesn't depend on the email used at checkout.
 const STRIPE_PORTAL_URL = (import.meta.env.VITE_STRIPE_PORTAL_URL as string | undefined)?.trim() || "";
 
 export default function Upgrade() {
@@ -19,6 +25,9 @@ export default function Upgrade() {
     trial?: boolean; trialDaysLeft?: number;
   } | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
+  // "Zarządzaj subskrypcją": otwieranie panelu Stripe / nie udało się go otworzyć
+  const [portalBusy, setPortalBusy] = useState(false);
+  const [portalFailed, setPortalFailed] = useState(false);
 
   useEffect(() => {
     checkReportLimit()
@@ -60,6 +69,37 @@ export default function Upgrade() {
     window.location.href = url;
   };
 
+  /**
+   * Opens the Stripe portal for the customer who paid for this account's subscription.
+   * Stripe's email login link is the fallback - it only works with the email used to pay.
+   */
+  const openPortal = async () => {
+    if (portalBusy) return;
+    setPortalBusy(true);
+    setPortalFailed(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/billing-portal", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session?.access_token ?? ""}` },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && typeof body.url === "string") {
+        window.location.href = body.url;
+        return; // the page is leaving, keep the button busy
+      }
+      throw new Error(body.error || `HTTP ${res.status}`);
+    } catch (e) {
+      console.warn("Billing portal:", e);
+      if (STRIPE_PORTAL_URL) {
+        window.location.href = `${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`;
+        return;
+      }
+      setPortalFailed(true);
+    }
+    setPortalBusy(false);
+  };
+
   // Checking payment state
   if (checkingPayment) {
     return (
@@ -92,21 +132,26 @@ export default function Upgrade() {
           <h2 className="text-2xl font-bold">Plan Solo aktywny!</h2>
           <p className="text-muted-foreground mt-2">Generuj raporty bez limitu.</p>
           <Button className="mt-6" onClick={() => navigate("/")}>Wróć do aplikacji</Button>
-          {STRIPE_PORTAL_URL && (
-            <div className="mt-8 max-w-xs">
-              <a
-                href={`${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
-              >
-                <Settings2 className="h-4 w-4" /> Zarządzaj subskrypcją
-              </a>
-              <p className="text-xs text-muted-foreground mt-2">
-                Faktury, karta płatnicza i anulowanie. Po anulowaniu plan działa do końca opłaconego okresu.
+          <div className="mt-8 max-w-xs">
+            <button
+              onClick={openPortal}
+              disabled={portalBusy}
+              className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline disabled:opacity-60"
+            >
+              {portalBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings2 className="h-4 w-4" />} Zarządzaj subskrypcją
+            </button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Faktury, karta płatnicza i anulowanie. Po anulowaniu plan działa do końca opłaconego okresu.
+            </p>
+            {portalFailed && (
+              // zawsze musi być sposób na anulowanie
+              <p className="text-xs text-destructive mt-2">
+                Nie udało się otworzyć strony subskrypcji. Spróbuj za chwilę albo napisz na{" "}
+                <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Subskrypcja RaportON")}`} className="underline">{CONTACT_EMAIL}</a>
+                {" "}z adresu, na który masz konto.
               </p>
-            </div>
-          )}
+            )}
+          </div>
         </main>
       </div>
     );

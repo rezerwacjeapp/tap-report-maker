@@ -1,5 +1,5 @@
 // Cloudflare Worker for raporton.pl: serves the built app from ./dist
-// and runs worker/index.ts only for /api/* (the Stripe webhook).
+// and runs worker/index.ts only for /api/* (the Stripe webhook and the subscription portal).
 {
   "name": "raporton",
   "main": "worker/index.ts",
