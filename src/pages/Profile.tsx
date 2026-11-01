@@ -274,6 +274,10 @@ export default function Profile() {
         <div className="space-y-3 pt-2">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Konto</p>
           {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <a href="/regulamin" target="_blank" rel="noopener noreferrer" className="py-1 text-muted-foreground underline underline-offset-2 hover:text-accent">Regulamin</a>
+            <a href="/prywatnosc" target="_blank" rel="noopener noreferrer" className="py-1 text-muted-foreground underline underline-offset-2 hover:text-accent">Polityka prywatności</a>
+          </div>
         </div>
       </main>
     </div>
