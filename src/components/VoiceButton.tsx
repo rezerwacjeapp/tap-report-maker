@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff } from "lucide-react";
 
@@ -9,6 +9,10 @@ interface Props {
 export function VoiceButton({ onResult }: Props) {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  // Dictation outlives many renders: hand each phrase to the latest onResult, so it is added
+  // to the current text, not to the text from when dictation started (which kept only the last phrase)
+  const onResultRef = useRef(onResult);
+  useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   const supported = "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
 
@@ -34,7 +38,7 @@ export function VoiceButton({ onResult }: Props) {
         }
       }
       if (newText.trim()) {
-        onResult(newText.trim());
+        onResultRef.current(newText.trim());
       }
     };
 

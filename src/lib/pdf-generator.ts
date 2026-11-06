@@ -366,6 +366,9 @@ export function buildReportDocument(
     runs.forEach((run, i) => add({
       table: { widths: [130, "*"], body: run.rows.map((r) => r.cells), dontBreakRows: run.keep },
       layout: {
+        // a cell without its own border (the spanned half of a full-width text row) gets none: pdfmake draws
+        // the table's top line before it copies borders onto spanned cells, which left a stray line from 1/4 of the page
+        defaultBorder: false,
         hLineWidth: () => 0.5,
         vLineWidth: () => 0,
         hLineColor: () => "#e5e7eb",
